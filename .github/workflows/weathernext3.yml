@@ -2,9 +2,9 @@ name: WeatherNext 3 auto maps
 
 on:
   schedule:
-    # Every hour at :20 UTC. The job only renders a run once it is new
-    # AND complete (00 / 06 / 12 / 18 UTC cycles), otherwise it exits quickly.
-    - cron: "20 * * * *"
+    # Every 2 hours at :20 UTC (:50 IST). A quick check runs first; the heavy
+    # install + render only happens when a new 00/06/12/18 UTC run exists.
+    - cron: "20 */2 * * *"
   workflow_dispatch:
     inputs:
       run:
@@ -19,6 +19,11 @@ concurrency:
   group: weathernext3
   cancel-in-progress: false
 
+env:
+  SITE_DIR: site
+  KEEP_RUNS: "4"
+  CF_PROJECT: masrainman-wn3        # Cloudflare Pages project name
+
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -28,30 +33,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get current website (gh-pages)
+      - name: Get current maps (site-data branch)
         run: |
           mkdir -p site
-          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
-            git fetch --depth 1 origin gh-pages
-            git --work-tree=site checkout origin/gh-pages -- .
+          if git ls-remote --exit-code --heads origin site-data >/dev/null 2>&1; then
+            git fetch --depth 1 origin site-data
+            git --work-tree=site checkout origin/site-data -- .
             git reset -q
           fi
-          ls site || true
+          ls site/runs 2>/dev/null || echo "(no maps yet)"
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
-
-      - name: Install packages
-        run: pip install -r requirements.txt
-
-      - name: Cache map coastlines
-        uses: actions/cache@v4
-        with:
-          path: ~/.local/share/cartopy
-          key: cartopy-naturalearth-v1
 
       - name: Google login (your WeatherNext access)
         env:
@@ -60,10 +55,28 @@ jobs:
           printf '%s' "$GCP_CREDS" > "$RUNNER_TEMP/gcp.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp.json" >> "$GITHUB_ENV"
 
+      - name: Quick check for new runs
+        id: check
+        run: |
+          pip install -q google-auth requests
+          python check_new.py
+
+      # ---------- everything below runs only when there is work ----------
+
+      - name: Install packages
+        if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
+        run: pip install -q -r requirements.txt
+
+      - name: Cache map coastlines
+        if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/cartopy
+          key: cartopy-naturalearth-v1
+
       - name: Render new runs
-        env:
-          SITE_DIR: site
-          KEEP_RUNS: "4"
+        id: render
+        if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
         run: |
           if [ -n "${{ github.event.inputs.run }}" ]; then
             python render.py --run "${{ github.event.inputs.run }}"
@@ -71,13 +84,23 @@ jobs:
             python render.py
           fi
 
-      - name: Publish website
+      - name: Save maps (site-data branch, private)
+        if: steps.render.outcome == 'success'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          publish_branch: gh-pages
+          publish_branch: site-data
           force_orphan: true   # keeps repo small: no image history
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "WeatherNext 3 maps update"
+
+      - name: Publish to Cloudflare Pages (login-protected)
+        if: steps.render.outcome == 'success'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true

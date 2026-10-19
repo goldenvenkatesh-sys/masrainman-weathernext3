@@ -1,0 +1,81 @@
+name: WeatherNext 3 auto maps
+
+on:
+  schedule:
+    # Every hour at :20 UTC. The job only renders a run once it is new
+    # AND complete (00 / 06 / 12 / 18 UTC cycles), otherwise it exits quickly.
+    - cron: "20 * * * *"
+  workflow_dispatch:
+    inputs:
+      run:
+        description: "Force one run, e.g. 20261019_00hr_01_preds (leave empty = automatic)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weathernext3
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get current website (gh-pages)
+        run: |
+          mkdir -p site
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git fetch --depth 1 origin gh-pages
+            git --work-tree=site checkout origin/gh-pages -- .
+            git reset -q
+          fi
+          ls site || true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install packages
+        run: pip install -r requirements.txt
+
+      - name: Cache map coastlines
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/cartopy
+          key: cartopy-naturalearth-v1
+
+      - name: Google Cloud login
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Render new runs
+        env:
+          SITE_DIR: site
+          KEEP_RUNS: "4"
+        run: |
+          if [ -n "${{ github.event.inputs.run }}" ]; then
+            python render.py --run "${{ github.event.inputs.run }}"
+          else
+            python render.py
+          fi
+
+      - name: Publish website
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: gh-pages
+          force_orphan: true   # keeps repo small: no image history
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "WeatherNext 3 maps update"

@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WeatherNext 3 Low Centres · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .frames{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
+  .fr{flex:0 0 auto;min-width:78px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
+  .fr b{display:block;font-size:13px}
+  .fr small{color:var(--muted);font-size:11px}
+  .fr.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300}
+  .fr.on small{color:#3b2a00}
+  .fr .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-left:4px;vertical-align:middle}
+  .viewer{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line);position:relative}
+  .viewer img{display:block;width:100%;height:auto}
+  .loading{position:absolute;top:10px;right:12px;background:#0b1220cc;color:#fff;padding:4px 10px;border-radius:6px;font-size:12px;display:none}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+  input[type=range]{flex:1;min-width:200px;accent-color:var(--accent2)}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .btn.gif{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .now{font-weight:700;font-size:15px}
+  .now small{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px}
+  .grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card h3{margin:0 0 8px;font-size:14px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .empty{color:var(--muted)}
+  .wrap{overflow-x:auto}
+  footer{color:var(--muted);font-size:12px;margin-top:18px}
+  .kbd{border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:11px}
+  @media (max-width:640px){header h1{font-size:15px} .fr{min-width:66px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>WeatherNext 3 · <span>Mean MSLP &amp; V3 Low Centres</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+</header>
+
+<main>
+  <div class="bar">
+    <span class="label">Run</span>
+    <div class="seg" id="runs"></div>
+  </div>
+  <div class="bar">
+    <span class="label">Layer</span>
+    <div class="seg">
+      <button class="pill on" data-layer="mslp">MSLP</button>
+      <button class="pill" data-layer="barbs">MSLP + 10-m wind barbs</button>
+    </div>
+  </div>
+
+  <div class="frames" id="frames"></div>
+
+  <div class="controls">
+    <button class="btn" id="prev" title="Previous (←)">◀</button>
+    <button class="btn primary" id="play">▶ Play</button>
+    <button class="btn" id="next" title="Next (→)">▶</button>
+    <input type="range" id="slider" min="0" max="0" value="0">
+    <label class="label" for="speed">Speed</label>
+    <select id="speed">
+      <option value="1500">Slow</option>
+      <option value="900" selected>Normal</option>
+      <option value="450">Fast</option>
+    </select>
+  </div>
+
+  <div class="controls">
+    <div class="now" id="now"></div>
+    <span style="flex:1"></span>
+    <a class="btn" id="dlPng" download>⬇ PNG (this frame)</a>
+    <a class="btn gif" id="dlGif" download>⬇ GIF (T+24 → T+360)</a>
+    <a class="btn" id="viewGif" target="_blank">Open GIF</a>
+  </div>
+
+  <div class="viewer">
+    <img id="map" alt="WeatherNext 3 MSLP map">
+    <div class="loading" id="loading">Loading…</div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h3 id="sysTitle">Systems at this time</h3>
+      <div class="wrap"><table id="sys"></table></div>
+    </div>
+    <div class="card">
+      <h3>Data downloads</h3>
+      <a class="btn" id="csvTracks" download>Persistent tracks CSV</a>
+      <a class="btn" id="csvCands" download>All candidates CSV</a>
+    </div>
+  </div>
+
+  <footer>
+    WeatherNext 3 © 2026 DeepMind Technologies Limited — experimental model output, not official weather warnings or forecasts.
+    V3 analysis &amp; visualisation: MasRainman. Updates automatically for the 00, 06, 12 and 18 UTC runs.
+    Keys: <span class="kbd">←</span> <span class="kbd">→</span> step, <span class="kbd">Space</span> play.
+  </footer>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const S = {manifest:null, run:0, layer:'mslp', idx:0, timer:null, cache:{}};
+
+  const fmtUTC = iso => {
+    const d = new Date(iso.replace('Z',':00Z'));
+    return d.toLocaleString('en-GB',{timeZone:'UTC',weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false}) + ' UTC';
+  };
+  const fmtIST = iso => {
+    const d = new Date(iso.replace('Z',':00Z'));
+    return d.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}) + ' IST';
+  };
+  const runLabel = r => {
+    const d = new Date(r.init.replace('Z',':00Z'));
+    return d.toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short'}) + ' ' + r.init.slice(11,13) + 'Z';
+  };
+
+  const cur = () => S.manifest.runs[S.run];
+  const base = () => 'runs/' + cur().run + '/';
+  const src = (i, layer) => base() + cur().frames[i][layer || S.layer];
+
+  function preload(){
+    cur().frames.forEach((f,i)=>{
+      const u = src(i);
+      if(!S.cache[u]){ const im = new Image(); im.src = u; S.cache[u] = im; }
+    });
+  }
+
+  function buildRuns(){
+    const box = $('runs'); box.innerHTML = '';
+    S.manifest.runs.forEach((r,i)=>{
+      const b = document.createElement('button');
+      b.className = 'pill' + (i===S.run?' on':'');
+      b.textContent = runLabel(r) + (i===0?' · latest':'');
+      b.onclick = () => { S.run = i; buildRuns(); buildFrames(); show(Math.min(S.idx, cur().frames.length-1)); preload(); };
+      box.appendChild(b);
+    });
+  }
+
+  function buildFrames(){
+    const box = $('frames'); box.innerHTML = '';
+    cur().frames.forEach((f,i)=>{
+      const d = document.createElement('div');
+      d.className = 'fr';
+      const day = new Date(f.valid.replace('Z',':00Z')).toLocaleString('en-GB',{timeZone:'UTC',weekday:'short',day:'2-digit',month:'short'});
+      d.innerHTML = '<b>T+' + f.hour + (f.systems.length?'<span class="dot" title="Low centre present"></span>':'') + '</b><small>' + day + '</small>';
+      d.onclick = () => { stop(); show(i); };
+      box.appendChild(d);
+    });
+    $('slider').max = cur().frames.length - 1;
+    const r = cur();
+    $('dlGif').href = base() + r.gifs[S.layer];
+    $('viewGif').href = base() + r.gifs[S.layer];
+    $('csvTracks').href = base() + r.csv.tracks;
+    $('csvCands').href = base() + r.csv.candidates;
+  }
+
+  function show(i){
+    S.idx = i;
+    const f = cur().frames[i];
+    const u = src(i);
+    const img = $('map');
+    const cached = S.cache[u];
+    if(!cached || !cached.complete){ $('loading').style.display='block'; }
+    img.onload = () => $('loading').style.display='none';
+    img.src = u;
+    $('slider').value = i;
+    document.querySelectorAll('.fr').forEach((el,k)=>el.classList.toggle('on',k===i));
+    const on = document.querySelectorAll('.fr')[i]; if(on) on.scrollIntoView({block:'nearest',inline:'nearest'});
+    $('now').innerHTML = 'T+' + f.hour + ' h · ' + fmtUTC(f.valid) + '<small>' + fmtIST(f.valid) + '</small>';
+    $('dlPng').href = u;
+    $('dlPng').setAttribute('download', 'weathernext3_' + cur().run + '_' + S.layer + '_T' + String(f.hour).padStart(3,'0') + '.png');
+    $('sysTitle').textContent = 'V3 systems at T+' + f.hour + ' h (' + f.systems.length + ')';
+    const t = $('sys');
+    if(!f.systems.length){ t.innerHTML = '<tr><td class="empty">No persistent V3 low centre in the domain at this time.</td></tr>'; return; }
+    t.innerHTML = '<tr><th>Track</th><th>Lat</th><th>Lon</th><th>MSLP hPa</th><th>Depression hPa</th><th>Wind kt</th><th>Circulation</th><th>Score</th></tr>' +
+      f.systems.map(s=>'<tr><td><b>'+s.id+'</b></td><td>'+s.lat.toFixed(1)+'°N</td><td>'+s.lon.toFixed(1)+'°E</td><td>'+s.mslp.toFixed(1)+'</td><td>'+s.dep.toFixed(2)+'</td><td>'+s.wind.toFixed(1)+'</td><td>'+s.circ.toFixed(3)+'</td><td>'+s.score.toFixed(3)+'</td></tr>').join('');
+  }
+
+  function step(d){ const n = cur().frames.length; show((S.idx + d + n) % n); }
+  function play(){ stop(); $('play').textContent = '❚❚ Pause'; S.timer = setInterval(()=>step(1), +$('speed').value); }
+  function stop(){ if(S.timer){ clearInterval(S.timer); S.timer=null; } $('play').textContent = '▶ Play'; }
+
+  $('play').onclick = () => S.timer ? stop() : play();
+  $('prev').onclick = () => { stop(); step(-1); };
+  $('next').onclick = () => { stop(); step(1); };
+  $('slider').oninput = e => { stop(); show(+e.target.value); };
+  $('speed').onchange = () => { if(S.timer) play(); };
+  document.querySelectorAll('[data-layer]').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('[data-layer]').forEach(x=>x.classList.toggle('on',x===b));
+    S.layer = b.dataset.layer; buildFrames(); show(S.idx); preload();
+  });
+  document.addEventListener('keydown', e=>{
+    if(e.target.tagName==='SELECT') return;
+    if(e.key==='ArrowRight'){ stop(); step(1); }
+    else if(e.key==='ArrowLeft'){ stop(); step(-1); }
+    else if(e.key===' '){ e.preventDefault(); S.timer ? stop() : play(); }
+  });
+
+  fetch('data/manifest.json?t=' + Date.now()).then(r=>r.json()).then(m=>{
+    S.manifest = m;
+    if(!m.runs.length){ $('upd').textContent = 'No runs rendered yet'; return; }
+    $('upd').textContent = 'Updated ' + fmtIST(m.updated);
+    buildRuns(); buildFrames(); show(0); preload();
+  }).catch(()=>{ $('upd').textContent = 'Could not load manifest'; });
+})();
+</script>
+</body>
+</html>

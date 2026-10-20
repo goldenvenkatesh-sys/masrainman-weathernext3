@@ -1003,6 +1003,24 @@ def rain_cmap():
     return _RAIN_CMAP
 
 
+RAIN_SMOOTH_DEG = 0.05   # target spacing for the smoothed rain field
+
+
+def smooth_rain_field(lon, lat, rain, grid_deg):
+    """Bilinear upsample of a rain grid to ~RAIN_SMOOTH_DEG for smooth contour shading."""
+    from scipy.ndimage import zoom
+    lon = np.asarray(lon, dtype=float)
+    lat = np.asarray(lat, dtype=float)
+    factor = max(1, int(round(float(grid_deg or 0.25) / RAIN_SMOOTH_DEG)))
+    if factor == 1 or lon.ndim != 1 or lat.ndim != 1:
+        return lon, lat, rain
+    rain = np.nan_to_num(np.asarray(rain, dtype=float), nan=0.0)
+    srain = np.maximum(zoom(rain, factor, order=1), 0)
+    slat = np.linspace(lat[0], lat[-1], srain.shape[0])
+    slon = np.linspace(lon[0], lon[-1], srain.shape[1])
+    return slon, slat, srain
+
+
 def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h=None):
     """Rain chart. period_h=None -> total since T+0, else rain in the last period_h hours."""
     cfg = MODELS[model]
@@ -1022,8 +1040,11 @@ def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h
     ax = fig.add_axes([0.01, 0.135, 0.98, 0.805], projection=ccrs.PlateCarree())
     ax.set_extent([RAIN_LON_MIN, RAIN_LON_MAX, RAIN_LAT_MIN, RAIN_LAT_MAX], crs=ccrs.PlateCarree())
     ax.set_facecolor("#f4f6fb")
-    ax.pcolormesh(data["rlon"], data["rlat"], np.where(rain < RAIN_LEVELS[0], np.nan, rain),
-                  cmap=cmap, norm=norm, shading="nearest", transform=ccrs.PlateCarree(), zorder=1)
+    # Smooth shading: interpolate the model grid to ~0.05° and draw filled contours,
+    # instead of painting each 0.1°/0.25° grid box as a square (looked blocky/pixelated).
+    slon, slat, srain = smooth_rain_field(data["rlon"], data["rlat"], rain, data.get("grid_deg", 0.25))
+    ax.contourf(slon, slat, srain, levels=RAIN_LEVELS, cmap=cmap, norm=norm, extend="max",
+                antialiased=True, transform=ccrs.PlateCarree(), zorder=1)
     ax.coastlines(resolution="50m", linewidth=0.7, color="black", zorder=5)
     ax.add_feature(india_view_borders(), facecolor="none", edgecolor="black", linewidth=0.5, zorder=6)
     gl = ax.gridlines(draw_labels=True, linewidth=0.4, color="gray", alpha=0.5, linestyle="--", zorder=7)
@@ -1057,7 +1078,7 @@ def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h
              fontsize=7.5, color="dimgray")
     fig.text(0.5, 0.008, cfg["credits"][-1], ha="center", fontsize=7.2, color="dimgray")
 
-    plt.savefig(out_png, dpi=150, bbox_inches="tight", pad_inches=0.08, facecolor="white")
+    plt.savefig(out_png, dpi=200, bbox_inches="tight", pad_inches=0.08, facecolor="white")
     plt.close(fig)
     return valid_time
 

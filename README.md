@@ -11,7 +11,7 @@ Automatic **MSLP + V3 low-centre** maps for 55–100E, 2–28N from three models
 **Rain charts (ECMWF IFS + AIFS):** besides the MSLP maps, every frame also has
 *Rain (total)* — rain since the start of the run — and *Rain (24 h)* — rain in the
 24 h before the map, on a wider 50–110°E, 0–42°N view with a 0.2–500 mm colour scale.
-They appear for runs drawn after this change. WeatherNext 3 has no rain charts yet.
+WeatherNext 3 gets the same two rain charts from `total_precipitation_1hr_mean` (hourly ensemble-mean rain, summed). Set `WN3_RAIN_VAR` to use another field, e.g. `total_precipitation_1hr_p90` or `imerg_tp_1hr_mean`. Rain charts appear for runs drawn after this change.
 
 For every complete run it draws **T+24, T+48 …** to the end of the forecast,
 with and without 10-m wind barbs, builds a GIF loop, writes CSVs of the V3 candidates

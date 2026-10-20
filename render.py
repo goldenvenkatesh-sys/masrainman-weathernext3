@@ -541,7 +541,10 @@ def _read_step_domain(path):
         da = ds[list(ds.data_vars)[0]]
         if short_name == "tp":
             da = _cut(da, RAIN_LAT_MIN, RAIN_LAT_MAX, RAIN_LON_MIN, RAIN_LON_MAX)
-            out["tp"] = da.values.astype(np.float32) * 1000.0       # m -> mm
+            # IFS gives tp in metres, AIFS in kg m-2 (= mm): go by the GRIB units
+            units = str(da.attrs.get("GRIB_units", da.attrs.get("units", "m"))).strip()
+            scale = 1000.0 if units == "m" else 1.0
+            out["tp"] = da.values.astype(np.float32) * scale       # -> mm
             out["tp_start"] = int(da.attrs.get("GRIB_startStep", 0))   # 0 = since T+0
             out["rlat"] = da["latitude"].values
             out["rlon"] = da["longitude"].values

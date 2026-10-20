@@ -1,14 +1,21 @@
-name: WeatherNext 3 auto maps
+name: MasRainman model maps (WeatherNext 3 + ECMWF IFS + AIFS)
 
 on:
   schedule:
-    # Every 2 hours at :20 UTC (:50 IST). A quick check runs first; the heavy
-    # install + render only happens when a new 00/06/12/18 UTC run exists.
-    - cron: "20 */2 * * *"
+    # Every 3 hours at :20 UTC (05:50, 08:50, 11:50, 14:50, 17:50, 20:50,
+    # 23:50, 02:50 IST). A quick check runs first; the heavy install + render
+    # only happens when a new WeatherNext 3, ECMWF IFS or AIFS run exists.
+    - cron: "20 */3 * * *"
   workflow_dispatch:
     inputs:
+      model:
+        description: "Model for a forced run (only used when 'run' is filled)"
+        required: false
+        type: choice
+        options: [wn3, ifs, aifs]
+        default: wn3
       run:
-        description: "Force one run, e.g. 20261019_00hr_01_preds (leave empty = automatic)"
+        description: "Force one run: WN3 20261019_00hr_01_preds, IFS/AIFS 20261019_12 (empty = automatic)"
         required: false
         default: ""
 
@@ -23,11 +30,14 @@ env:
   SITE_DIR: site
   KEEP_RUNS: "4"
   CF_PROJECT: masrainman-wn3        # Cloudflare Pages project name
+  # To save GitHub minutes, draw only the 15-day ECMWF runs (00Z and 12Z):
+  # remove the # at the start of the next line.
+  # ECMWF_CYCLES: "00,12"
 
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Checkout code
@@ -41,7 +51,8 @@ jobs:
             git --work-tree=site checkout origin/site-data -- .
             git reset -q
           fi
-          ls site/runs 2>/dev/null || echo "(no maps yet)"
+          ls site/runs 2>/dev/null || echo "(no WeatherNext 3 maps yet)"
+          ls site/ecmwf/ifs site/ecmwf/aifs 2>/dev/null || echo "(no ECMWF maps yet)"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -65,7 +76,10 @@ jobs:
 
       - name: Install packages
         if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
-        run: pip install -q -r requirements.txt
+        run: |
+          pip install -q -r requirements.txt
+          # ECMWF GRIB reading (eccodes wheel includes the library)
+          pip install -q requests xarray cfgrib "eccodes>=2.39"
 
       - name: Cache map coastlines
         if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
@@ -79,7 +93,7 @@ jobs:
         if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
         run: |
           if [ -n "${{ github.event.inputs.run }}" ]; then
-            python render.py --run "${{ github.event.inputs.run }}"
+            python render.py --model "${{ github.event.inputs.model }}" --run "${{ github.event.inputs.run }}"
           else
             python render.py
           fi
@@ -94,7 +108,7 @@ jobs:
           force_orphan: true   # keeps repo small: no image history
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_message: "WeatherNext 3 maps update"
+          commit_message: "MasRainman model maps update"
 
       - name: Publish to Cloudflare Pages (login-protected)
         if: steps.render.outcome == 'success'

@@ -106,8 +106,15 @@ LON_MIN, LON_MAX = 55.0, 100.0
 BOUNDARY_FILE = os.path.join(HERE, "boundaries", "borders_india_view.geojson")
 
 # ECMWF open data
-ECMWF_ROOT = "https://data.ecmwf.int/forecasts"
+ECMWF_ROOT = os.environ.get("ECMWF_ROOT", "https://data.ecmwf.int/forecasts")
 ECMWF_STEP_H = 6            # 6-hourly fields for tracking (both models have these)
+# Grid resolutions to try, best first. ECMWF added free 0.1° (~9 km) IFS data
+# in Oct 2026 (folder .../ifs/0p1/oper/, files *-oper-fc-sfc.grib2). The 0.1°
+# files appear about 2 h after the 0.25° ones; a run first drawn at 0.25° is
+# drawn again at 0.1° once that is fully published.
+ECMWF_RESOL_DEG = {"0p1": 0.1, "0p25": 0.25}
+# File-name endings: new style (separate sfc / pl files) and the old single file
+ECMWF_FILE_KINDS = ["oper-fc-sfc", "oper-fc"]
 # Which ECMWF runs to draw. "00,12" = only the 15-day runs (saves GitHub minutes)
 ECMWF_CYCLES = [int(c) for c in os.environ.get("ECMWF_CYCLES", "00,06,12,18").split(",") if c.strip()]
 HTTP_TIMEOUT = (10, 120)    # connect, read seconds
@@ -142,8 +149,9 @@ MODELS = {
         "manifest": "manifest_ifs.json",
         "pattern": ECMWF_RUN_PATTERN,
         "ecmwf_model": "ifs",
+        "resols": [r for r in os.environ.get("IFS_RESOLS", "0p1,0p25").split(",") if r.strip()],
         "title": "ECMWF IFS HRES — MSLP with V3 Low Centres",
-        "info_head": "ECMWF IFS (operational deterministic, 0.25°)",
+        "info_head": "ECMWF IFS (operational deterministic, {grid})",
         "barbs_label": "10-m wind barbs: ON",
         "credits": [
             "Source: ECMWF open data © European Centre for Medium-Range Weather Forecasts | CC BY 4.0",
@@ -158,8 +166,9 @@ MODELS = {
         "manifest": "manifest_aifs.json",
         "pattern": ECMWF_RUN_PATTERN,
         "ecmwf_model": "aifs-single",
+        "resols": ["0p25"],
         "title": "ECMWF AIFS — MSLP with V3 Low Centres",
-        "info_head": "ECMWF AIFS Single (AI model, 0.25°)",
+        "info_head": "ECMWF AIFS Single (AI model, {grid})",
         "barbs_label": "10-m wind barbs: ON",
         "credits": [
             "Source: ECMWF open data © European Centre for Medium-Range Weather Forecasts | CC BY 4.0",
@@ -337,32 +346,70 @@ def _http():
     return s
 
 
-def ecmwf_run_url(key, run_time):
+def ecmwf_run_url(key, run_time, resol="0p25"):
     cfg = MODELS[key]
     ymd = run_time.strftime("%Y%m%d")
     hh = run_time.hour
     # All four IFS/AIFS runs are published under stream "oper"
-    return f"{ECMWF_ROOT}/{ymd}/{hh:02d}z/{cfg['ecmwf_model']}/0p25/oper", f"{ymd}{hh:02d}0000"
+    return f"{ECMWF_ROOT}/{ymd}/{hh:02d}z/{cfg['ecmwf_model']}/{resol}/oper", f"{ymd}{hh:02d}0000"
 
 
-def ecmwf_last_step(key, run_time, http):
-    """Return the run's final step if it is fully published, else None."""
-    base, stamp = ecmwf_run_url(key, run_time)
-    wanted = [360] if run_time.hour in (0, 12) else [144, 360]
-    for step in wanted:
-        try:
-            r = http.head(f"{base}/{stamp}-{step}h-oper-fc.index",
-                          timeout=(5, 15), allow_redirects=True)
-            if r.status_code == 200:
-                return step
-        except Exception as exc:
-            print(f"  ({key} {stamp} check failed: {type(exc).__name__})")
-            return None
+def grid_label(deg):
+    """0.1 -> '0.1° ~9 km', 0.25 -> '0.25° ~28 km' (ECMWF's own figures)."""
+    km = {0.1: 9, 0.25: 28}.get(round(deg, 3), round(deg * 111))
+    return f"{deg:g}° ~{km} km"
+
+
+def ecmwf_best_source(key, run_time, http):
+    """Best fully published version of a run, or None.
+
+    Returns {"resol": "0p1", "step": 360, "kind": "oper-fc-sfc"}.
+    A run counts as complete once its last-step .index file exists.
+    00/12Z need T+360; 06/18Z accept T+144 (or T+360).
+    The longest forecast wins; for equal length the finer grid wins.
+    """
+    wanted = [360] if run_time.hour in (0, 12) else [360, 144]
+    for step in wanted:                       # longest first
+        for resol in MODELS[key]["resols"]:   # finest first
+            base, stamp = ecmwf_run_url(key, run_time, resol)
+            for kind in ECMWF_FILE_KINDS:
+                try:
+                    r = http.head(f"{base}/{stamp}-{step}h-{kind}.index",
+                                  timeout=(5, 15), allow_redirects=True)
+                except Exception as exc:
+                    print(f"  ({key} {stamp} {resol} check failed: {type(exc).__name__})")
+                    continue
+                if r.status_code == 200:
+                    return {"resol": resol, "step": step, "kind": kind}
     return None
 
 
+def ecmwf_last_step(key, run_time, http):
+    """Kept for older callers: the final step of the best source, else None."""
+    src = ecmwf_best_source(key, run_time, http)
+    return src["step"] if src else None
+
+
+def source_rank(key, step, resol):
+    """Bigger is better: longer forecast first, then finer grid."""
+    order = MODELS[key]["resols"]
+    fineness = len(order) - order.index(resol) if resol in order else 0
+    return (int(step), fineness)
+
+
+def rendered_rank(model, run_name):
+    """Rank of a run already on the site (old runs without 'resol' were 0.25°)."""
+    path = os.path.join(runs_root(model), run_name, "run.json")
+    try:
+        with open(path) as f:
+            info = json.load(f)
+    except Exception:
+        return None
+    return source_rank(model, info.get("last_hour", 0), info.get("resol", "0p25"))
+
+
 def list_ecmwf_runs(key):
-    """Newest complete runs first: [(run_name, last_step), ...]."""
+    """Newest complete runs first: [(run_name, source), ...]."""
     print(f"\nSearching {MODELS[key]['label']} runs...")
     http = _http()
     t = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
@@ -372,19 +419,19 @@ def list_ecmwf_runs(key):
         if t.hour not in ECMWF_CYCLES:
             t -= timedelta(hours=6)
             continue
-        step = ecmwf_last_step(key, t, http)
-        if step:
-            found.append((t.strftime("%Y%m%d_%H"), step))
+        src = ecmwf_best_source(key, t, http)
+        if src:
+            found.append((t.strftime("%Y%m%d_%H"), src))
             if len(found) == KEEP_RUNS:
                 break
         t -= timedelta(hours=6)
     return found
 
 
-def _download_step(http, base, stamp, step, params, out_path):
+def _download_step(http, base, stamp, step, kind, params, out_path):
     """Fetch only the wanted GRIB messages of one step, using the .index byte ranges."""
-    idx_url = f"{base}/{stamp}-{step}h-oper-fc.index"
-    grib_url = f"{base}/{stamp}-{step}h-oper-fc.grib2"
+    idx_url = f"{base}/{stamp}-{step}h-{kind}.index"
+    grib_url = f"{base}/{stamp}-{step}h-{kind}.grib2"
     r = http.get(idx_url, timeout=HTTP_TIMEOUT)
     r.raise_for_status()
     parts = []
@@ -393,7 +440,7 @@ def _download_step(http, base, stamp, step, params, out_path):
         if not line:
             continue
         rec = json.loads(line)
-        if rec.get("param") in params:
+        if rec.get("param") in params and rec.get("levtype", "sfc") == "sfc":
             parts.append((int(rec["_offset"]), int(rec["_length"]), rec["param"]))
     got = {p for _, _, p in parts}
     missing = set(params) - got
@@ -401,70 +448,90 @@ def _download_step(http, base, stamp, step, params, out_path):
         raise RuntimeError(f"step {step}: {', '.join(sorted(missing))} not in index")
     with open(out_path, "wb") as f:
         for off, length, _ in sorted(parts):
-            rr = http.get(grib_url, timeout=HTTP_TIMEOUT,
-                          headers={"Range": f"bytes={off}-{off + length - 1}"})
-            rr.raise_for_status()
+            for attempt in range(3):
+                try:
+                    rr = http.get(grib_url, timeout=HTTP_TIMEOUT,
+                                  headers={"Range": f"bytes={off}-{off + length - 1}"})
+                    rr.raise_for_status()
+                    if len(rr.content) != length:
+                        raise RuntimeError(f"short read {len(rr.content)}/{length}")
+                    break
+                except Exception:
+                    if attempt == 2:
+                        raise
             f.write(rr.content)
     return out_path
 
 
-def load_ecmwf_run(key, run_name, last_step):
+def _read_step_domain(path):
+    """Read msl/10u/10v of one step file, cut to the map domain right away
+    (a global 0.1° field is 26 MB, the domain cut is under 0.5 MB)."""
     import xarray as xr
 
+    out = {}
+    for short_name in ("msl", "10u", "10v"):
+        ds = xr.open_dataset(path, engine="cfgrib",
+                             backend_kwargs={"filter_by_keys": {"shortName": short_name},
+                                             "indexpath": ""})
+        da = ds[list(ds.data_vars)[0]]
+        lon = da["longitude"].values
+        if lon.max() > 180 and LON_MIN < 0:
+            da = da.assign_coords(longitude=((lon + 180) % 360) - 180).sortby("longitude")
+        da = da.sortby("latitude")                       # ascending like WeatherNext
+        da = da.sel(latitude=slice(LAT_MIN, LAT_MAX), longitude=slice(LON_MIN, LON_MAX))
+        out[short_name] = da.values.astype(np.float32)
+        out["lat"] = da["latitude"].values
+        out["lon"] = da["longitude"].values
+        ds.close()
+    return out
+
+
+def load_ecmwf_run(key, run_name, source):
     cfg = MODELS[key]
+    if isinstance(source, int):                       # old style: just a step
+        source = {"resol": "0p25", "step": source, "kind": "oper-fc"}
+    resol, last_step, kind = source["resol"], source["step"], source["kind"]
     run_time = decode_init_time(run_name)
-    base, stamp = ecmwf_run_url(key, run_time)
+    base, stamp = ecmwf_run_url(key, run_time, resol)
     steps = list(range(0, last_step + 1, ECMWF_STEP_H))
     params = ["msl", "10u", "10v"]
+    grid = ECMWF_RESOL_DEG.get(resol, 0.25)
 
-    print(f"\nDownloading {cfg['label']} {run_name}: {len(steps)} steps (T+0 … T+{last_step}) ...")
+    print(f"\nDownloading {cfg['label']} {run_name} at {grid_label(grid)}: "
+          f"{len(steps)} steps (T+0 … T+{last_step}) ...")
     tmp = tempfile.mkdtemp(prefix=f"{key}_{run_name}_")
     try:
         http = _http()
-        with ThreadPoolExecutor(max_workers=8) as pool:
-            files = list(pool.map(
-                lambda s: _download_step(http, base, stamp, s, params,
-                                         os.path.join(tmp, f"s{s:03d}.grib2")),
-                steps))
 
-        merged = os.path.join(tmp, "all.grib2")
-        with open(merged, "wb") as out:
-            for p in files:
-                with open(p, "rb") as f:
-                    shutil.copyfileobj(f, out)
+        def fetch_and_cut(s):
+            p = _download_step(http, base, stamp, s, kind, params,
+                               os.path.join(tmp, f"s{s:03d}.grib2"))
+            try:
+                return s, _read_step_domain(p)
+            finally:
+                os.remove(p)                          # keep disk use small
 
-        def read(short_name):
-            ds = xr.open_dataset(merged, engine="cfgrib",
-                                 backend_kwargs={"filter_by_keys": {"shortName": short_name},
-                                                 "indexpath": ""})
-            da = ds[list(ds.data_vars)[0]]
-            lon = da["longitude"].values
-            if lon.max() > 180 and LON_MIN < 0:
-                da = da.assign_coords(longitude=((lon + 180) % 360) - 180).sortby("longitude")
-            da = da.sortby("latitude")                       # ascending like WeatherNext
-            da = da.sel(latitude=slice(LAT_MIN, LAT_MAX), longitude=slice(LON_MIN, LON_MAX))
-            if "step" not in da.dims:
-                da = da.expand_dims("step")
-            hours = (da["step"].values / np.timedelta64(1, "h")).astype(int)
-            order = np.argsort(hours)
-            return da.isel(step=order), hours[order]
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            results = dict(pool.map(fetch_and_cut, steps))
 
-        msl, hours = read("msl")
-        u10, hu = read("10u")
-        v10, hv = read("10v")
-        if not (np.array_equal(hours, hu) and np.array_equal(hours, hv)):
-            raise RuntimeError("MSLP and wind steps do not match")
+        hours = sorted(results)
+        first = results[hours[0]]
+        for h in hours:
+            r = results[h]
+            if r["msl"].shape != first["msl"].shape:
+                raise RuntimeError(f"step {h}: grid changed {r['msl'].shape} vs {first['msl'].shape}")
 
-        mslp = msl.values.astype(np.float32) / 100.0   # Pa -> hPa
+        mslp = np.stack([results[h]["msl"] for h in hours]) / 100.0   # Pa -> hPa
         data = {
-            "lat": msl["latitude"].values,
-            "lon": msl["longitude"].values,
-            "mslp": mslp,
-            "u10": u10.values.astype(np.float32),
-            "v10": v10.values.astype(np.float32),
+            "lat": first["lat"],
+            "lon": first["lon"],
+            "mslp": mslp.astype(np.float32),
+            "u10": np.stack([results[h]["10u"] for h in hours]),
+            "v10": np.stack([results[h]["10v"] for h in hours]),
             "n_hours": int(hours[-1]),
             "hours": [int(h) for h in hours],
-            "grid_deg": 0.25,
+            "grid_deg": grid,
+            "resol": resol,
         }
         print(f"Grid {mslp.shape}, MSLP {np.nanmin(mslp):.1f}–{np.nanmax(mslp):.1f} hPa")
         return data
@@ -791,7 +858,7 @@ def draw_map(out_png, model, run_name, init_time, plot_hour, data, tracks_df,
         fontsize=18, fontweight="bold", pad=12)
 
     info_text = (
-        f"{cfg['info_head']}\n"
+        f"{cfg['info_head'].format(grid=grid_label(data.get('grid_deg', 0.1)))}\n"
         f"Run: {run_name}\n"
         f"Initialisation: {init_time.strftime('%Y-%m-%d %H:%M UTC')}\n"
         f"Forecast: +{plot_hour} h\n"
@@ -899,6 +966,8 @@ def render_run(model, run_name, data):
         "run": run_name,
         "init": init_time.strftime("%Y-%m-%dT%H:%MZ"),
         "last_hour": int(max(data["hours"])),
+        "resol": data.get("resol"),
+        "grid_deg": data.get("grid_deg"),
         "persistent_tracks": n_persistent,
         "frames": frames,
         "gifs": gifs,
@@ -1021,26 +1090,34 @@ def process_ecmwf(model, force_run=None):
     label = MODELS[model]["label"]
     http = _http()
     if force_run:
-        step = ecmwf_last_step(model, decode_init_time(force_run), http)
-        if not step:
+        src = ecmwf_best_source(model, decode_init_time(force_run), http)
+        if not src:
             print(f"[{label}] {force_run} is not complete on data.ecmwf.int yet.")
             return 0
-        targets = [(force_run, step)]
+        targets = [(force_run, src)]
     else:
         available = list_ecmwf_runs(model)
-        print("Latest available:", ", ".join(r for r, _ in available) or "(none)")
-        done = set(rendered_runs(model))
-        targets = [(r, s) for r, s in available if r not in done]
+        print("Latest available:", ", ".join(f"{r} ({s['resol']}, T+{s['step']})"
+                                             for r, s in available) or "(none)")
+        targets = []
+        for r, src in available:
+            have = rendered_rank(model, r)
+            best = source_rank(model, src["step"], src["resol"])
+            if have is None:
+                targets.append((r, src))
+            elif best > have:
+                print(f"[{label}] {r}: better data now ({src['resol']}, T+{src['step']}) - redrawing")
+                targets.append((r, src))
 
     if not targets:
         print(f"[{label}] Nothing new to render.")
         return 0
 
     rendered = 0
-    for run_name, last_step in targets:
+    for run_name, src in targets:
         if rendered >= MAX_NEW_RUNS_PER_JOB:
             break
-        data = load_ecmwf_run(model, run_name, last_step)
+        data = load_ecmwf_run(model, run_name, src)
         render_run(model, run_name, data)
         rendered += 1
         del data

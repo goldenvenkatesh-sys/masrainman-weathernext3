@@ -5,7 +5,7 @@ Automatic **MSLP + V3 low-centre** maps for 55–100E, 2–28N from three models
 | Model | Source | Runs | Length |
 |---|---|---|---|
 | WeatherNext 3 (statistics mean) | Google Cloud `weathernext3_statistics_spatial` | 00/06/12/18 UTC | T+360 |
-| ECMWF IFS HRES | data.ecmwf.int open data (0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
+| ECMWF IFS HRES | data.ecmwf.int open data (0.1° ~9 km when published, else 0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
 | ECMWF AIFS Single | data.ecmwf.int open data (0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
 
 For every complete run it draws **T+24, T+48 …** to the end of the forecast,

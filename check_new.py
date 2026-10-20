@@ -7,7 +7,8 @@
 #   wn3=true/false          WeatherNext 3 has a new run
 #   ifs=true/false          ECMWF IFS has a new run
 #   aifs=true/false         ECMWF AIFS has a new run
-#   ifs_runs=YYYYMMDD_HH,.. new ECMWF IFS runs (complete only)
+#   ifs_runs=YYYYMMDD_HH,.. new ECMWF IFS runs (complete only, or now
+#                            available at 0.1° after being drawn at 0.25°)
 #   aifs_runs=...           new ECMWF AIFS runs (complete only)
 # so the workflow can skip the heavy install + render when nothing is new.
 #
@@ -69,43 +70,60 @@ def check_wn3():
 
 
 # ------------------------------------------------------------- ECMWF open data
-# Files live at https://data.ecmwf.int/forecasts/YYYYMMDD/HHz/<model>/0p25/<stream>/
-# 00/12Z runs go to 360 h; 06/18Z go to 144 h. All four runs use stream "oper"
-# (checked on data.ecmwf.int, Oct 2026 - the old "scda" name is no longer used).
-ECMWF_ROOT = "https://data.ecmwf.int/forecasts"
+# Files live at https://data.ecmwf.int/forecasts/YYYYMMDD/HHz/<model>/<resol>/oper/
+# 00/12Z runs go to 360 h; 06/18Z go to 144 h. All four runs use stream "oper".
+# Since Oct 2026 ECMWF also gives free 0.1° (~9 km) IFS data in .../ifs/0p1/oper/
+# with files named *-oper-fc-sfc.index; the 0.25° files are *-oper-fc.index.
+# IFS uses 0.1° when it is fully published, else 0.25° (must match render.py).
+import json
+
+ECMWF_ROOT = os.environ.get("ECMWF_ROOT", "https://data.ecmwf.int/forecasts")
 ECMWF = {
-    "ifs":  {"model": "ifs",         "streams": {0: "oper", 6: "oper", 12: "oper", 18: "oper"}},
-    "aifs": {"model": "aifs-single", "streams": {0: "oper", 6: "oper", 12: "oper", 18: "oper"}},
+    "ifs":  {"model": "ifs",
+             "resols": [r for r in os.environ.get("IFS_RESOLS", "0p1,0p25").split(",") if r.strip()]},
+    "aifs": {"model": "aifs-single", "resols": ["0p25"]},
 }
+FILE_KINDS = ["oper-fc-sfc", "oper-fc"]
 
 
-def ecmwf_last_step(day, hh):
-    return 360 if hh in (0, 12) else 144
-
-
-def ecmwf_run_complete(key, run_time):
-    """A run counts as complete once its last-step .index file exists."""
+def ecmwf_best_source(key, run_time):
+    """(step, resol) of the best fully published version, or None.
+    Longest forecast first, then the finest grid."""
     cfg = ECMWF[key]
     hh = run_time.hour
-    stream = cfg["streams"][hh]
-    step = ecmwf_last_step(run_time, hh)
     ymd = run_time.strftime("%Y%m%d")
-    base = f"{ECMWF_ROOT}/{ymd}/{hh:02d}z/{cfg['model']}/0p25/{stream}"
-    name = f"{ymd}{hh:02d}0000-{step}h-{stream}-fc.index"
+    wanted = [360] if hh in (0, 12) else [360, 144]
     print(f"  checking {key.upper()} {ymd} {hh:02d}Z ... ", end="", flush=True)
+    for step in wanted:
+        for resol in cfg["resols"]:
+            base = f"{ECMWF_ROOT}/{ymd}/{hh:02d}z/{cfg['model']}/{resol}/oper"
+            for kind in FILE_KINDS:
+                try:
+                    r = requests.head(f"{base}/{ymd}{hh:02d}0000-{step}h-{kind}.index",
+                                      timeout=TIMEOUT, allow_redirects=True)
+                except requests.RequestException as e:
+                    print(f"[{resol} failed: {type(e).__name__}] ", end="", flush=True)
+                    continue
+                if r.status_code == 200:
+                    print(f"complete ({resol}, T+{step})", flush=True)
+                    return step, resol
+    print("not ready", flush=True)
+    return None
+
+
+def rank(key, step, resol):
+    order = ECMWF[key]["resols"]
+    return (int(step), len(order) - order.index(resol) if resol in order else 0)
+
+
+def rendered_rank(key, run_name):
+    path = os.path.join(SITE_DIR, "ecmwf", key, run_name, "run.json")
     try:
-        r = requests.head(f"{base}/{name}", timeout=TIMEOUT, allow_redirects=True)
-        ok = r.status_code == 200
-        # AIFS 06/18Z may run to 360 h too; accept either length.
-        if not ok and key == "aifs" and step == 144:
-            name360 = f"{ymd}{hh:02d}0000-360h-{stream}-fc.index"
-            r = requests.head(f"{base}/{name360}", timeout=TIMEOUT, allow_redirects=True)
-            ok = r.status_code == 200
-        print("complete" if ok else f"not ready (HTTP {r.status_code})", flush=True)
-        return ok
-    except requests.RequestException as e:
-        print(f"FAILED: {type(e).__name__}", flush=True)
-    return False
+        with open(path) as f:
+            info = json.load(f)
+    except Exception:
+        return None
+    return rank(key, info.get("last_hour", 0), info.get("resol") or "0p25")
 
 
 def check_ecmwf(key):
@@ -119,15 +137,19 @@ def check_ecmwf(key):
         if t.hour not in ECMWF_CYCLES:
             t -= timedelta(hours=6)
             continue
-        if ecmwf_run_complete(key, t):
-            latest.append(t.strftime("%Y%m%d_%H"))
+        src = ecmwf_best_source(key, t)
+        if src:
+            latest.append((t.strftime("%Y%m%d_%H"), src))
             if len(latest) == KEEP_RUNS:
                 break
         t -= timedelta(hours=6)
 
-    have = site_has("ecmwf", key)
-    missing = [r for r in latest if r not in have]
-    print(f"[{key.upper():4}] latest :", ", ".join(latest) or "(none found)")
+    missing = []
+    for run, (step, resol) in latest:
+        have = rendered_rank(key, run)
+        if have is None or rank(key, step, resol) > have:
+            missing.append(run)
+    print(f"[{key.upper():4}] latest :", ", ".join(f"{r} ({s[1]})" for r, s in latest) or "(none found)")
     print(f"[{key.upper():4}] to draw:", ", ".join(missing) or "(nothing new)")
     return missing
 

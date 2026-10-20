@@ -105,6 +105,10 @@ LON_MIN, LON_MAX = 55.0, 100.0
 RAIN_LAT_MIN, RAIN_LAT_MAX = 0.0, 42.0
 RAIN_LON_MIN, RAIN_LON_MAX = 50.0, 110.0
 
+# WeatherNext 3 rain field: hourly total precipitation, ensemble mean (m).
+# Others in the store: _p10.._p90, imerg_tp_1hr_*, experimental_tp_1hr_*
+WN3_RAIN_VAR = os.environ.get("WN3_RAIN_VAR", "total_precipitation_1hr_mean")
+
 # Rain colour scale (mm) — grey / green / blue / yellow-red / brown / purple
 RAIN_LEVELS = [0.2, 0.6, 1.2, 1.8, 2.5, 3.75, 5, 6.25, 7.5, 10, 12.5, 15, 17.5, 20, 22.5,
                26, 30, 35, 40, 45, 50, 62.5, 75, 87.5, 100, 125, 150, 175, 200, 225, 250,
@@ -155,6 +159,7 @@ MODELS = {
         "pattern": RUN_PATTERN,
         "title": "WeatherNext 3 — Mean MSLP with V3 Low Centres",
         "info_head": "WeatherNext 3 Statistics Mean",
+        "rain_label": "WeatherNext 3 Mean",
         "barbs_label": "Mean 10-m wind barbs: ON",
         "credits": [
             "WeatherNext 3 © 2026 DeepMind Technologies Limited | Experimental model output",
@@ -345,7 +350,7 @@ def load_run(run_name):
 
     print(f"Grid {mslp.shape}, MSLP {np.nanmin(mslp):.1f}–{np.nanmax(mslp):.1f} hPa")
 
-    return {
+    data = {
         "lat": lat_full[lat_start:lat_end],
         "lon": lon_full[lon_start:lon_end],
         "mslp": mslp,
@@ -355,6 +360,25 @@ def load_run(run_name):
         "hours": list(range(1, n_hours + 1)),   # array index i = T+(i+1) h
         "grid_deg": 0.1,
     }
+
+    # Rain: hourly ensemble-mean precipitation (m) -> running total since T+0 (mm)
+    try:
+        tp_arr = root[WN3_RAIN_VAR]
+        rlat = np.where((lat_full >= RAIN_LAT_MIN) & (lat_full <= RAIN_LAT_MAX))[0]
+        rlon = np.where((lon_full >= RAIN_LON_MIN) & (lon_full <= RAIN_LON_MAX))[0]
+        rsl = (slice(0, n_hours), slice(int(rlat[0]), int(rlat[-1]) + 1),
+               slice(int(rlon[0]), int(rlon[-1]) + 1))
+        print(f"Loading rain ({WN3_RAIN_VAR}) for the rain-chart area ...")
+        hourly = np.nan_to_num(np.asarray(tp_arr[rsl], dtype=np.float32)) * 1000.0  # m -> mm
+        data["rain"] = np.cumsum(np.maximum(hourly, 0), axis=0, dtype=np.float32)
+        data["rlat"] = lat_full[rsl[1]]
+        data["rlon"] = lon_full[rsl[2]]
+        del hourly
+        print(f"Rain grid {data['rain'].shape}, max total {np.nanmax(data['rain'][-1]):.0f} mm")
+    except Exception as exc:   # never lose the MSLP maps because of rain
+        print(f"  (rain not loaded: {type(exc).__name__}: {exc} - rain charts skipped)")
+
+    return data
 
 
 # ============================================================
@@ -998,7 +1022,7 @@ def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h
     gl.ylabel_style = {"size": 8.5}
 
     grid = grid_label(data.get("grid_deg", 0.25)).split(" ")[0]
-    fig.text(0.012, 0.965, f"{cfg['label']} {grid}  Init {init_time.strftime('%Hz %d %b %Y')} • {what}",
+    fig.text(0.012, 0.965, f"{cfg.get('rain_label', cfg['label'])} {grid}  Init {init_time.strftime('%Hz %d %b %Y')} • {what}",
              ha="left", va="center", fontsize=12.5, fontweight="bold")
     fig.text(0.988, 0.965, f"Hour: {plot_hour} • Valid: {valid_time.strftime('%Hz %a %d %b %Y')}",
              ha="right", va="center", fontsize=12.5, fontweight="bold")

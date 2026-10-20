@@ -527,7 +527,8 @@ def _read_step_domain(path):
         try:
             ds = xr.open_dataset(path, engine="cfgrib",
                                  backend_kwargs={"filter_by_keys": {"shortName": short_name},
-                                                 "indexpath": ""})
+                                                 "indexpath": "",
+                                                 "read_keys": ["startStep", "endStep"]})
         except Exception:
             if short_name == "tp":
                 continue
@@ -541,6 +542,7 @@ def _read_step_domain(path):
         if short_name == "tp":
             da = _cut(da, RAIN_LAT_MIN, RAIN_LAT_MAX, RAIN_LON_MIN, RAIN_LON_MAX)
             out["tp"] = da.values.astype(np.float32) * 1000.0       # m -> mm
+            out["tp_start"] = int(da.attrs.get("GRIB_startStep", 0))   # 0 = since T+0
             out["rlat"] = da["latitude"].values
             out["rlon"] = da["longitude"].values
         else:
@@ -552,16 +554,21 @@ def _read_step_domain(path):
     return out
 
 
-def rain_since_start(hours, fields):
-    """Accumulated rain since T+0 for each hour. ECMWF tp is normally
-    accumulated from the start; if it looks like per-step amounts instead
-    (values dropping between steps), it is summed up."""
+def rain_since_start(hours, fields, starts):
+    """Accumulated rain since T+0 for each hour.
+
+    ECMWF says in each GRIB message what period tp covers (startStep-endStep).
+    startStep 0 everywhere -> already a running total since T+0 (normal case).
+    Otherwise each field covers its own period and the periods are added up.
+    (Do not guess from the values: packing noise makes totals dip slightly.)"""
     acc = np.stack(fields).astype(np.float32)
-    drops = [np.mean(acc[i + 1] < acc[i] - 0.05) for i in range(len(acc) - 1)]
-    if drops and max(drops) > 0.05:
-        print("  tp looks like per-step amounts -> summing")
+    since_start = all(st == 0 for h, st in zip(hours, starts) if h > 0)
+    if not since_start:
+        print(f"  tp covers separate periods (start steps {sorted(set(starts))}) -> adding up")
         acc = np.cumsum(acc, axis=0)
-    return np.maximum(acc, 0)
+    # running totals can only grow; packing noise can dip them a little
+    acc = np.maximum.accumulate(np.maximum(acc, 0), axis=0)
+    return acc
 
 
 def load_ecmwf_run(key, run_name, source):
@@ -617,8 +624,9 @@ def load_ecmwf_run(key, run_name, source):
             ref = results[rain_hours[0]]
             zero = np.zeros_like(ref["tp"])
             fields = [results[h]["tp"] if "tp" in results[h] else zero for h in hours]
+            starts = [results[h].get("tp_start", 0) for h in hours]
             if all(f.shape == zero.shape for f in fields):
-                data["rain"] = rain_since_start(hours, fields)
+                data["rain"] = rain_since_start(hours, fields, starts)
                 data["rlat"], data["rlon"] = ref["rlat"], ref["rlon"]
                 print(f"Rain grid {data['rain'].shape}, max total {np.nanmax(data['rain'][-1]):.0f} mm")
         else:

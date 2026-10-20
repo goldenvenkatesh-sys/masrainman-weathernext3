@@ -1,27 +1,42 @@
-# MasRainman · WeatherNext 3 Low Centres (auto maps)
+# MasRainman · Model Low Centres (auto maps)
 
-Automatic WeatherNext 3 **Mean MSLP + V3 low-centre** maps for 55–100E, 2–28N.
+Automatic **MSLP + V3 low-centre** maps for 55–100E, 2–28N from three models:
 
-For every 00, 06, 12 and 18 UTC run it draws **T+24, T+48 … T+360** (15 frames),
-with and without mean 10-m wind barbs, builds a GIF loop, and publishes a viewer page
-with run selector, frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
-The latest 4 runs stay selectable. India's border is drawn as per the Government of India.
+| Model | Source | Runs | Length |
+|---|---|---|---|
+| WeatherNext 3 (statistics mean) | Google Cloud `weathernext3_statistics_spatial` | 00/06/12/18 UTC | T+360 |
+| ECMWF IFS HRES | data.ecmwf.int open data (0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
+| ECMWF AIFS Single | data.ecmwf.int open data (0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
+
+For every complete run it draws **T+24, T+48 …** to the end of the forecast,
+with and without 10-m wind barbs, builds a GIF loop, writes CSVs of the V3 candidates
+and persistent tracks, and publishes a viewer page with model and run selectors,
+frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
+The latest 4 runs of each model stay selectable. India's border is drawn as per the Government of India.
 
 ## Files
 
 | File | What it does |
 |---|---|
-| `render.py` | Finds new complete runs, runs V3 detection + tracking, draws maps, GIFs, CSVs, manifest |
-| `web/index.html` | The viewer page (copied into the website on every run) |
-| `boundaries/countries_india_view.geojson` | Country borders, India as per GoI (Natural Earth India view) |
-| `.github/workflows/weathernext3.yml` | Runs every hour, renders only new complete runs, publishes to `gh-pages` |
+| `check_new.py` | Quick check (no heavy installs): is there a new complete run the site doesn't have yet? |
+| `render.py` | Loads new runs, runs V3 detection + tracking, draws maps, GIFs, CSVs and manifests |
+| `web/index.html` | The viewer page (copied into the site on every run) |
+| `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
+| `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |
+
+## How a run works
+
+1. Every 3 hours at :20 UTC (05:50, 08:50, 11:50, 14:50, 17:50, 20:50, 23:50, 02:50 IST)
+   the workflow restores the current site from the `site-data` branch.
+2. `check_new.py` looks for new complete runs. If there are none, the job stops here.
+3. Otherwise `render.py` draws the new runs (max 2 per model per job) and drops runs
+   beyond the latest 4.
+4. The site is saved to the `site-data` branch (force-pushed, so old images don't pile up
+   in git history) and deployed to **Cloudflare Pages** (project `masrainman-wn3`).
 
 ## One-time setup
 
-1. **Create the repo** (e.g. `masrainman-weathernext3`) and upload all files keeping the folders
-   (`.github/workflows/…` must keep that exact path).
-
-2. **Google service account key** (GitHub cannot use the Colab login):
+1. **Google service account key** for WeatherNext 3 (GitHub cannot use the Colab login):
    - Google Cloud Console → the project that has your WeatherNext access →
      IAM & Admin → Service Accounts → *Create service account*.
    - Give it **Storage Object Viewer**.
@@ -30,28 +45,47 @@ The latest 4 runs stay selectable. India's border is drawn as per the Government
      email to the same WeatherNext access, or ask Google to add it).
    - Keys → *Add key* → JSON → download.
 
-3. **Add the key as a secret**: repo → Settings → Secrets and variables → Actions →
-   *New repository secret* → name `GCP_SA_KEY`, paste the whole JSON. Never upload the JSON file itself.
+2. **Repository secrets**: repo → Settings → Secrets and variables → Actions → *New repository secret*:
 
-4. **First run**: Actions tab → *WeatherNext 3 auto maps* → *Run workflow*.
-   It creates the `gh-pages` branch (~20–30 min per run).
+   | Secret | Value |
+   |---|---|
+   | `GCP_SA_KEY` | The whole service-account JSON. Never upload the JSON file itself. |
+   | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with *Cloudflare Pages: Edit* |
+   | `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID |
 
-5. **Turn on the website**: Settings → Pages → Source *Deploy from a branch* →
-   `gh-pages` / `(root)`. Page: `https://<your-user>.github.io/<repo>/`
+   ECMWF open data needs no key.
 
-After that it runs by itself every hour and only renders when a new run is complete.
+3. **First run**: Actions tab → *MasRainman model maps* → *Run workflow*.
+   It creates the `site-data` branch and the Cloudflare Pages project.
+
+4. **Protect the page** (optional): in Cloudflare → Zero Trust → Access, add an application
+   for the Pages domain so only people you allow can log in.
+
+After that it runs by itself every 3 hours and only renders when a new run is complete.
 
 ## Options
 
-- Force a specific run: *Run workflow* → enter e.g. `20261019_06hr_01_preds`.
-- Runs kept on the site: `KEEP_RUNS` in the workflow (default 4).
-- Test without Google Cloud: `python render.py --demo` (synthetic cyclone), then open `site/index.html`
-  through a local server: `cd site && python -m http.server`.
+- Force a specific run: *Run workflow* → pick the model and enter the run,
+  e.g. WeatherNext 3 `20261019_06hr_01_preds`, IFS/AIFS `20261019_12`.
+- Runs kept per model: `KEEP_RUNS` in the workflow (default 4).
+- Save GitHub minutes by drawing only the 15-day ECMWF runs: uncomment
+  `ECMWF_CYCLES: "00,12"` in the workflow.
+- Only some models: `python render.py --models ifs,aifs`.
+- Test without any downloads: `python render.py --demo` (synthetic cyclone, all models), then open
+  the site through a local server: `cd site && python -m http.server`.
+
+## Site layout
+
+```
+site/runs/<YYYYMMDD_HHhr_01_preds>/   WeatherNext 3     site/data/manifest.json
+site/ecmwf/ifs/<YYYYMMDD_HH>/         ECMWF IFS         site/data/manifest_ifs.json
+site/ecmwf/aifs/<YYYYMMDD_HH>/        ECMWF AIFS        site/data/manifest_aifs.json
+site/data/models.json                 list of models for the page
+```
 
 ## Notes
 
-- `gh-pages` is force-pushed each time, so old images don't pile up in git history.
-- GitHub Pages on a free account needs a **public** repo, and anyone with the link can see the page.
-  If you want it private, use GitHub Pro or host the `site/` folder elsewhere.
 - Real-time WeatherNext 3 output is under Google DeepMind's experimental-data terms; check they allow
-  public posting before sharing the page widely.
+  sharing before giving the page to others.
+- ECMWF open data is CC BY 4.0.
+- These maps are not official forecasts. Please follow IMD for official forecasts and warnings.

@@ -9,7 +9,7 @@ on:
         default: ""
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   list:
@@ -33,3 +33,10 @@ jobs:
           pip install -q google-auth requests
           python list_wn3_vars.py | tee vars.txt
           { echo '```'; cat vars.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Save the list (branch wn3-variables-output)
+        run: |
+          mkdir -p out && cp vars.txt out/wn3_variables.txt
+          cd out && git init -q && git checkout -q -b wn3-variables-output
+          git add wn3_variables.txt
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" commit -q -m "WeatherNext 3 variable list"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" wn3-variables-output

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WeatherNext 3 Low Centres · MasRainman</title>
+<title>Model Low Centres · MasRainman</title>
 <style>
   :root{
     --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
@@ -21,6 +21,10 @@
   .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
   .pill:hover{border-color:var(--accent)}
   .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .pill.model{padding:8px 16px;font-size:14px;font-weight:600}
+  .pill.model.on{background:var(--ok);border-color:var(--ok);color:#03150d}
+  .pill.model[disabled]{opacity:.45;cursor:not-allowed}
+  .pill.model small{font-weight:400;opacity:.8;margin-left:4px;font-size:11px}
   .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
   .frames{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
   .fr{flex:0 0 auto;min-width:78px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
@@ -57,11 +61,15 @@
 </head>
 <body>
 <header>
-  <h1>WeatherNext 3 · <span>Mean MSLP &amp; V3 Low Centres</span></h1>
+  <h1><span id="hModel">WeatherNext 3</span> · <span id="hTitle">Mean MSLP &amp; V3 Low Centres</span></h1>
   <div class="upd" id="upd">Loading…</div>
 </header>
 
 <main>
+  <div class="bar">
+    <span class="label">Model</span>
+    <div class="seg" id="models"></div>
+  </div>
   <div class="bar">
     <span class="label">Run</span>
     <div class="seg" id="runs"></div>
@@ -93,12 +101,12 @@
     <div class="now" id="now"></div>
     <span style="flex:1"></span>
     <a class="btn" id="dlPng" download>⬇ PNG (this frame)</a>
-    <a class="btn gif" id="dlGif" download>⬇ GIF (T+24 → T+360)</a>
+    <a class="btn gif" id="dlGif" download>⬇ GIF</a>
     <a class="btn" id="viewGif" target="_blank">Open GIF</a>
   </div>
 
   <div class="viewer">
-    <img id="map" alt="WeatherNext 3 MSLP map">
+    <img id="map" alt="MSLP map with V3 low centres">
     <div class="loading" id="loading">Loading…</div>
   </div>
 
@@ -115,8 +123,9 @@
   </div>
 
   <footer>
-    WeatherNext 3 © 2026 DeepMind Technologies Limited — experimental model output, not official weather warnings or forecasts.
-    V3 analysis &amp; visualisation: MasRainman. Updates automatically for the 00, 06, 12 and 18 UTC runs.
+    <span id="credit"></span>
+    V3 analysis &amp; visualisation: MasRainman. Updates automatically every 3 hours for the 00, 06, 12 and 18 UTC runs
+    (ECMWF 06/18 UTC runs go to T+144).
     Keys: <span class="kbd">←</span> <span class="kbd">→</span> step, <span class="kbd">Space</span> play.
   </footer>
 </main>
@@ -124,7 +133,23 @@
 <script>
 (function(){
   const $ = id => document.getElementById(id);
-  const S = {manifest:null, run:0, layer:'mslp', idx:0, timer:null, cache:{}};
+  const S = {manifest:null, run:0, layer:'mslp', idx:0, timer:null, cache:{},
+             models:[], model:null, manifests:{}};
+
+  // Per-model text (title, credit, download file prefix)
+  const INFO = {
+    wn3:  {title:'Mean MSLP & V3 Low Centres', prefix:'weathernext3',
+           credit:'WeatherNext 3 © 2026 DeepMind Technologies Limited — experimental model output, not official weather warnings or forecasts.'},
+    ifs:  {title:'MSLP & V3 Low Centres', prefix:'ecmwf_ifs',
+           credit:'ECMWF IFS HRES (operational deterministic) — ECMWF open data © ECMWF, CC BY 4.0. Not an official forecast; follow IMD for warnings.'},
+    aifs: {title:'MSLP & V3 Low Centres', prefix:'ecmwf_aifs',
+           credit:'ECMWF AIFS Single (AI model) — ECMWF open data © ECMWF, CC BY 4.0. Not an official forecast; follow IMD for warnings.'}
+  };
+  const FALLBACK_MODELS = [
+    {id:'wn3',  label:'WeatherNext 3', manifest:'data/manifest.json',      base:'runs'},
+    {id:'ifs',  label:'ECMWF IFS',     manifest:'data/manifest_ifs.json',  base:'ecmwf/ifs'},
+    {id:'aifs', label:'ECMWF AIFS',    manifest:'data/manifest_aifs.json', base:'ecmwf/aifs'}
+  ];
 
   const fmtUTC = iso => {
     const d = new Date(iso.replace('Z',':00Z'));
@@ -140,7 +165,8 @@
   };
 
   const cur = () => S.manifest.runs[S.run];
-  const base = () => 'runs/' + cur().run + '/';
+  const modelObj = () => S.models.find(m => m.id === S.model);
+  const base = () => (S.manifest.base || modelObj().base || 'runs') + '/' + cur().run + '/';
   const src = (i, layer) => base() + cur().frames[i][layer || S.layer];
 
   function preload(){
@@ -173,6 +199,8 @@
     });
     $('slider').max = cur().frames.length - 1;
     const r = cur();
+    const fr = r.frames;
+    $('dlGif').textContent = '⬇ GIF (T+' + fr[0].hour + ' → T+' + fr[fr.length-1].hour + ')';
     $('dlGif').href = base() + r.gifs[S.layer];
     $('viewGif').href = base() + r.gifs[S.layer];
     $('csvTracks').href = base() + r.csv.tracks;
@@ -193,7 +221,7 @@
     const on = document.querySelectorAll('.fr')[i]; if(on) on.scrollIntoView({block:'nearest',inline:'nearest'});
     $('now').innerHTML = 'T+' + f.hour + ' h · ' + fmtUTC(f.valid) + '<small>' + fmtIST(f.valid) + '</small>';
     $('dlPng').href = u;
-    $('dlPng').setAttribute('download', 'weathernext3_' + cur().run + '_' + S.layer + '_T' + String(f.hour).padStart(3,'0') + '.png');
+    $('dlPng').setAttribute('download', (INFO[S.model] || INFO.wn3).prefix + '_' + cur().run + '_' + S.layer + '_T' + String(f.hour).padStart(3,'0') + '.png');
     $('sysTitle').textContent = 'V3 systems at T+' + f.hour + ' h (' + f.systems.length + ')';
     const t = $('sys');
     if(!f.systems.length){ t.innerHTML = '<tr><td class="empty">No persistent V3 low centre in the domain at this time.</td></tr>'; return; }
@@ -221,11 +249,52 @@
     else if(e.key===' '){ e.preventDefault(); S.timer ? stop() : play(); }
   });
 
-  fetch('data/manifest.json?t=' + Date.now()).then(r=>r.json()).then(m=>{
-    S.manifest = m;
-    if(!m.runs.length){ $('upd').textContent = 'No runs rendered yet'; return; }
-    $('upd').textContent = 'Updated ' + fmtIST(m.updated);
-    buildRuns(); buildFrames(); show(0); preload();
+  const getJSON = u => fetch(u + '?t=' + Date.now()).then(r => { if(!r.ok) throw r.status; return r.json(); });
+
+  function buildModels(){
+    const box = $('models'); box.innerHTML = '';
+    S.models.forEach(m=>{
+      const man = S.manifests[m.id];
+      const n = man ? man.runs.length : 0;
+      const b = document.createElement('button');
+      b.className = 'pill model' + (m.id===S.model?' on':'');
+      b.innerHTML = m.label + (n ? '' : '<small>(no maps yet)</small>');
+      b.disabled = !n;
+      b.onclick = () => selectModel(m.id);
+      box.appendChild(b);
+    });
+  }
+
+  function selectModel(id){
+    const man = S.manifests[id];
+    if(!man || !man.runs.length) return;
+    stop();
+    // keep the same run time and forecast hour when switching, if that model has it
+    const keepInit = S.manifest ? cur().init : null;
+    const keepHour = S.manifest ? cur().frames[S.idx].hour : null;
+    S.model = id; S.manifest = man;
+    const ri = man.runs.findIndex(r => r.init === keepInit);
+    S.run = ri >= 0 ? ri : 0;
+    const fi = keepHour == null ? 0 : cur().frames.findIndex(f => f.hour === keepHour);
+    const info = INFO[id] || INFO.wn3;
+    $('hModel').textContent = modelObj().label;
+    $('hTitle').textContent = info.title;
+    $('credit').textContent = info.credit;
+    $('upd').textContent = 'Updated ' + fmtIST(man.updated);
+    try { localStorage.setItem('mr_model', id); } catch(e){}
+    buildModels(); buildRuns(); buildFrames(); show(fi >= 0 ? fi : 0); preload();
+  }
+
+  getJSON('data/models.json').then(j => j.models).catch(() => FALLBACK_MODELS).then(models=>{
+    S.models = models;
+    return Promise.all(models.map(m =>
+      getJSON(m.manifest).then(man => { S.manifests[m.id] = man; }).catch(()=>{})));
+  }).then(()=>{
+    let saved = null;
+    try { saved = localStorage.getItem('mr_model'); } catch(e){}
+    const have = S.models.filter(m => S.manifests[m.id] && S.manifests[m.id].runs.length);
+    if(!have.length){ buildModels(); $('upd').textContent = 'No runs rendered yet'; return; }
+    selectModel(have.some(m => m.id === saved) ? saved : have[0].id);
   }).catch(()=>{ $('upd').textContent = 'Could not load manifest'; });
 })();
 </script>

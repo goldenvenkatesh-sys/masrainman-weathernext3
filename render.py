@@ -101,6 +101,28 @@ GIF_FRAME_MS = 900
 LAT_MIN, LAT_MAX = 2.0, 28.0
 LON_MIN, LON_MAX = 55.0, 100.0
 
+# Rain-chart domain (wider, like the usual South Asia rain charts)
+RAIN_LAT_MIN, RAIN_LAT_MAX = 0.0, 42.0
+RAIN_LON_MIN, RAIN_LON_MAX = 50.0, 110.0
+
+# Rain colour scale (mm) — grey / green / blue / yellow-red / brown / purple
+RAIN_LEVELS = [0.2, 0.6, 1.2, 1.8, 2.5, 3.75, 5, 6.25, 7.5, 10, 12.5, 15, 17.5, 20, 22.5,
+               26, 30, 35, 40, 45, 50, 62.5, 75, 87.5, 100, 125, 150, 175, 200, 225, 250,
+               275, 300, 325, 350, 375, 400, 425, 450, 475, 500]
+RAIN_TICKS = [0.2, 1.2, 2.5, 5, 7.5, 12.5, 17.5, 22.5, 30, 40, 50, 75, 100, 150, 200,
+              250, 300, 350, 400, 450, 500]
+RAIN_COLOURS = [  # one colour per band above (40 bands); above 500 = RAIN_OVER
+    "#d0d0d0", "#bdbdbd", "#a3a3a3", "#8c8c8c", "#6f6f6f",                       # 0.2 – 3.75 grey
+    "#c4f7b8", "#a2ef8f", "#7fe36a", "#5ad146", "#33b52b", "#12951c",            # 3.75 – 15 green
+    "#0b3fb8", "#2266dd", "#4a95ee", "#8fc8f7",                                  # 15 – 26 blue
+    "#fff3a3", "#ffde5c", "#ffc430", "#ffa51f", "#ff8a16", "#ff6a10",            # 26 – 62.5 yellow-orange
+    "#f2450c", "#df1a0a", "#c40606", "#a10000", "#7c0b05",                       # 62.5 – 150 red
+    "#5e2a1e", "#7d4a3c", "#a07264", "#c49d91", "#e6cfc8",                       # 150 – 275 brown
+    "#ddd0ee", "#c4b3e6", "#a991d8", "#8e6fc8", "#7650b5", "#6630a0",            # 275 – 425 lavender-purple
+    "#8020a8", "#a01ab8", "#c626cf",                                             # 425 – 500 magenta
+]
+RAIN_OVER = "#e83ce8"
+
 # India national boundary as per Government of India
 # (land borders only, from Natural Earth "India point-of-view" countries)
 BOUNDARY_FILE = os.path.join(HERE, "boundaries", "borders_india_view.geojson")
@@ -428,7 +450,7 @@ def list_ecmwf_runs(key):
     return found
 
 
-def _download_step(http, base, stamp, step, kind, params, out_path):
+def _download_step(http, base, stamp, step, kind, params, out_path, optional=()):
     """Fetch only the wanted GRIB messages of one step, using the .index byte ranges."""
     idx_url = f"{base}/{stamp}-{step}h-{kind}.index"
     grib_url = f"{base}/{stamp}-{step}h-{kind}.grib2"
@@ -440,7 +462,7 @@ def _download_step(http, base, stamp, step, kind, params, out_path):
         if not line:
             continue
         rec = json.loads(line)
-        if rec.get("param") in params and rec.get("levtype", "sfc") == "sfc":
+        if rec.get("param") in set(params) | set(optional) and rec.get("levtype", "sfc") == "sfc":
             parts.append((int(rec["_offset"]), int(rec["_length"]), rec["param"]))
     got = {p for _, _, p in parts}
     missing = set(params) - got
@@ -463,27 +485,59 @@ def _download_step(http, base, stamp, step, kind, params, out_path):
     return out_path
 
 
+def _cut(da, lat0, lat1, lon0, lon1):
+    lon = da["longitude"].values
+    if lon.max() > 180 and lon0 < 0:
+        da = da.assign_coords(longitude=((lon + 180) % 360) - 180).sortby("longitude")
+    da = da.sortby("latitude")                       # ascending like WeatherNext
+    return da.sel(latitude=slice(lat0, lat1), longitude=slice(lon0, lon1))
+
+
 def _read_step_domain(path):
-    """Read msl/10u/10v of one step file, cut to the map domain right away
-    (a global 0.1° field is 26 MB, the domain cut is under 0.5 MB)."""
+    """Read msl/10u/10v (+tp if present) of one step file, cut to the map domains
+    right away (a global 0.1° field is 26 MB, the domain cut is under 1 MB)."""
     import xarray as xr
 
     out = {}
-    for short_name in ("msl", "10u", "10v"):
-        ds = xr.open_dataset(path, engine="cfgrib",
-                             backend_kwargs={"filter_by_keys": {"shortName": short_name},
-                                             "indexpath": ""})
+    for short_name in ("msl", "10u", "10v", "tp"):
+        try:
+            ds = xr.open_dataset(path, engine="cfgrib",
+                                 backend_kwargs={"filter_by_keys": {"shortName": short_name},
+                                                 "indexpath": ""})
+        except Exception:
+            if short_name == "tp":
+                continue
+            raise
+        if not ds.data_vars:
+            ds.close()
+            if short_name == "tp":
+                continue
+            raise RuntimeError(f"{short_name} missing in {os.path.basename(path)}")
         da = ds[list(ds.data_vars)[0]]
-        lon = da["longitude"].values
-        if lon.max() > 180 and LON_MIN < 0:
-            da = da.assign_coords(longitude=((lon + 180) % 360) - 180).sortby("longitude")
-        da = da.sortby("latitude")                       # ascending like WeatherNext
-        da = da.sel(latitude=slice(LAT_MIN, LAT_MAX), longitude=slice(LON_MIN, LON_MAX))
-        out[short_name] = da.values.astype(np.float32)
-        out["lat"] = da["latitude"].values
-        out["lon"] = da["longitude"].values
+        if short_name == "tp":
+            da = _cut(da, RAIN_LAT_MIN, RAIN_LAT_MAX, RAIN_LON_MIN, RAIN_LON_MAX)
+            out["tp"] = da.values.astype(np.float32) * 1000.0       # m -> mm
+            out["rlat"] = da["latitude"].values
+            out["rlon"] = da["longitude"].values
+        else:
+            da = _cut(da, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX)
+            out[short_name] = da.values.astype(np.float32)
+            out["lat"] = da["latitude"].values
+            out["lon"] = da["longitude"].values
         ds.close()
     return out
+
+
+def rain_since_start(hours, fields):
+    """Accumulated rain since T+0 for each hour. ECMWF tp is normally
+    accumulated from the start; if it looks like per-step amounts instead
+    (values dropping between steps), it is summed up."""
+    acc = np.stack(fields).astype(np.float32)
+    drops = [np.mean(acc[i + 1] < acc[i] - 0.05) for i in range(len(acc) - 1)]
+    if drops and max(drops) > 0.05:
+        print("  tp looks like per-step amounts -> summing")
+        acc = np.cumsum(acc, axis=0)
+    return np.maximum(acc, 0)
 
 
 def load_ecmwf_run(key, run_name, source):
@@ -505,7 +559,7 @@ def load_ecmwf_run(key, run_name, source):
 
         def fetch_and_cut(s):
             p = _download_step(http, base, stamp, s, kind, params,
-                               os.path.join(tmp, f"s{s:03d}.grib2"))
+                               os.path.join(tmp, f"s{s:03d}.grib2"), optional=("tp",))
             try:
                 return s, _read_step_domain(p)
             finally:
@@ -533,6 +587,18 @@ def load_ecmwf_run(key, run_name, source):
             "grid_deg": grid,
             "resol": resol,
         }
+        # Rain: needs tp at every step after T+0 (T+0 is zero by definition)
+        rain_hours = [h for h in hours if h > 0]
+        if rain_hours and all("tp" in results[h] for h in rain_hours):
+            ref = results[rain_hours[0]]
+            zero = np.zeros_like(ref["tp"])
+            fields = [results[h]["tp"] if "tp" in results[h] else zero for h in hours]
+            if all(f.shape == zero.shape for f in fields):
+                data["rain"] = rain_since_start(hours, fields)
+                data["rlat"], data["rlon"] = ref["rlat"], ref["rlon"]
+                print(f"Rain grid {data['rain'].shape}, max total {np.nanmax(data['rain'][-1]):.0f} mm")
+        else:
+            print("  (no total precipitation in this run - rain charts skipped)")
         print(f"Grid {mslp.shape}, MSLP {np.nanmin(mslp):.1f}–{np.nanmax(mslp):.1f} hPa")
         return data
     finally:
@@ -886,6 +952,81 @@ def draw_map(out_png, model, run_name, init_time, plot_hour, data, tracks_df,
     return selected_centres, valid_time
 
 
+_RAIN_CMAP = None
+
+
+def rain_cmap():
+    """Discrete colour scale: one fixed colour per band."""
+    global _RAIN_CMAP
+    if _RAIN_CMAP is None:
+        from matplotlib.colors import BoundaryNorm, ListedColormap
+        assert len(RAIN_COLOURS) == len(RAIN_LEVELS) - 1
+        cmap = ListedColormap(RAIN_COLOURS)
+        cmap.set_under("white")
+        cmap.set_over(RAIN_OVER)
+        _RAIN_CMAP = (cmap, BoundaryNorm(RAIN_LEVELS, cmap.N))
+    return _RAIN_CMAP
+
+
+def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h=None):
+    """Rain chart. period_h=None -> total since T+0, else rain in the last period_h hours."""
+    cfg = MODELS[model]
+    i = data["hours"].index(plot_hour)
+    valid_time = init_time + timedelta(hours=plot_hour)
+    rain = data["rain"][i]
+    if period_h:
+        start = plot_hour - period_h
+        rain = rain - (data["rain"][data["hours"].index(start)] if start > 0 else 0)
+        what = f"{period_h}-h Precipitation (mm), T+{max(start, 0)} to T+{plot_hour}"
+    else:
+        what = "Total Precipitation (mm)"
+    rain = np.maximum(rain, 0)
+    cmap, norm = rain_cmap()
+
+    fig = plt.figure(figsize=(13, 10.6), facecolor="white")
+    ax = fig.add_axes([0.01, 0.135, 0.98, 0.805], projection=ccrs.PlateCarree())
+    ax.set_extent([RAIN_LON_MIN, RAIN_LON_MAX, RAIN_LAT_MIN, RAIN_LAT_MAX], crs=ccrs.PlateCarree())
+    ax.set_facecolor("#f4f6fb")
+    ax.pcolormesh(data["rlon"], data["rlat"], np.where(rain < RAIN_LEVELS[0], np.nan, rain),
+                  cmap=cmap, norm=norm, shading="nearest", transform=ccrs.PlateCarree(), zorder=1)
+    ax.coastlines(resolution="50m", linewidth=0.7, color="black", zorder=5)
+    ax.add_feature(india_view_borders(), facecolor="none", edgecolor="black", linewidth=0.5, zorder=6)
+    gl = ax.gridlines(draw_labels=True, linewidth=0.4, color="gray", alpha=0.5, linestyle="--", zorder=7)
+    gl.top_labels = False
+    gl.left_labels = False
+    gl.xlabel_style = {"size": 8.5}
+    gl.ylabel_style = {"size": 8.5}
+
+    grid = grid_label(data.get("grid_deg", 0.25)).split(" ")[0]
+    fig.text(0.012, 0.965, f"{cfg['label']} {grid}  Init {init_time.strftime('%Hz %d %b %Y')} • {what}",
+             ha="left", va="center", fontsize=12.5, fontweight="bold")
+    fig.text(0.988, 0.965, f"Hour: {plot_hour} • Valid: {valid_time.strftime('%Hz %a %d %b %Y')}",
+             ha="right", va="center", fontsize=12.5, fontweight="bold")
+
+    # Horizontal colour bar with every band, labelled at the usual values
+    cax = fig.add_axes([0.04, 0.055, 0.68, 0.022])
+    n = len(RAIN_LEVELS) - 1
+    cax.imshow(np.arange(n)[None, :], cmap=cmap, norm=plt.Normalize(-0.5, n - 0.5),
+               aspect="auto", extent=(0, n, 0, 1))
+    cax.set_yticks([])
+    cax.set_xticks([RAIN_LEVELS.index(t) for t in RAIN_TICKS])
+    cax.set_xticklabels([f"{t:g}" for t in RAIN_TICKS], fontsize=8.5)
+    cax.xaxis.set_ticks_position("top")
+    cax.tick_params(length=0, pad=2)
+    for sp in cax.spines.values():
+        sp.set_linewidth(0.6)
+
+    fig.text(0.988, 0.065, f"Max: {np.nanmax(rain):.0f}", ha="right", va="center",
+             fontsize=13, fontweight="bold")
+    fig.text(0.5, 0.025, cfg["credits"][0] + " | Rain chart: MasRainman", ha="center",
+             fontsize=7.5, color="dimgray")
+    fig.text(0.5, 0.008, cfg["credits"][-1], ha="center", fontsize=7.2, color="dimgray")
+
+    plt.savefig(out_png, dpi=150, bbox_inches="tight", pad_inches=0.08, facecolor="white")
+    plt.close(fig)
+    return valid_time
+
+
 def make_gif(png_paths, out_gif):
     frames = []
     for p in png_paths:
@@ -925,6 +1066,9 @@ def render_run(model, run_name, data):
 
     frames = []
     pngs = {"mslp": [], "barbs": []}
+    has_rain = "rain" in data
+    if has_rain:
+        pngs.update({"rain": [], "rain24": []})
 
     for h in hours:
         print(f"[{cfg['label']}] Drawing T+{h:03d} ...")
@@ -935,6 +1079,16 @@ def render_run(model, run_name, data):
                                            data, tracks_df, n_persistent, barbs)
             entry[layer] = fname
             pngs[layer].append(os.path.join(tmp_dir, fname))
+
+        if has_rain:
+            for layer, period in (("rain", None), ("rain24", 24)):
+                if period and (h - period) not in available and h - period > 0:
+                    continue
+                fname = f"{layer}_T{h:03d}.png"
+                draw_rain_map(os.path.join(tmp_dir, fname), model, run_name, init_time, h,
+                              data, period)
+                entry[layer] = fname
+                pngs[layer].append(os.path.join(tmp_dir, fname))
 
         entry["valid"] = valid_time.strftime("%Y-%m-%dT%H:%MZ")
         entry["systems"] = [
@@ -955,6 +1109,8 @@ def render_run(model, run_name, data):
     print("Building GIFs ...")
     gifs = {}
     for layer in pngs:
+        if not pngs[layer]:
+            continue
         gname = f"{pre}_{run_name}_{layer}_loop.gif"
         make_gif(pngs[layer], os.path.join(tmp_dir, gname))
         gifs[layer] = gname

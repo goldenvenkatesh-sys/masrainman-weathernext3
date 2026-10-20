@@ -79,6 +79,8 @@
     <div class="seg">
       <button class="pill on" data-layer="mslp">MSLP</button>
       <button class="pill" data-layer="barbs">MSLP + 10-m wind barbs</button>
+      <button class="pill" data-layer="rain" title="Total rain since the start of the run">Rain (total)</button>
+      <button class="pill" data-layer="rain24" title="Rain in the 24 hours before each map">Rain (24 h)</button>
     </div>
   </div>
 
@@ -167,7 +169,7 @@
   const cur = () => S.manifest.runs[S.run];
   const modelObj = () => S.models.find(m => m.id === S.model);
   const base = () => (S.manifest.base || modelObj().base || 'runs') + '/' + cur().run + '/';
-  const src = (i, layer) => base() + cur().frames[i][layer || S.layer];
+  const src = (i, layer) => { const f = cur().frames[i]; return base() + (f[layer || S.layer] || f.mslp); };
 
   function preload(){
     cur().frames.forEach((f,i)=>{
@@ -187,7 +189,20 @@
     });
   }
 
+  // Rain layers exist only for runs that have them (ECMWF runs drawn after Oct 2026)
+  const hasLayer = (r, layer) => !!(r.gifs && r.gifs[layer]) && r.frames.some(f => f[layer]);
+  function syncLayers(){
+    const r = cur();
+    document.querySelectorAll('[data-layer]').forEach(b=>{
+      const ok = hasLayer(r, b.dataset.layer);
+      b.style.display = ok ? '' : 'none';
+    });
+    if(!hasLayer(r, S.layer)) S.layer = 'mslp';
+    document.querySelectorAll('[data-layer]').forEach(b=>b.classList.toggle('on', b.dataset.layer===S.layer));
+  }
+
   function buildFrames(){
+    syncLayers();
     const box = $('frames'); box.innerHTML = '';
     cur().frames.forEach((f,i)=>{
       const d = document.createElement('div');

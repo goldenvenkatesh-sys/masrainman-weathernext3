@@ -8,6 +8,11 @@ Automatic **MSLP + V3 low-centre** maps for 55–100E, 2–28N from three models
 | ECMWF IFS HRES | data.ecmwf.int open data (0.1° ~9 km when published, else 0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
 | ECMWF AIFS Single | data.ecmwf.int open data (0.25°) | 00/06/12/18 UTC | 00/12Z T+360, 06/18Z T+144 |
 
+**Rain charts (ECMWF IFS + AIFS):** besides the MSLP maps, every frame also has
+*Rain (total)* — rain since the start of the run — and *Rain (24 h)* — rain in the
+24 h before the map, on a wider 50–110°E, 0–42°N view with a 0.2–500 mm colour scale.
+They appear for runs drawn after this change. WeatherNext 3 has no rain charts yet.
+
 For every complete run it draws **T+24, T+48 …** to the end of the forecast,
 with and without 10-m wind barbs, builds a GIF loop, writes CSVs of the V3 candidates
 and persistent tracks, and publishes a viewer page with model and run selectors,

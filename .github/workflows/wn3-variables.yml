@@ -1,0 +1,35 @@
+name: WeatherNext 3 variable list
+
+on:
+  workflow_dispatch:
+    inputs:
+      run:
+        description: "Run to inspect, e.g. 20261020_00hr_01_preds (empty = latest)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Google login (your WeatherNext access)
+        env:
+          GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          printf '%s' "$GCP_CREDS" > "$RUNNER_TEMP/gcp.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp.json" >> "$GITHUB_ENV"
+      - name: List variables
+        env:
+          WN3_RUN: ${{ github.event.inputs.run }}
+        run: |
+          pip install -q google-auth requests
+          python list_wn3_vars.py | tee vars.txt
+          { echo '```'; cat vars.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,43 @@
+name: EFI climate (one-time)
+
+# Builds the ERA5 1991-2020 daily percentile climate the Extreme Forecast
+# Index compares against, and stores it as assets of the release
+# "efi-climate" (about 300 MB, kept out of the git history).
+# Run once; run again only if efi_climate.py changes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Climate years"
+        required: false
+        default: "1991-2020"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        var: [rain24, tmax, tmin, tmean]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build climate (${{ matrix.var }})
+        run: |
+          pip install -q numpy numcodecs requests
+          python efi_climate.py --vars ${{ matrix.var }} --years "${{ github.event.inputs.years }}"
+      - name: Upload to release efi-climate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view efi-climate >/dev/null 2>&1 || \
+            gh release create efi-climate --title "EFI climate (ERA5 ${{ github.event.inputs.years }})" \
+              --notes "Daily percentile climate for the Extreme Forecast Index. Built by efi_climate.py." || true
+          gh release upload efi-climate climate/${{ matrix.var }}_*.npz --clobber

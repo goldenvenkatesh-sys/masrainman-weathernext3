@@ -98,6 +98,44 @@ jobs:
             python render.py
           fi
 
+      # ---------- Extreme Forecast Index (WeatherNext 3, Day 1-7) ----------
+      # Needs the climate files from the "EFI climate (one-time)" workflow.
+      # Never blocks the low-centre maps: failures here are only reported.
+
+      - name: Cache EFI climate
+        id: efi-cache
+        if: steps.render.outcome == 'success'
+        uses: actions/cache@v4
+        with:
+          path: climate
+          key: efi-climate-${{ hashFiles('efi_climate.py') }}-v1
+
+      - name: Get EFI climate (release efi-climate)
+        if: steps.render.outcome == 'success' && steps.efi-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view efi-climate >/dev/null 2>&1; then
+            gh release download efi-climate --dir climate --pattern '*.npz' --clobber
+            ls climate | wc -l
+          else
+            echo "No efi-climate release yet - run the 'EFI climate (one-time)' workflow."
+          fi
+
+      - name: Extreme Forecast Index maps
+        if: steps.render.outcome == 'success' && (github.event.inputs.run == '' || github.event.inputs.model == 'wn3')
+        continue-on-error: true
+        run: |
+          if [ -z "$(ls climate/*.npz 2>/dev/null)" ]; then
+            echo "EFI skipped: no climate files."; exit 0
+          fi
+          if [ -n "${{ github.event.inputs.run }}" ]; then
+            python efi.py --run "${{ github.event.inputs.run }}"
+          else
+            python efi.py
+          fi
+
       - name: Save maps (site-data branch, private)
         if: steps.render.outcome == 'success'
         uses: peaceiris/actions-gh-pages@v4

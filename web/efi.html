@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Extreme Forecast Index · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header a{color:var(--muted);font-size:13px}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1300px;margin:0 auto;padding:14px 16px 40px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .frames{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px}
+  .fr{flex:0 0 auto;min-width:96px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
+  .fr b{display:block;font-size:13px}
+  .fr small{color:var(--muted);font-size:11px;display:block}
+  .fr.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300}
+  .fr.on small{color:#3b2a00}
+  .chip{display:inline-block;margin-top:3px;padding:0 6px;border-radius:5px;font-size:11px;font-weight:700;color:#1d1300}
+  .viewer{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .viewer img{display:block;width:100%;height:auto}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;text-decoration:none;font-size:13px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.gif{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px}
+  .card h3{margin:0 0 8px;font-size:14px}
+  .wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .note{color:var(--muted);font-size:12.5px;line-height:1.55}
+  .empty{color:var(--muted);padding:30px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>WeatherNext 3</span> · Extreme Forecast Index (Day 1–7)</h1>
+  <a href="index.html">← Low-centre maps</a>
+  <div class="upd" id="upd">Loading…</div>
+</header>
+<main>
+  <div class="bar"><span class="label">Run</span><div class="seg" id="runs"></div></div>
+  <div class="bar"><span class="label">Variable</span><div class="seg" id="vars"></div></div>
+  <div class="frames" id="days"></div>
+  <div class="viewer"><img id="map" alt="EFI map"></div>
+  <div class="controls">
+    <a class="btn" id="dlPng" download>⬇ PNG (this day)</a>
+    <a class="btn gif" id="dlGif" download>⬇ GIF (Day 1–7)</a>
+    <a class="btn" id="dlNpz" download>⬇ EFI / SOT grids (.npz)</a>
+  </div>
+  <div class="card">
+    <h3>Strongest signal each day</h3>
+    <div class="wrap"><table id="tbl"></table></div>
+  </div>
+  <div class="card note">
+    <b>How to read it.</b> The EFI compares the forecast distribution with the 1991–2020 ERA5 climate
+    for the same time of year. 0 = normal, ±1 = the whole forecast is beyond the climate record.
+    0.5–0.8 means unusual, above 0.8 very unusual. The Shift of Tails (contours) shows how far beyond
+    the climate 99th percentile the top 10&nbsp;% of the forecast goes: 0 = it just reaches it, 1 or more =
+    a rare event. Forecast spread comes from WeatherNext 3's 10/25/50/75/90th percentiles.
+    Experimental, not an official warning: follow IMD.
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let M = null, run = null, v = null, day = 0;
+
+function colour(e){
+  const a = Math.abs(e);
+  if (a < 0.5) return "#3a4766";
+  if (e > 0) return ["#fff07a","#ffbf3a","#ff7a1a","#e3261b","#d04a8f"][Math.min(4, Math.floor((a - 0.5) * 10))];
+  return ["#bfdff5","#7cbbe8","#3f8fd2","#1c5aa6","#2a5fd6"][Math.min(4, Math.floor((a - 0.5) * 10))];
+}
+function fmt(t){ const d = new Date(t); return d.toUTCString().slice(0, 11); }
+function base(){ return `efi/${run.run}/`; }
+
+function pills(el, items, isOn, onClick){
+  el.innerHTML = "";
+  items.forEach(it => {
+    const b = document.createElement("button");
+    b.className = "pill" + (isOn(it) ? " on" : "");
+    b.textContent = it.text;
+    b.onclick = () => onClick(it);
+    el.appendChild(b);
+  });
+}
+
+function draw(){
+  pills($("runs"), M.runs.map(r => ({text: r.run.replace("_01_preds", ""), r})),
+        it => it.r === run, it => { run = it.r; v = run.variables.find(x => x.id === v.id) || run.variables[0]; draw(); });
+  pills($("vars"), run.variables.map(x => ({text: x.label, x})),
+        it => it.x.id === v.id, it => { v = it.x; draw(); });
+  const days = $("days"); days.innerHTML = "";
+  v.days.forEach((d, i) => {
+    const e = d.max_efi, lo = d.min_efi;
+    const show = Math.abs(lo) > Math.abs(e) && v.id !== "rain24" ? lo : e;
+    const f = document.createElement("div");
+    f.className = "fr" + (i === day ? " on" : "");
+    f.innerHTML = `<b>Day ${d.day}</b><small>${fmt(d.start)}</small>` +
+      `<span class="chip" style="background:${colour(show)};color:${Math.abs(show) < 0.5 ? "#c9d4ea" : "#1d1300"}">${show.toFixed(2)}</span>`;
+    f.onclick = () => { day = i; draw(); };
+    days.appendChild(f);
+  });
+  const d = v.days[day];
+  $("map").src = base() + d.png;
+  $("dlPng").href = base() + d.png;
+  $("dlGif").href = base() + v.gif;
+  $("dlNpz").href = base() + run.npz;
+  const key = Object.keys(d).find(k => k.startsWith("points_ge_"));
+  $("tbl").innerHTML = "<tr><th>Day</th><th>Period (UTC)</th><th>Max EFI</th><th>Where</th><th>SOT there</th>" +
+    `<th>Points EFI ≥ ${key ? key.split("_").pop() : ""}</th><th>Min EFI</th></tr>` +
+    v.days.map(x => `<tr><td>Day ${x.day}</td><td>${x.start.slice(5, 16).replace("T", " ")} → ${x.end.slice(5, 16).replace("T", " ")}</td>` +
+      `<td>${x.max_efi.toFixed(2)}</td><td>${x.lat.toFixed(2)}N ${x.lon.toFixed(2)}E</td>` +
+      `<td>${x.sot === null ? "–" : x.sot.toFixed(2)}</td><td>${x[key] ?? ""}</td><td>${x.min_efi.toFixed(2)}</td></tr>`).join("");
+}
+
+document.addEventListener("keydown", e => {
+  if (!v) return;
+  if (e.key === "ArrowRight") { day = Math.min(v.days.length - 1, day + 1); draw(); }
+  if (e.key === "ArrowLeft") { day = Math.max(0, day - 1); draw(); }
+});
+
+fetch("data/manifest_efi.json", {cache: "no-store"}).then(r => r.json()).then(m => {
+  M = m;
+  $("upd").textContent = "Updated " + m.updated.replace("T", " ");
+  if (!m.runs.length) { document.querySelector("main").innerHTML = '<div class="empty">No EFI runs yet.</div>'; return; }
+  run = m.runs[0]; v = run.variables[0]; draw();
+}).catch(() => { $("upd").textContent = "No EFI data yet"; });
+</script>
+</body>
+</html>

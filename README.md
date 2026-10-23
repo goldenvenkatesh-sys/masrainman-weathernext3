@@ -19,6 +19,39 @@ and persistent tracks, and publishes a viewer page with model and run selectors,
 frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
 The latest 4 runs of each model stay selectable. India's border is drawn as per the Government of India.
 
+## Extreme Forecast Index (Day 1 to Day 7)
+
+An ECMWF-style **Extreme Forecast Index (EFI)** and **Shift of Tails (SOT)** for India from
+WeatherNext 3, for each 24 h from T+0–24 (Day 1) to T+144–168 (Day 7), on its own page
+(`efi.html`, linked from the main viewer):
+
+| Variable | What it flags |
+|---|---|
+| 24-h rainfall | Heavy-rain days (EFI > 0, SOT of the upper tail) |
+| Maximum temperature | Hot days (EFI > 0) and unusually cool days (EFI < 0) |
+| Minimum temperature | Warm nights and cold nights (SOT for both tails) |
+| Mean temperature | Heat / cold spells |
+
+- **EFI** = how far the whole forecast distribution sits from the climate of that time of year:
+  0 normal, 0.5–0.8 unusual, above 0.8 very unusual, ±1 everything beyond the climate record.
+- **SOT** = how far the top 10 % of the forecast goes beyond the climate 99th percentile
+  (0 = reaches it, 1 or more = a rare event). Drawn as contours.
+- **Forecast spread**: WeatherNext 3's hourly 10/25/50/75/90th percentiles, turned into daily
+  totals / max / min / mean percentile by percentile. This is exact for the mean and a good
+  approximation for temperature; for rain it makes the wet end a little too wide.
+- **Climate**: ERA5 daily 1991–2020, ±15 days around the date, 0.25°, 60–100°E, 5–38°N
+  (`efi_climate.py`, from the free WeatherBench 2 copy of ERA5 on Google Cloud).
+  Wet EFI is not shown where the forecast 90th percentile is under 1 mm.
+- Each run also saves the EFI / SOT grids as `efi_<run>.npz` for your own analysis.
+
+**One-time setup:** Actions → *EFI climate (one-time)* → *Run workflow*. It builds the climate
+(about 20 minutes, 4 jobs) and keeps it as assets of the release `efi-climate` (about 300 MB,
+outside the git history). After that the normal map workflow draws the EFI for each new
+WeatherNext 3 run. Without the climate the EFI step is skipped and the other maps are unaffected.
+
+Try it without any login: `python efi.py --demo` (synthetic depression + heatwave), then
+`cd site && python -m http.server` and open `efi.html`. Tests: `python -m pytest tests`.
+
 ## Files
 
 | File | What it does |
@@ -26,6 +59,11 @@ The latest 4 runs of each model stay selectable. India's border is drawn as per 
 | `check_new.py` | Quick check (no heavy installs): is there a new complete run the site doesn't have yet? |
 | `render.py` | Loads new runs, runs V3 detection + tracking, draws maps, GIFs, CSVs and manifests |
 | `web/index.html` | The viewer page (copied into the site on every run) |
+| `efi.py` | Extreme Forecast Index: WeatherNext 3 daily percentiles vs climate, maps, GIFs, manifest |
+| `efi_core.py` | EFI and Shift of Tails maths (numpy only), from percentiles or ensemble members |
+| `efi_climate.py` | Builds the ERA5 1991–2020 percentile climate the EFI compares against |
+| `web/efi.html` | The EFI viewer page |
+| `.github/workflows/efi-climate.yml` | One-time job that builds the climate into the `efi-climate` release |
 | `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
 | `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |
 

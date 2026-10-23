@@ -13,6 +13,12 @@ Automatic **MSLP + V3 low-centre** maps for 55–100E, 2–28N from three models
 24 h before the map, on a wider 50–110°E, 0–42°N view with a 0.2–500 mm colour scale.
 WeatherNext 3 gets the same two rain charts from `total_precipitation_1hr_mean` (hourly ensemble-mean rain, summed). Set `WN3_RAIN_VAR` to use another field, e.g. `total_precipitation_1hr_p90` or `imerg_tp_1hr_mean`. Rain charts appear for runs drawn after this change.
 
+**MSLP detail chart (all three models):** a wider 50–100°E, 0–29°N view from West Bengal
+across the whole Bay of Bengal and Arabian Sea. It has smooth MSLP shading in 1-hPa steps on a
+910–1062 hPa scale, isobars every 1 hPa (labelled every 2 hPa), state boundaries, city names, the
+central pressure of each V3 low, and the valid time in IST. This is the *MSLP detail* layer in the viewer.
+State lines and cities are in `boundaries/` (from Natural Earth). The chart appears for runs drawn after this change.
+
 For every complete run it draws **T+24, T+48 …** to the end of the forecast,
 with and without 10-m wind barbs, builds a GIF loop, writes CSVs of the V3 candidates
 and persistent tracks, and publishes a viewer page with model and run selectors,

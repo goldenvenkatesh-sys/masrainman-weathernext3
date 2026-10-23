@@ -105,6 +105,25 @@ LON_MIN, LON_MAX = 55.0, 100.0
 RAIN_LAT_MIN, RAIN_LAT_MAX = 0.0, 42.0
 RAIN_LON_MIN, RAIN_LON_MAX = 50.0, 110.0
 
+# Detailed MSLP chart domain: West Bengal to the whole Arabian Sea and Bay of Bengal
+WIDE_LAT_MIN, WIDE_LAT_MAX = 0.0, 29.0
+WIDE_LON_MIN, WIDE_LON_MAX = 50.0, 100.0
+
+# Detailed MSLP colour scale (hPa): purple / blue deep lows, white-green near 1000,
+# yellow-red highs. Shaded in 1-hPa steps.
+MSLP_ANCHORS = [
+    (910, "#ff3dff"), (925, "#c41fc4"), (938, "#9618a8"), (950, "#661598"), (962, "#28157a"),
+    (972, "#0f3fc4"), (978, "#2a7de8"), (984, "#6db3f2"), (990, "#cdeaf2"), (996, "#a9cdb6"),
+    (1000, "#5fb06a"), (1004, "#2f9a3c"), (1008, "#6cc13a"), (1014, "#c4e03c"), (1020, "#f2e43f"),
+    (1026, "#f4a52f"), (1032, "#e3511f"), (1038, "#c01818"), (1044, "#8a0f12"), (1050, "#c08080"),
+    (1056, "#f2b3c4"), (1062, "#f4f4f4"),
+]
+MSLP_TICKS = [910, 925, 938, 950, 962, 972, 978, 984, 990, 996, 1002, 1008, 1014, 1020,
+              1026, 1032, 1038, 1044, 1050, 1056, 1062]
+STATES_FILE = os.path.join(HERE, "boundaries", "india_states_lines.geojson")
+CITIES_FILE = os.path.join(HERE, "boundaries", "cities_mslp_wide.json")
+CITY_SPACING_DEG = 1.4      # skip a city label closer than this to one already drawn
+
 # WeatherNext 3 rain field: hourly total precipitation, ensemble mean (m).
 # Others in the store: _p10.._p90, imerg_tp_1hr_*, experimental_tp_1hr_*
 WN3_RAIN_VAR = os.environ.get("WN3_RAIN_VAR", "total_precipitation_1hr_mean")
@@ -361,6 +380,19 @@ def load_run(run_name):
         "grid_deg": 0.1,
     }
 
+    # Detailed MSLP chart: wider domain, only the hours that get a map
+    try:
+        wlat = np.where((lat_full >= WIDE_LAT_MIN) & (lat_full <= WIDE_LAT_MAX))[0]
+        wlon = np.where((lon_full >= WIDE_LON_MIN) & (lon_full <= WIDE_LON_MAX))[0]
+        whours = [h for h in range(FRAME_STEP_H, min(FRAME_END_H, n_hours) + 1, FRAME_STEP_H)]
+        ys = slice(int(wlat[0]), int(wlat[-1]) + 1)
+        xs = slice(int(wlon[0]), int(wlon[-1]) + 1)
+        print("Loading MSLP for the detailed chart ...")
+        wm = np.stack([np.asarray(mslp_arr[h - 1, ys, xs], dtype=np.float32) for h in whours]) / 100.0
+        data["wide"] = {"lat": lat_full[ys], "lon": lon_full[xs], "mslp": wm, "hours": whours}
+    except Exception as exc:
+        print(f"  (detailed MSLP not loaded: {type(exc).__name__}: {exc})")
+
     # Rain: hourly ensemble-mean precipitation (m) -> running total since T+0 (mm)
     try:
         tp_arr = root[WN3_RAIN_VAR]
@@ -549,6 +581,11 @@ def _read_step_domain(path):
             out["rlat"] = da["latitude"].values
             out["rlon"] = da["longitude"].values
         else:
+            if short_name == "msl":
+                w = _cut(da, WIDE_LAT_MIN, WIDE_LAT_MAX, WIDE_LON_MIN, WIDE_LON_MAX)
+                out["wmsl"] = w.values.astype(np.float32) / 100.0     # Pa -> hPa
+                out["wlat"] = w["latitude"].values
+                out["wlon"] = w["longitude"].values
             da = _cut(da, LAT_MIN, LAT_MAX, LON_MIN, LON_MAX)
             out[short_name] = da.values.astype(np.float32)
             out["lat"] = da["latitude"].values
@@ -621,6 +658,10 @@ def load_ecmwf_run(key, run_name, source):
             "grid_deg": grid,
             "resol": resol,
         }
+        whours = [h for h in hours if h % FRAME_STEP_H == 0 and h > 0 and "wmsl" in results[h]]
+        if whours:
+            data["wide"] = {"lat": results[whours[0]]["wlat"], "lon": results[whours[0]]["wlon"],
+                            "mslp": np.stack([results[h]["wmsl"] for h in whours]), "hours": whours}
         # Rain: needs tp at every step after T+0 (T+0 is zero by definition)
         rain_hours = [h for h in hours if h > 0]
         if rain_hours and all("tp" in results[h] for h in rain_hours):
@@ -644,11 +685,25 @@ def load_ecmwf_run(key, run_name, source):
 # DEMO DATA
 # ============================================================
 
+def _demo_mslp(t, n_hours, LAT2, LON2):
+    clat = 11.0 + 0.02 * t
+    clon = 90.0 - 0.045 * t
+    r2 = ((LAT2 - clat) ** 2 + ((LON2 - clon) * np.cos(np.radians(clat))) ** 2)
+    depth = 4 + 10 * np.sin(np.pi * t / n_hours)
+    return 1008 + 0.25 * (LAT2 - 15) - depth * np.exp(-r2 / 6.0)
+
+
 def make_demo_data(n_hours=360, step_h=1, grid=0.1):
     """Synthetic fields for testing the pipeline without any downloads."""
     lat = np.round(np.arange(LAT_MIN, LAT_MAX + 0.001, grid), 2)
     lon = np.round(np.arange(LON_MIN, LON_MAX + 0.001, grid), 2)
     LON2, LAT2 = np.meshgrid(lon, lat)
+    wlat = np.round(np.arange(WIDE_LAT_MIN, WIDE_LAT_MAX + 0.001, grid), 2)
+    wlon = np.round(np.arange(WIDE_LON_MIN, WIDE_LON_MAX + 0.001, grid), 2)
+    WLON2, WLAT2 = np.meshgrid(wlon, wlat)
+    whours = list(range(FRAME_STEP_H, n_hours + 1, FRAME_STEP_H))
+    wide = {"lat": wlat, "lon": wlon, "hours": whours,
+            "mslp": np.stack([_demo_mslp(t, n_hours, WLAT2, WLON2) for t in whours]).astype(np.float32)}
     hours = list(range(step_h if step_h == 1 else 0, n_hours + 1, step_h))
     mslp = np.empty((len(hours), len(lat), len(lon)), np.float32)
     u10 = np.empty_like(mslp)
@@ -658,8 +713,7 @@ def make_demo_data(n_hours=360, step_h=1, grid=0.1):
         clon = 90.0 - 0.045 * t
         r2 = ((LAT2 - clat) ** 2 + ((LON2 - clon) * np.cos(np.radians(clat))) ** 2)
         depth = 4 + 10 * np.sin(np.pi * t / n_hours)
-        p = 1008 + 0.25 * (LAT2 - 15) - depth * np.exp(-r2 / 6.0)
-        mslp[i] = p
+        mslp[i] = _demo_mslp(t, n_hours, LAT2, LON2)
         dy = LAT2 - clat
         dx = (LON2 - clon) * np.cos(np.radians(clat))
         speed = 2.2 * depth * np.sqrt(r2) * np.exp(-r2 / 6.0)
@@ -667,7 +721,7 @@ def make_demo_data(n_hours=360, step_h=1, grid=0.1):
         u10[i] = -speed * dy / rr - 0.3 * dx / rr * speed - 4
         v10[i] = speed * dx / rr - 0.3 * dy / rr * speed
     return {"lat": lat, "lon": lon, "mslp": mslp, "u10": u10, "v10": v10,
-            "n_hours": n_hours, "hours": hours, "grid_deg": grid}
+            "n_hours": n_hours, "hours": hours, "grid_deg": grid, "wide": wide}
 
 
 # ============================================================
@@ -1083,6 +1137,125 @@ def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h
     return valid_time
 
 
+_MSLP_CMAP = None
+_STATES_FEATURE = None
+_CITIES = None
+
+
+def mslp_cmap():
+    """Smooth MSLP colour scale through MSLP_ANCHORS."""
+    global _MSLP_CMAP
+    if _MSLP_CMAP is None:
+        from matplotlib.colors import LinearSegmentedColormap
+        lo, hi = MSLP_ANCHORS[0][0], MSLP_ANCHORS[-1][0]
+        _MSLP_CMAP = LinearSegmentedColormap.from_list(
+            "mslp_detail", [((v - lo) / (hi - lo), c) for v, c in MSLP_ANCHORS], N=512)
+    return _MSLP_CMAP
+
+
+def india_state_lines():
+    global _STATES_FEATURE
+    if _STATES_FEATURE is None:
+        with open(STATES_FILE) as f:
+            gj = json.load(f)
+        _STATES_FEATURE = ShapelyFeature([shape(ft["geometry"]) for ft in gj["features"]],
+                                         ccrs.PlateCarree())
+    return _STATES_FEATURE
+
+
+def map_cities():
+    """Cities to label, biggest first, thinned so labels do not pile up."""
+    global _CITIES
+    if _CITIES is None:
+        with open(CITIES_FILE) as f:
+            cities = json.load(f)
+        kept = []
+        for name, lat, lon, _rank in cities:
+            if all(abs(lat - a) > CITY_SPACING_DEG or abs(lon - b) > CITY_SPACING_DEG
+                   for _, a, b in kept):
+                kept.append((name, lat, lon))
+        _CITIES = kept
+    return _CITIES
+
+
+def draw_mslp_detail_map(out_png, model, run_name, init_time, plot_hour, data, centres):
+    """Detailed MSLP chart (West Bengal to the Arabian Sea): smooth shading in 1-hPa steps,
+    1-hPa isobars, state lines, cities, and the pressure of each V3 low centre."""
+    cfg = MODELS[model]
+    wide = data["wide"]
+    i = wide["hours"].index(plot_hour)
+    valid_time = init_time + timedelta(hours=plot_hour)
+    ist = valid_time + timedelta(hours=5, minutes=30)
+    grid_deg = data.get("grid_deg", 0.25)
+    lon, lat, p = smooth_rain_field(wide["lon"], wide["lat"], wide["mslp"][i], grid_deg)
+    p = np.clip(p, MSLP_ANCHORS[0][0], MSLP_ANCHORS[-1][0])
+    lo, hi = MSLP_ANCHORS[0][0], MSLP_ANCHORS[-1][0]
+
+    fig = plt.figure(figsize=(13, 9.6), facecolor="white")
+    ax = fig.add_axes([0.01, 0.17, 0.98, 0.80], projection=ccrs.PlateCarree())
+    ax.set_extent([WIDE_LON_MIN, WIDE_LON_MAX, WIDE_LAT_MIN, WIDE_LAT_MAX], crs=ccrs.PlateCarree())
+    ax.contourf(lon, lat, p, levels=np.arange(lo, hi + 1, 1), cmap=mslp_cmap(),
+                vmin=lo, vmax=hi, antialiased=True, transform=ccrs.PlateCarree(), zorder=1)
+
+    # Isobars every 1 hPa, labelled every 2 hPa
+    pmin, pmax = int(np.floor(np.nanmin(p))), int(np.ceil(np.nanmax(p)))
+    levels = np.arange(pmin, pmax + 1, 1)
+    cs = ax.contour(lon, lat, p, levels=levels, colors="#8c8c99", linewidths=0.55,
+                    transform=ccrs.PlateCarree(), zorder=3)
+    ax.clabel(cs, levels=[v for v in levels if v % 2 == 0], inline=True, fontsize=7.5,
+              fmt="%d", inline_spacing=2, colors="black")
+
+    ax.coastlines(resolution="50m", linewidth=1.0, color="black", zorder=5)
+    ax.add_feature(india_view_borders(), facecolor="none", edgecolor="black", linewidth=0.8, zorder=6)
+    ax.add_feature(india_state_lines(), facecolor="none", edgecolor="#2f3a2f", linewidth=0.45,
+                   alpha=0.8, zorder=6)
+
+    for name, clat, clon in map_cities():
+        ax.plot(clon, clat, "s", markersize=2.6, color="white", markeredgecolor="black",
+                markeredgewidth=0.6, transform=ccrs.PlateCarree(), zorder=8)
+        ax.text(clon, clat + 0.18, name, fontsize=7, ha="center", va="bottom", color="#101010",
+                transform=ccrs.PlateCarree(), zorder=8,
+                bbox=dict(boxstyle="round,pad=0.12", facecolor="white", edgecolor="none", alpha=0.55))
+
+    # Central pressure of each tracked low, read from this field near the V3 centre
+    for _, row in centres.iterrows():
+        clat, clon = float(row["lat"]), float(row["lon"])
+        if not (WIDE_LAT_MIN <= clat <= WIDE_LAT_MAX and WIDE_LON_MIN <= clon <= WIDE_LON_MAX):
+            continue
+        ax.text(clon, clat, f"{float(row['mslp_hpa']):.0f}", fontsize=13, fontweight="bold",
+                ha="center", va="center", color="black", transform=ccrs.PlateCarree(), zorder=20,
+                bbox=dict(boxstyle="round,pad=0.18", facecolor="white", edgecolor="black",
+                          linewidth=0.8, alpha=0.85))
+
+    gl = ax.gridlines(draw_labels=True, linewidth=0.3, color="gray", alpha=0.45, linestyle="--", zorder=7)
+    gl.top_labels = False
+    gl.right_labels = False
+    gl.xlabel_style = {"size": 8}
+    gl.ylabel_style = {"size": 8}
+
+    # Bottom panel: title, colour bar, valid time
+    fig.text(0.012, 0.135, "Mean Sea Level Pressure (hPa)", fontsize=17, fontweight="bold", va="center")
+    fig.text(0.988, 0.150, "Valid for", fontsize=9, ha="right", va="center")
+    fig.text(0.988, 0.131, f"{ist.strftime('%a %d/%m/%Y, %I:%M %p')} IST", fontsize=11,
+             fontweight="bold", ha="right", va="center")
+    fig.text(0.988, 0.113, f"{valid_time.strftime('%Hz %d %b %Y')} UTC  (T+{plot_hour} h)",
+             fontsize=8.5, ha="right", va="center", color="dimgray")
+    cax = fig.add_axes([0.012, 0.068, 0.976, 0.022])
+    sm = plt.cm.ScalarMappable(cmap=mslp_cmap(), norm=plt.Normalize(lo, hi))
+    cb = fig.colorbar(sm, cax=cax, orientation="horizontal", ticks=MSLP_TICKS)
+    cb.ax.tick_params(labelsize=8)
+    grid = grid_label(grid_deg).split(" ")[0]
+    fig.text(0.012, 0.030, f"West Bengal – Bay of Bengal – Arabian Sea   |   {cfg['label']} {grid}, "
+             f"run {init_time.strftime('%d/%m/%Y %Hz')}   |   Boxed numbers: V3 low centres (hPa)",
+             fontsize=9, va="center")
+    fig.text(0.012, 0.012, cfg["credits"][0] + " | Chart: MasRainman", fontsize=7.2,
+             color="dimgray", va="center")
+
+    plt.savefig(out_png, dpi=170, bbox_inches="tight", pad_inches=0.08, facecolor="white")
+    plt.close(fig)
+    return valid_time
+
+
 def make_gif(png_paths, out_gif):
     frames = []
     for p in png_paths:
@@ -1125,6 +1298,9 @@ def render_run(model, run_name, data):
     has_rain = "rain" in data
     if has_rain:
         pngs.update({"rain": [], "rain24": []})
+    has_wide = "wide" in data
+    if has_wide:
+        pngs["mslpw"] = []
 
     for h in hours:
         print(f"[{cfg['label']}] Drawing T+{h:03d} ...")
@@ -1135,6 +1311,14 @@ def render_run(model, run_name, data):
                                            data, tracks_df, n_persistent, barbs)
             entry[layer] = fname
             pngs[layer].append(os.path.join(tmp_dir, fname))
+
+        if has_wide and h in data["wide"]["hours"]:
+            fname = f"mslpw_T{h:03d}.png"
+            plot_index = data["hours"].index(h)
+            draw_mslp_detail_map(os.path.join(tmp_dir, fname), model, run_name, init_time, h, data,
+                                 tracks_df[tracks_df["hour"] == plot_index])
+            entry["mslpw"] = fname
+            pngs["mslpw"].append(os.path.join(tmp_dir, fname))
 
         if has_rain:
             for layer, period in (("rain", None), ("rain24", 24)):

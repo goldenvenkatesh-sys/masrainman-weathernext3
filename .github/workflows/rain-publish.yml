@@ -3,12 +3,12 @@ name: Rain reports on the site
 # Republishes the Cloudflare site with the newest rainfall reports (Rain reports page),
 # keeping the model maps exactly as the last model run saved them (site-data branch).
 #  - instantly, when the rain-report repo sends "rain-reports" (needs its WN3_DISPATCH_TOKEN secret)
-#  - otherwise every 2 hours, about an hour after each 2-hourly rain report
+#  - otherwise every hour
 on:
   repository_dispatch:
     types: [rain-reports]
   schedule:
-    - cron: "50 1,3,5,7,9,11,13,15,17,19,21,23 * * *"   # 07:20, 09:20 … IST
+    - cron: "20 * * * *"   # every hour at :50 IST, so each 2-hourly report shows within the hour
   workflow_dispatch:
 
 permissions:

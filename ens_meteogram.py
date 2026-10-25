@@ -504,7 +504,7 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
 
     fig = plt.figure(figsize=(16, fig_h), dpi=100)
     gs = fig.add_gridspec(2, 2, height_ratios=[top_ratio, 1], width_ratios=[60, 1],
-                          left=0.045, right=0.955, top=0.905, bottom=0.09,
+                          left=0.045, right=0.955, top=0.905, bottom=0.09 if is_ens else 0.125,
                           hspace=0.08, wspace=0.015)
     ax = fig.add_subplot(gs[0, 0])
     axl = fig.add_subplot(gs[1, 0])

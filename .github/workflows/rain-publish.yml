@@ -5,10 +5,11 @@ name: Rain reports on the site
 #  - instantly, when the rain-report repo sends "rain-reports" (needs its WN3_DISPATCH_TOKEN secret)
 #  - otherwise every hour
 on:
-  repository_dispatch:
-    types: [rain-reports]
-  schedule:
-    - cron: "20 * * * *"   # every hour at :50 IST, so each 2-hourly report shows within the hour
+  # Manual only (automatic runs switched off on request). To turn them back on, add:
+  #   repository_dispatch:
+  #     types: [rain-reports]
+  #   schedule:
+  #     - cron: "20 * * * *"
   workflow_dispatch:
 
 permissions:

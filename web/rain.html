@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rain Reports · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97; --live:#ff4d5e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .pill.region{padding:8px 16px;font-size:14px;font-weight:600}
+  .pill.region.on{background:var(--ok);border-color:var(--ok);color:#03150d}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .btn.gif{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .btn small{font-weight:400;opacity:.75;font-size:11px}
+  h2{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 8px;font-weight:600}
+  .latest{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:var(--text);padding:0;font:inherit}
+  .tile:hover,.tile.on{border-color:var(--accent2)}
+  .tile img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#fff}
+  .tile div{padding:7px 9px}
+  .tile b{display:block;font-size:12.5px}
+  .tile small{color:var(--muted);font-size:11px}
+  .tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--live);color:#fff;margin-left:4px;vertical-align:1px}
+  .list{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:thin}
+  .chip{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text);font:inherit;font-size:12.5px}
+  .chip.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+  .viewer{background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .viewer video,.viewer img{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain;margin:0 auto;background:#000}
+  .side{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .side h3{margin:0 0 2px;font-size:15px}
+  .side .when{color:var(--muted);font-size:12px;margin-bottom:10px}
+  .dl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  textarea{width:100%;min-height:150px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:12.5px/1.45 inherit;resize:vertical}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .ok{color:var(--ok);font-size:12px}
+  .empty{color:var(--muted);padding:30px 0;text-align:center}
+  footer{color:var(--muted);font-size:12px;margin-top:20px}
+  @media (max-width:820px){.stage{grid-template-columns:1fr}}
+  @media (max-width:640px){header h1{font-size:15px}.latest{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>MasRainman · <span>Rain Reports</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Model maps</a>
+</header>
+
+<main>
+  <h2>Latest</h2>
+  <div class="latest" id="latest"></div>
+
+  <h2>Browse</h2>
+  <div class="bar"><span class="label">State</span><div class="seg" id="regions"></div></div>
+  <div class="bar"><span class="label">Report</span><div class="seg" id="kinds"></div></div>
+  <div class="bar" id="langBar"><span class="label">Language</span><div class="seg" id="langs"></div></div>
+  <div class="list" id="list"></div>
+
+  <div class="stage" id="stage">
+    <div class="viewer" id="viewer"></div>
+    <div class="side">
+      <h3 id="title"></h3>
+      <div class="when" id="when"></div>
+      <div class="dl" id="dl"></div>
+      <span class="label">Caption</span>
+      <textarea id="cap" readonly></textarea>
+      <div class="row">
+        <button class="btn" id="copy">Copy caption</button>
+        <button class="btn primary" id="share" hidden>Share…</button>
+        <span class="ok" id="msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Rainfall data: TN-SMART (TNSDMA), IMD Thiruvananthapuram / Kerala WRD / KSEB, KSNDMC.
+    Analysis &amp; graphics: MasRainman. Kept here: the newest 12 "rain so far" pictures per state,
+    10 days of daily and multi-day reports, and 13 months of monthly totals.
+  </footer>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const BASE = 'rain/';
+  const REGION_ORDER = ['tn','kl','ka'];
+  const KIND_ORDER = ['live','daily','accum','month'];
+  const KIND_SHORT = {live:'Rain so far', daily:'24-hour', accum:'Multi-day', month:'Monthly'};
+  const LANG = {ta:'Tamil', en:'English', ml:'Malayalam'};
+  const S = {all:[], region:null, kind:null, lang:null, cur:null};
+
+  const url = p => /^https?:/.test(p) ? p : BASE + p;
+  const fmtIST = iso => new Date(iso).toLocaleString('en-IN',{timeZone:'Asia/Kolkata',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true}) + ' IST';
+  const tagFor = r => r.kind === 'live' ? '<span class="tag">LIVE</span>' : '';
+  const nameFor = r => r.region_name + ' · ' + KIND_SHORT[r.kind] + (r.region === 'kl' ? ' (' + (LANG[r.lang]||r.lang) + ')' : '');
+
+  function pills(box, values, current, label, cls, onPick){
+    box.innerHTML = '';
+    values.forEach(v=>{
+      const b = document.createElement('button');
+      b.className = 'pill' + (cls ? ' ' + cls : '') + (v === current ? ' on' : '');
+      b.textContent = label(v);
+      b.onclick = () => onPick(v);
+      box.appendChild(b);
+    });
+  }
+
+  const inRegion = () => S.all.filter(r => r.region === S.region);
+  const inKind = () => inRegion().filter(r => r.kind === S.kind);
+  const filtered = () => inKind().filter(r => !S.lang || r.lang === S.lang);
+
+  function buildFilters(){
+    const regions = REGION_ORDER.filter(g => S.all.some(r => r.region === g));
+    pills($('regions'), regions, S.region, g => S.all.find(r => r.region === g).region_name, 'region', g => pick({region:g}));
+    const kinds = KIND_ORDER.filter(k => inRegion().some(r => r.kind === k));
+    pills($('kinds'), kinds, S.kind, k => KIND_SHORT[k], '', k => pick({region:S.region, kind:k}));
+    const langs = [...new Set(inKind().map(r => r.lang))];
+    $('langBar').style.display = langs.length > 1 ? '' : 'none';
+    pills($('langs'), langs, S.lang, l => LANG[l] || l, '', l => pick({region:S.region, kind:S.kind, lang:l}));
+    const box = $('list'); box.innerHTML = '';
+    filtered().forEach(r=>{
+      const c = document.createElement('button');
+      c.className = 'chip' + (S.cur && r.id === S.cur.id ? ' on' : '');
+      c.textContent = r.label;
+      c.onclick = () => show(r);
+      box.appendChild(c);
+    });
+  }
+
+  // choose filters; anything not given falls back to the first available, newest report shown
+  function pick(o){
+    S.region = o.region || S.region;
+    if(!inRegion().length) S.region = S.all[0].region;
+    const has = k => inRegion().some(r => r.kind === k);
+    S.kind = has(o.kind) ? o.kind : has(S.kind) ? S.kind : KIND_ORDER.find(has);
+    const langs = [...new Set(inKind().map(r => r.lang))];
+    S.lang = o.lang && langs.includes(o.lang) ? o.lang : (langs.includes(S.lang) ? S.lang : langs[0]);
+    show(o.report || filtered()[0]);
+  }
+
+  function show(r){
+    S.cur = r;
+    buildFilters();
+    document.querySelectorAll('.tile').forEach(t => t.classList.toggle('on', t.dataset.id === r.id));
+    const f = r.files;
+    const v = $('viewer');
+    if(f.mp4){
+      v.innerHTML = '<video controls autoplay muted loop playsinline preload="metadata"' + (f.png ? ' poster="' + url(f.png) + '"' : '') + ' src="' + url(f.mp4) + '"></video>';
+    } else {
+      v.innerHTML = '<img alt="' + nameFor(r) + '" src="' + url(f.gif || f.png) + '">';
+    }
+    $('title').innerHTML = nameFor(r) + tagFor(r);
+    $('when').textContent = r.label + ' · made ' + fmtIST(r.made);
+    const dl = $('dl'); dl.innerHTML = '';
+    [['mp4','⬇ MP4 video','primary'],['gif','⬇ GIF','gif'],['png','⬇ PNG picture','']].forEach(([e,t,c])=>{
+      if(!f[e]) return;
+      const a = document.createElement('a');
+      a.className = 'btn' + (c ? ' ' + c : '');
+      a.href = url(f[e]); a.setAttribute('download', f[e].split('/').pop());
+      a.innerHTML = t + (f[e + '_mb'] != null ? ' <small>' + f[e + '_mb'] + ' MB</small>' : '');
+      dl.appendChild(a);
+    });
+    $('cap').value = r.caption || '';
+    $('msg').textContent = '';
+    $('share').hidden = !(navigator.canShare && navigator.share && (f.mp4 || f.png));
+    try { localStorage.setItem('mr_rain', JSON.stringify({region:S.region, kind:S.kind, lang:S.lang})); } catch(e){}
+  }
+
+  $('copy').onclick = () => {
+    const t = $('cap').value;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+      .catch(() => { $('cap').select(); document.execCommand('copy'); })
+      .then(() => $('msg').textContent = 'Copied ✓');
+  };
+
+  // phone: share the video (or picture) straight to WhatsApp / Facebook / X with the caption
+  $('share').onclick = async () => {
+    const r = S.cur, p = r.files.mp4 || r.files.png;
+    $('msg').textContent = 'Preparing…';
+    try {
+      const blob = await (await fetch(url(p))).blob();
+      const file = new File([blob], p.split('/').pop(), {type: blob.type || (p.endsWith('.mp4') ? 'video/mp4' : 'image/png')});
+      const data = {files:[file], text: r.caption || '', title: nameFor(r)};
+      if(!navigator.canShare(data)) throw new Error('This browser cannot share files');
+      await navigator.share(data);
+      $('msg').textContent = '';
+    } catch(e){ $('msg').textContent = e.name === 'AbortError' ? '' : 'Share not available — use Download'; }
+  };
+
+  function buildLatest(){
+    const seen = new Set(), box = $('latest'); box.innerHTML = '';
+    const order = r => REGION_ORDER.indexOf(r.region) * 10 + KIND_ORDER.indexOf(r.kind);
+    S.all.filter(r => { const k = r.region + r.kind + r.lang; if(seen.has(k)) return false; seen.add(k); return true; })
+      .sort((a,b) => order(a) - order(b) || a.lang.localeCompare(b.lang))
+      .forEach(r=>{
+        const t = document.createElement('button');
+        t.className = 'tile'; t.dataset.id = r.id;
+        t.innerHTML = (r.files.png ? '<img loading="lazy" alt="" src="' + url(r.files.png) + '">' : '') +
+          '<div><b>' + nameFor(r) + tagFor(r) + '</b><small>' + r.label + '</small></div>';
+        t.onclick = () => { pick({region:r.region, kind:r.kind, lang:r.lang, report:r}); $('stage').scrollIntoView({behavior:'smooth', block:'start'}); };
+        box.appendChild(t);
+      });
+  }
+
+  fetch(BASE + 'index.json?t=' + Date.now()).then(r => { if(!r.ok) throw r.status; return r.json(); }).then(j=>{
+    S.all = j.reports || [];
+    $('upd').textContent = 'Updated ' + fmtIST(j.updated);
+    if(!S.all.length) throw 'empty';
+    buildLatest();
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem('mr_rain') || '{}'); } catch(e){}
+    pick({region: saved.region || S.all[0].region, kind: saved.kind, lang: saved.lang});
+  }).catch(()=>{
+    $('upd').textContent = '';
+    $('stage').innerHTML = '<div class="empty">No rain reports here yet. They appear after the next rainfall report runs.</div>';
+  });
+})();
+</script>
+</body>
+</html>

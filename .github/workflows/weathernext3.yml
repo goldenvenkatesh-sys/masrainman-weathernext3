@@ -110,6 +110,10 @@ jobs:
           user_email: "github-actions[bot]@users.noreply.github.com"
           commit_message: "MasRainman model maps update"
 
+      - name: Add rainfall reports (TN / Kerala / Karnataka)
+        if: steps.render.outcome == 'success'
+        run: bash get_rain_reports.sh site
+
       - name: Publish to Cloudflare Pages (login-protected)
         if: steps.render.outcome == 'success'
         env:

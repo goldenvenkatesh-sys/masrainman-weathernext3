@@ -71,7 +71,7 @@ WN3_STAT_LABEL = {"p90": "p90", "p75": "p75", "p50": "median", "p25": "p25", "p1
                   "mean": "mean"}
 
 MODELS = {
-    "ecmwf_ens": {"label": "ECMWF ENS (51 members)", "short": "ECMWF ENS",
+    "ecmwf_ens": {"label": "ECMWF ENS (members)", "short": "ECMWF ENS",
                   "credit": "Source: ECMWF open data (CC BY 4.0)"},
     "wn3": {"label": "WeatherNext 3 (percentiles)", "short": "WeatherNext 3",
             "credit": "Source: Google DeepMind WeatherNext 3 (experimental)"},
@@ -255,7 +255,7 @@ def _get(url, headers=None):
 def ens_step_messages(base, stamp, step):
     """Raw GRIB messages of tp (all 51 members) for one step."""
     idx = _get(f"{base}/{stamp}-{step}h-enfo-ef.index").text
-    parts = []
+    parts, types = [], set()
     for line in idx.splitlines():
         line = line.strip()
         if not line:
@@ -263,7 +263,10 @@ def ens_step_messages(base, stamp, step):
         rec = json.loads(line)
         if rec.get("param") == "tp":
             parts.append((int(rec["_offset"]), int(rec["_length"])))
-    if len(parts) < 51:
+            types.add(rec.get("type"))
+    if step == STEP_H:
+        print(f"  step {step}: {len(parts)} tp messages (types {sorted(map(str, types))})")
+    if len(parts) < 50:     # 50 perturbed members (+ control when it is published)
         raise RuntimeError(f"step {step}: only {len(parts)} tp messages in the index")
     msgs = []
     url = f"{base}/{stamp}-{step}h-enfo-ef.grib2"
@@ -325,8 +328,8 @@ def load_ecmwf_ens(run_name, source, districts):
                 acc[:, int(num)] = vals[[p[0] for p in state["pts"]]]
             finally:
                 ec.codes_release(gid)
-        if np.isnan(acc).any():
-            raise RuntimeError(f"step {step}: some members missing")
+        if np.isnan(acc[:, 1:]).any():
+            raise RuntimeError(f"step {step}: some perturbed members missing")
         return step, acc
 
     with ThreadPoolExecutor(max_workers=8) as pool:
@@ -340,14 +343,20 @@ def load_ecmwf_ens(run_name, source, districts):
     # running total since T+0, [district, member, hour]; T+0 = 0
     hours = [0] + steps
     tot = np.stack([np.zeros_like(res[steps[0]])] + [res[s] for s in steps], axis=-1) * scale
+    has_ctrl = not np.isnan(tot[:, 0, 1:]).any()
+    if not has_ctrl:
+        print("  (control run has no rain in the open data - grid shows the 50 members)")
+        tot[:, 0, :] = 0
     tot = np.maximum.accumulate(np.maximum(tot, 0), axis=-1)       # packing noise can dip it
     hidx = {h: k for k, h in enumerate(hours)}
     cols = columns()
     q = np.stack([tot[..., hidx[h]] - tot[..., hidx[h - PERIOD_H]] for h in cols], axis=-1)
     q = np.maximum(q, 0).astype(np.float32)
+    if not has_ctrl:
+        q = q[:, 1:]                                                # [district, 50, column]
     print(f"  done: max 24-h member total {np.nanmax(q):.0f} mm")
     return {"values": q, "points": [(p[1], p[2]) for p in state["pts"]],
-            "grid_deg": float(state["grid"]), "resol": source["resol"]}
+            "grid_deg": float(state["grid"]), "resol": source["resol"], "control": has_ctrl}
 
 
 # ============================================================
@@ -474,9 +483,10 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
     valid = [init + timedelta(hours=h) for h in cols]
     is_ens = model == "ecmwf_ens"
 
+    has_ctrl = is_ens and values.shape[0] == 51
     if is_ens:
-        # rows bottom -> top: c00, 01 … 50 (like WeatherBell)
-        row_labels = ["c00"] + [f"{m:02d}" for m in range(1, 51)]
+        # rows bottom -> top: c00, 01 … 50 (like WeatherBell); no c00 if control is missing
+        row_labels = (["c00"] if has_ctrl else []) + [f"{m:02d}" for m in range(1, 51)]
         grid_vals = values                      # row 0 = control at the bottom
         fs_cell, fs_row = 5.0, 5.5
         fig_h, top_ratio = 13.0, 2.2
@@ -516,7 +526,7 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
     ax.set_ylim(0, nrow)
     ax.set_xticks([])
     if is_ens:
-        ticks = [k for k in range(nrow) if k % 2 == 0]
+        ticks = [k for k in range(nrow) if (k % 2 == 0) == has_ctrl]
         ax.set_yticks([k + 0.5 for k in ticks])
         ax.set_yticklabels([row_labels[k] for k in ticks], fontsize=fs_row)
     else:
@@ -530,14 +540,15 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
     # ---- lower panel
     x = np.arange(ncol) + 0.5
     if is_ens:
-        ctrl, mean = values[0], values.mean(axis=0)
+        ctrl, mean = (values[0] if has_ctrl else None), values.mean(axis=0)
         lo, hi = values.min(axis=0), values.max(axis=0)
         p25, p75 = np.percentile(values, 25, axis=0), np.percentile(values, 75, axis=0)
         axl.vlines(x, lo, hi, color="black", lw=0.6)
         axl.hlines(hi, x - 0.18, x + 0.18, color="black", lw=0.6)
         axl.bar(x, p75 - p25, bottom=p25, width=0.45, color="#bbbbbb", edgecolor="#777", lw=0.4,
                 label="25–75%")
-        axl.plot(x, ctrl, color="#1f3fbf", marker="o", ms=2.2, lw=1.1, label="Control")
+        if ctrl is not None:
+            axl.plot(x, ctrl, color="#1f3fbf", marker="o", ms=2.2, lw=1.1, label="Control")
         axl.plot(x, mean, color="#1c8a2e", marker="o", ms=2.2, lw=1.1, label="Mean")
         top = float(hi.max())
     else:
@@ -578,6 +589,8 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
             f"  •  24-Hour Rain (mm)")
     if not is_ens:
         head += "  •  percentiles of hourly rain, summed"
+    elif not has_ctrl:
+        head += "  •  50 members"
     fig.text(0.045, 0.975, head, fontsize=13, weight="bold", va="top")
     fig.text(0.045, 0.948,
              f"{district['hq']} — {district['district']} district, {district['state']}  "
@@ -624,7 +637,8 @@ def render_run(model, run_name, init, districts, data, entry_extra=None):
     with open(os.path.join(out_dir, "values.json"), "w") as f:
         json.dump({"columns_utc": [(init + timedelta(hours=h)).strftime("%Y-%m-%dT%HZ")
                                    for h in columns()],
-                   "rows": (["c00"] + [f"{m:02d}" for m in range(1, 51)]) if model == "ecmwf_ens"
+                   "rows": ((["c00"] if data["values"].shape[1] == 51 else [])
+                            + [f"{m:02d}" for m in range(1, 51)]) if model == "ecmwf_ens"
                    else WN3_STATS,
                    "districts": {d["id"]: np.round(data["values"][k], 1).tolist()
                                  for k, d in enumerate(districts)}}, f, separators=(",", ":"))

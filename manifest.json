@@ -1,0 +1,1166 @@
+{
+ "models": {
+  "ecmwf_ens": {
+   "label": "ECMWF ENS (members)",
+   "runs": [
+    {
+     "run": "20261025_00",
+     "init": "2026-10-25T00:00Z",
+     "grid_deg": 0.25,
+     "made": "2026-10-25T19:54+05:30",
+     "resol": "0p25"
+    }
+   ]
+  },
+  "wn3": {
+   "label": "WeatherNext 3 (percentiles)",
+   "runs": [
+    {
+     "run": "20261025_06hr_01_preds",
+     "init": "2026-10-25T06:00Z",
+     "grid_deg": 0.1,
+     "made": "2026-10-25T19:56+05:30"
+    }
+   ]
+  }
+ },
+ "districts": [
+  {
+   "id": "tn-ariyalur",
+   "state": "Tamil Nadu",
+   "district": "Ariyalur",
+   "hq": "Ariyalur",
+   "lat": 11.14,
+   "lon": 79.08
+  },
+  {
+   "id": "tn-chengalpattu",
+   "state": "Tamil Nadu",
+   "district": "Chengalpattu",
+   "hq": "Chengalpattu",
+   "lat": 12.69,
+   "lon": 79.98
+  },
+  {
+   "id": "tn-chennai",
+   "state": "Tamil Nadu",
+   "district": "Chennai",
+   "hq": "Chennai",
+   "lat": 13.08,
+   "lon": 80.27
+  },
+  {
+   "id": "tn-coimbatore",
+   "state": "Tamil Nadu",
+   "district": "Coimbatore",
+   "hq": "Coimbatore",
+   "lat": 11.02,
+   "lon": 76.96
+  },
+  {
+   "id": "tn-cuddalore",
+   "state": "Tamil Nadu",
+   "district": "Cuddalore",
+   "hq": "Cuddalore",
+   "lat": 11.75,
+   "lon": 79.75
+  },
+  {
+   "id": "tn-dharmapuri",
+   "state": "Tamil Nadu",
+   "district": "Dharmapuri",
+   "hq": "Dharmapuri",
+   "lat": 12.13,
+   "lon": 78.16
+  },
+  {
+   "id": "tn-dindigul",
+   "state": "Tamil Nadu",
+   "district": "Dindigul",
+   "hq": "Dindigul",
+   "lat": 10.36,
+   "lon": 77.98
+  },
+  {
+   "id": "tn-erode",
+   "state": "Tamil Nadu",
+   "district": "Erode",
+   "hq": "Erode",
+   "lat": 11.34,
+   "lon": 77.72
+  },
+  {
+   "id": "tn-kallakurichi",
+   "state": "Tamil Nadu",
+   "district": "Kallakurichi",
+   "hq": "Kallakurichi",
+   "lat": 11.74,
+   "lon": 78.96
+  },
+  {
+   "id": "tn-kancheepuram",
+   "state": "Tamil Nadu",
+   "district": "Kancheepuram",
+   "hq": "Kancheepuram",
+   "lat": 12.83,
+   "lon": 79.7
+  },
+  {
+   "id": "tn-kanniyakumari",
+   "state": "Tamil Nadu",
+   "district": "Kanniyakumari",
+   "hq": "Nagercoil",
+   "lat": 8.18,
+   "lon": 77.41
+  },
+  {
+   "id": "tn-karur",
+   "state": "Tamil Nadu",
+   "district": "Karur",
+   "hq": "Karur",
+   "lat": 10.96,
+   "lon": 78.08
+  },
+  {
+   "id": "tn-krishnagiri",
+   "state": "Tamil Nadu",
+   "district": "Krishnagiri",
+   "hq": "Krishnagiri",
+   "lat": 12.52,
+   "lon": 78.21
+  },
+  {
+   "id": "tn-madurai",
+   "state": "Tamil Nadu",
+   "district": "Madurai",
+   "hq": "Madurai",
+   "lat": 9.93,
+   "lon": 78.12
+  },
+  {
+   "id": "tn-mayiladuthurai",
+   "state": "Tamil Nadu",
+   "district": "Mayiladuthurai",
+   "hq": "Mayiladuthurai",
+   "lat": 11.1,
+   "lon": 79.65
+  },
+  {
+   "id": "tn-nagapattinam",
+   "state": "Tamil Nadu",
+   "district": "Nagapattinam",
+   "hq": "Nagapattinam",
+   "lat": 10.77,
+   "lon": 79.84
+  },
+  {
+   "id": "tn-namakkal",
+   "state": "Tamil Nadu",
+   "district": "Namakkal",
+   "hq": "Namakkal",
+   "lat": 11.22,
+   "lon": 78.17
+  },
+  {
+   "id": "tn-nilgiris",
+   "state": "Tamil Nadu",
+   "district": "Nilgiris",
+   "hq": "Udhagamandalam",
+   "lat": 11.41,
+   "lon": 76.7
+  },
+  {
+   "id": "tn-perambalur",
+   "state": "Tamil Nadu",
+   "district": "Perambalur",
+   "hq": "Perambalur",
+   "lat": 11.23,
+   "lon": 78.88
+  },
+  {
+   "id": "tn-pudukkottai",
+   "state": "Tamil Nadu",
+   "district": "Pudukkottai",
+   "hq": "Pudukkottai",
+   "lat": 10.38,
+   "lon": 78.82
+  },
+  {
+   "id": "tn-ramanathapuram",
+   "state": "Tamil Nadu",
+   "district": "Ramanathapuram",
+   "hq": "Ramanathapuram",
+   "lat": 9.37,
+   "lon": 78.83
+  },
+  {
+   "id": "tn-ranipet",
+   "state": "Tamil Nadu",
+   "district": "Ranipet",
+   "hq": "Ranipet",
+   "lat": 12.93,
+   "lon": 79.33
+  },
+  {
+   "id": "tn-salem",
+   "state": "Tamil Nadu",
+   "district": "Salem",
+   "hq": "Salem",
+   "lat": 11.66,
+   "lon": 78.15
+  },
+  {
+   "id": "tn-sivaganga",
+   "state": "Tamil Nadu",
+   "district": "Sivaganga",
+   "hq": "Sivaganga",
+   "lat": 9.85,
+   "lon": 78.48
+  },
+  {
+   "id": "tn-tenkasi",
+   "state": "Tamil Nadu",
+   "district": "Tenkasi",
+   "hq": "Tenkasi",
+   "lat": 8.96,
+   "lon": 77.3
+  },
+  {
+   "id": "tn-thanjavur",
+   "state": "Tamil Nadu",
+   "district": "Thanjavur",
+   "hq": "Thanjavur",
+   "lat": 10.79,
+   "lon": 79.14
+  },
+  {
+   "id": "tn-theni",
+   "state": "Tamil Nadu",
+   "district": "Theni",
+   "hq": "Theni",
+   "lat": 10.01,
+   "lon": 77.48
+  },
+  {
+   "id": "tn-thoothukudi",
+   "state": "Tamil Nadu",
+   "district": "Thoothukudi",
+   "hq": "Thoothukudi",
+   "lat": 8.76,
+   "lon": 78.13
+  },
+  {
+   "id": "tn-tiruchirappalli",
+   "state": "Tamil Nadu",
+   "district": "Tiruchirappalli",
+   "hq": "Tiruchirappalli",
+   "lat": 10.79,
+   "lon": 78.7
+  },
+  {
+   "id": "tn-tirunelveli",
+   "state": "Tamil Nadu",
+   "district": "Tirunelveli",
+   "hq": "Tirunelveli",
+   "lat": 8.71,
+   "lon": 77.76
+  },
+  {
+   "id": "tn-tirupathur",
+   "state": "Tamil Nadu",
+   "district": "Tirupathur",
+   "hq": "Tirupathur",
+   "lat": 12.5,
+   "lon": 78.57
+  },
+  {
+   "id": "tn-tiruppur",
+   "state": "Tamil Nadu",
+   "district": "Tiruppur",
+   "hq": "Tiruppur",
+   "lat": 11.11,
+   "lon": 77.34
+  },
+  {
+   "id": "tn-tiruvallur",
+   "state": "Tamil Nadu",
+   "district": "Tiruvallur",
+   "hq": "Tiruvallur",
+   "lat": 13.14,
+   "lon": 79.91
+  },
+  {
+   "id": "tn-tiruvannamalai",
+   "state": "Tamil Nadu",
+   "district": "Tiruvannamalai",
+   "hq": "Tiruvannamalai",
+   "lat": 12.23,
+   "lon": 79.07
+  },
+  {
+   "id": "tn-tiruvarur",
+   "state": "Tamil Nadu",
+   "district": "Tiruvarur",
+   "hq": "Tiruvarur",
+   "lat": 10.77,
+   "lon": 79.64
+  },
+  {
+   "id": "tn-vellore",
+   "state": "Tamil Nadu",
+   "district": "Vellore",
+   "hq": "Vellore",
+   "lat": 12.92,
+   "lon": 79.13
+  },
+  {
+   "id": "tn-viluppuram",
+   "state": "Tamil Nadu",
+   "district": "Viluppuram",
+   "hq": "Viluppuram",
+   "lat": 11.94,
+   "lon": 79.49
+  },
+  {
+   "id": "tn-virudhunagar",
+   "state": "Tamil Nadu",
+   "district": "Virudhunagar",
+   "hq": "Virudhunagar",
+   "lat": 9.58,
+   "lon": 77.96
+  },
+  {
+   "id": "kl-thiruvananthapuram",
+   "state": "Kerala",
+   "district": "Thiruvananthapuram",
+   "hq": "Thiruvananthapuram",
+   "lat": 8.52,
+   "lon": 76.94
+  },
+  {
+   "id": "kl-kollam",
+   "state": "Kerala",
+   "district": "Kollam",
+   "hq": "Kollam",
+   "lat": 8.89,
+   "lon": 76.61
+  },
+  {
+   "id": "kl-pathanamthitta",
+   "state": "Kerala",
+   "district": "Pathanamthitta",
+   "hq": "Pathanamthitta",
+   "lat": 9.26,
+   "lon": 76.79
+  },
+  {
+   "id": "kl-alappuzha",
+   "state": "Kerala",
+   "district": "Alappuzha",
+   "hq": "Alappuzha",
+   "lat": 9.5,
+   "lon": 76.34
+  },
+  {
+   "id": "kl-kottayam",
+   "state": "Kerala",
+   "district": "Kottayam",
+   "hq": "Kottayam",
+   "lat": 9.59,
+   "lon": 76.52
+  },
+  {
+   "id": "kl-idukki",
+   "state": "Kerala",
+   "district": "Idukki",
+   "hq": "Painavu",
+   "lat": 9.85,
+   "lon": 76.94
+  },
+  {
+   "id": "kl-ernakulam",
+   "state": "Kerala",
+   "district": "Ernakulam",
+   "hq": "Kakkanad",
+   "lat": 10.02,
+   "lon": 76.34
+  },
+  {
+   "id": "kl-thrissur",
+   "state": "Kerala",
+   "district": "Thrissur",
+   "hq": "Thrissur",
+   "lat": 10.53,
+   "lon": 76.21
+  },
+  {
+   "id": "kl-palakkad",
+   "state": "Kerala",
+   "district": "Palakkad",
+   "hq": "Palakkad",
+   "lat": 10.78,
+   "lon": 76.65
+  },
+  {
+   "id": "kl-malappuram",
+   "state": "Kerala",
+   "district": "Malappuram",
+   "hq": "Malappuram",
+   "lat": 11.07,
+   "lon": 76.07
+  },
+  {
+   "id": "kl-kozhikode",
+   "state": "Kerala",
+   "district": "Kozhikode",
+   "hq": "Kozhikode",
+   "lat": 11.26,
+   "lon": 75.78
+  },
+  {
+   "id": "kl-wayanad",
+   "state": "Kerala",
+   "district": "Wayanad",
+   "hq": "Kalpetta",
+   "lat": 11.61,
+   "lon": 76.08
+  },
+  {
+   "id": "kl-kannur",
+   "state": "Kerala",
+   "district": "Kannur",
+   "hq": "Kannur",
+   "lat": 11.87,
+   "lon": 75.37
+  },
+  {
+   "id": "kl-kasaragod",
+   "state": "Kerala",
+   "district": "Kasaragod",
+   "hq": "Kasaragod",
+   "lat": 12.5,
+   "lon": 74.99
+  },
+  {
+   "id": "ka-bagalkote",
+   "state": "Karnataka",
+   "district": "Bagalkote",
+   "hq": "Bagalkote",
+   "lat": 16.18,
+   "lon": 75.7
+  },
+  {
+   "id": "ka-ballari",
+   "state": "Karnataka",
+   "district": "Ballari",
+   "hq": "Ballari",
+   "lat": 15.14,
+   "lon": 76.92
+  },
+  {
+   "id": "ka-belagavi",
+   "state": "Karnataka",
+   "district": "Belagavi",
+   "hq": "Belagavi",
+   "lat": 15.85,
+   "lon": 74.5
+  },
+  {
+   "id": "ka-bengaluru-rural",
+   "state": "Karnataka",
+   "district": "Bengaluru Rural",
+   "hq": "Devanahalli",
+   "lat": 13.25,
+   "lon": 77.71
+  },
+  {
+   "id": "ka-bengaluru-urban",
+   "state": "Karnataka",
+   "district": "Bengaluru Urban",
+   "hq": "Bengaluru",
+   "lat": 12.97,
+   "lon": 77.59
+  },
+  {
+   "id": "ka-bidar",
+   "state": "Karnataka",
+   "district": "Bidar",
+   "hq": "Bidar",
+   "lat": 17.91,
+   "lon": 77.52
+  },
+  {
+   "id": "ka-chamarajanagara",
+   "state": "Karnataka",
+   "district": "Chamarajanagara",
+   "hq": "Chamarajanagara",
+   "lat": 11.92,
+   "lon": 76.94
+  },
+  {
+   "id": "ka-chikkaballapura",
+   "state": "Karnataka",
+   "district": "Chikkaballapura",
+   "hq": "Chikkaballapura",
+   "lat": 13.43,
+   "lon": 77.73
+  },
+  {
+   "id": "ka-chikkamagaluru",
+   "state": "Karnataka",
+   "district": "Chikkamagaluru",
+   "hq": "Chikkamagaluru",
+   "lat": 13.32,
+   "lon": 75.77
+  },
+  {
+   "id": "ka-chitradurga",
+   "state": "Karnataka",
+   "district": "Chitradurga",
+   "hq": "Chitradurga",
+   "lat": 14.23,
+   "lon": 76.4
+  },
+  {
+   "id": "ka-dakshina-kannada",
+   "state": "Karnataka",
+   "district": "Dakshina Kannada",
+   "hq": "Mangaluru",
+   "lat": 12.91,
+   "lon": 74.86
+  },
+  {
+   "id": "ka-davanagere",
+   "state": "Karnataka",
+   "district": "Davanagere",
+   "hq": "Davanagere",
+   "lat": 14.46,
+   "lon": 75.92
+  },
+  {
+   "id": "ka-dharwad",
+   "state": "Karnataka",
+   "district": "Dharwad",
+   "hq": "Dharwad",
+   "lat": 15.46,
+   "lon": 75.01
+  },
+  {
+   "id": "ka-gadag",
+   "state": "Karnataka",
+   "district": "Gadag",
+   "hq": "Gadag",
+   "lat": 15.43,
+   "lon": 75.63
+  },
+  {
+   "id": "ka-hassan",
+   "state": "Karnataka",
+   "district": "Hassan",
+   "hq": "Hassan",
+   "lat": 13.01,
+   "lon": 76.1
+  },
+  {
+   "id": "ka-haveri",
+   "state": "Karnataka",
+   "district": "Haveri",
+   "hq": "Haveri",
+   "lat": 14.79,
+   "lon": 75.4
+  },
+  {
+   "id": "ka-kalaburagi",
+   "state": "Karnataka",
+   "district": "Kalaburagi",
+   "hq": "Kalaburagi",
+   "lat": 17.33,
+   "lon": 76.83
+  },
+  {
+   "id": "ka-kodagu",
+   "state": "Karnataka",
+   "district": "Kodagu",
+   "hq": "Madikeri",
+   "lat": 12.42,
+   "lon": 75.74
+  },
+  {
+   "id": "ka-kolar",
+   "state": "Karnataka",
+   "district": "Kolar",
+   "hq": "Kolar",
+   "lat": 13.14,
+   "lon": 78.13
+  },
+  {
+   "id": "ka-koppal",
+   "state": "Karnataka",
+   "district": "Koppal",
+   "hq": "Koppal",
+   "lat": 15.35,
+   "lon": 76.15
+  },
+  {
+   "id": "ka-mandya",
+   "state": "Karnataka",
+   "district": "Mandya",
+   "hq": "Mandya",
+   "lat": 12.52,
+   "lon": 76.9
+  },
+  {
+   "id": "ka-mysuru",
+   "state": "Karnataka",
+   "district": "Mysuru",
+   "hq": "Mysuru",
+   "lat": 12.3,
+   "lon": 76.64
+  },
+  {
+   "id": "ka-raichur",
+   "state": "Karnataka",
+   "district": "Raichur",
+   "hq": "Raichur",
+   "lat": 16.2,
+   "lon": 77.36
+  },
+  {
+   "id": "ka-ramanagara-bengaluru-south",
+   "state": "Karnataka",
+   "district": "Ramanagara (Bengaluru South)",
+   "hq": "Ramanagara",
+   "lat": 12.72,
+   "lon": 77.28
+  },
+  {
+   "id": "ka-shivamogga",
+   "state": "Karnataka",
+   "district": "Shivamogga",
+   "hq": "Shivamogga",
+   "lat": 13.93,
+   "lon": 75.57
+  },
+  {
+   "id": "ka-tumakuru",
+   "state": "Karnataka",
+   "district": "Tumakuru",
+   "hq": "Tumakuru",
+   "lat": 13.34,
+   "lon": 77.1
+  },
+  {
+   "id": "ka-udupi",
+   "state": "Karnataka",
+   "district": "Udupi",
+   "hq": "Udupi",
+   "lat": 13.34,
+   "lon": 74.75
+  },
+  {
+   "id": "ka-uttara-kannada",
+   "state": "Karnataka",
+   "district": "Uttara Kannada",
+   "hq": "Karwar",
+   "lat": 14.81,
+   "lon": 74.13
+  },
+  {
+   "id": "ka-vijayanagara",
+   "state": "Karnataka",
+   "district": "Vijayanagara",
+   "hq": "Hosapete",
+   "lat": 15.27,
+   "lon": 76.39
+  },
+  {
+   "id": "ka-vijayapura",
+   "state": "Karnataka",
+   "district": "Vijayapura",
+   "hq": "Vijayapura",
+   "lat": 16.83,
+   "lon": 75.71
+  },
+  {
+   "id": "ka-yadgir",
+   "state": "Karnataka",
+   "district": "Yadgir",
+   "hq": "Yadgir",
+   "lat": 16.77,
+   "lon": 77.14
+  },
+  {
+   "id": "ap-srikakulam",
+   "state": "Andhra Pradesh",
+   "district": "Srikakulam",
+   "hq": "Srikakulam",
+   "lat": 18.3,
+   "lon": 83.9
+  },
+  {
+   "id": "ap-vizianagaram",
+   "state": "Andhra Pradesh",
+   "district": "Vizianagaram",
+   "hq": "Vizianagaram",
+   "lat": 18.11,
+   "lon": 83.4
+  },
+  {
+   "id": "ap-parvathipuram-manyam",
+   "state": "Andhra Pradesh",
+   "district": "Parvathipuram Manyam",
+   "hq": "Parvathipuram",
+   "lat": 18.78,
+   "lon": 83.43
+  },
+  {
+   "id": "ap-alluri-sitharama-raju",
+   "state": "Andhra Pradesh",
+   "district": "Alluri Sitharama Raju",
+   "hq": "Paderu",
+   "lat": 18.08,
+   "lon": 82.67
+  },
+  {
+   "id": "ap-visakhapatnam",
+   "state": "Andhra Pradesh",
+   "district": "Visakhapatnam",
+   "hq": "Visakhapatnam",
+   "lat": 17.69,
+   "lon": 83.22
+  },
+  {
+   "id": "ap-anakapalli",
+   "state": "Andhra Pradesh",
+   "district": "Anakapalli",
+   "hq": "Anakapalli",
+   "lat": 17.69,
+   "lon": 83.0
+  },
+  {
+   "id": "ap-kakinada",
+   "state": "Andhra Pradesh",
+   "district": "Kakinada",
+   "hq": "Kakinada",
+   "lat": 16.99,
+   "lon": 82.25
+  },
+  {
+   "id": "ap-east-godavari",
+   "state": "Andhra Pradesh",
+   "district": "East Godavari",
+   "hq": "Rajamahendravaram",
+   "lat": 17.0,
+   "lon": 81.8
+  },
+  {
+   "id": "ap-konaseema",
+   "state": "Andhra Pradesh",
+   "district": "Konaseema",
+   "hq": "Amalapuram",
+   "lat": 16.58,
+   "lon": 82.01
+  },
+  {
+   "id": "ap-eluru",
+   "state": "Andhra Pradesh",
+   "district": "Eluru",
+   "hq": "Eluru",
+   "lat": 16.71,
+   "lon": 81.1
+  },
+  {
+   "id": "ap-west-godavari",
+   "state": "Andhra Pradesh",
+   "district": "West Godavari",
+   "hq": "Bhimavaram",
+   "lat": 16.54,
+   "lon": 81.52
+  },
+  {
+   "id": "ap-ntr",
+   "state": "Andhra Pradesh",
+   "district": "NTR",
+   "hq": "Vijayawada",
+   "lat": 16.51,
+   "lon": 80.65
+  },
+  {
+   "id": "ap-krishna",
+   "state": "Andhra Pradesh",
+   "district": "Krishna",
+   "hq": "Machilipatnam",
+   "lat": 16.19,
+   "lon": 81.14
+  },
+  {
+   "id": "ap-guntur",
+   "state": "Andhra Pradesh",
+   "district": "Guntur",
+   "hq": "Guntur",
+   "lat": 16.31,
+   "lon": 80.44
+  },
+  {
+   "id": "ap-palnadu",
+   "state": "Andhra Pradesh",
+   "district": "Palnadu",
+   "hq": "Narasaraopet",
+   "lat": 16.24,
+   "lon": 80.05
+  },
+  {
+   "id": "ap-bapatla",
+   "state": "Andhra Pradesh",
+   "district": "Bapatla",
+   "hq": "Bapatla",
+   "lat": 15.9,
+   "lon": 80.47
+  },
+  {
+   "id": "ap-prakasam",
+   "state": "Andhra Pradesh",
+   "district": "Prakasam",
+   "hq": "Ongole",
+   "lat": 15.51,
+   "lon": 80.05
+  },
+  {
+   "id": "ap-nellore",
+   "state": "Andhra Pradesh",
+   "district": "Nellore",
+   "hq": "Nellore",
+   "lat": 14.44,
+   "lon": 79.99
+  },
+  {
+   "id": "ap-kurnool",
+   "state": "Andhra Pradesh",
+   "district": "Kurnool",
+   "hq": "Kurnool",
+   "lat": 15.83,
+   "lon": 78.04
+  },
+  {
+   "id": "ap-nandyal",
+   "state": "Andhra Pradesh",
+   "district": "Nandyal",
+   "hq": "Nandyal",
+   "lat": 15.48,
+   "lon": 78.48
+  },
+  {
+   "id": "ap-anantapur",
+   "state": "Andhra Pradesh",
+   "district": "Anantapur",
+   "hq": "Anantapur",
+   "lat": 14.68,
+   "lon": 77.6
+  },
+  {
+   "id": "ap-sri-sathya-sai",
+   "state": "Andhra Pradesh",
+   "district": "Sri Sathya Sai",
+   "hq": "Puttaparthi",
+   "lat": 14.17,
+   "lon": 77.81
+  },
+  {
+   "id": "ap-ysr-kadapa",
+   "state": "Andhra Pradesh",
+   "district": "YSR Kadapa",
+   "hq": "Kadapa",
+   "lat": 14.47,
+   "lon": 78.82
+  },
+  {
+   "id": "ap-annamayya",
+   "state": "Andhra Pradesh",
+   "district": "Annamayya",
+   "hq": "Rayachoti",
+   "lat": 14.06,
+   "lon": 78.75
+  },
+  {
+   "id": "ap-tirupati",
+   "state": "Andhra Pradesh",
+   "district": "Tirupati",
+   "hq": "Tirupati",
+   "lat": 13.63,
+   "lon": 79.42
+  },
+  {
+   "id": "ap-chittoor",
+   "state": "Andhra Pradesh",
+   "district": "Chittoor",
+   "hq": "Chittoor",
+   "lat": 13.22,
+   "lon": 79.1
+  },
+  {
+   "id": "tg-adilabad",
+   "state": "Telangana",
+   "district": "Adilabad",
+   "hq": "Adilabad",
+   "lat": 19.67,
+   "lon": 78.53
+  },
+  {
+   "id": "tg-bhadradri-kothagudem",
+   "state": "Telangana",
+   "district": "Bhadradri Kothagudem",
+   "hq": "Kothagudem",
+   "lat": 17.55,
+   "lon": 80.62
+  },
+  {
+   "id": "tg-hanumakonda",
+   "state": "Telangana",
+   "district": "Hanumakonda",
+   "hq": "Hanumakonda",
+   "lat": 18.01,
+   "lon": 79.56
+  },
+  {
+   "id": "tg-hyderabad",
+   "state": "Telangana",
+   "district": "Hyderabad",
+   "hq": "Hyderabad",
+   "lat": 17.39,
+   "lon": 78.49
+  },
+  {
+   "id": "tg-jagtial",
+   "state": "Telangana",
+   "district": "Jagtial",
+   "hq": "Jagtial",
+   "lat": 18.79,
+   "lon": 78.91
+  },
+  {
+   "id": "tg-jangaon",
+   "state": "Telangana",
+   "district": "Jangaon",
+   "hq": "Jangaon",
+   "lat": 17.72,
+   "lon": 79.15
+  },
+  {
+   "id": "tg-jayashankar-bhupalpally",
+   "state": "Telangana",
+   "district": "Jayashankar Bhupalpally",
+   "hq": "Bhupalpally",
+   "lat": 18.43,
+   "lon": 79.86
+  },
+  {
+   "id": "tg-jogulamba-gadwal",
+   "state": "Telangana",
+   "district": "Jogulamba Gadwal",
+   "hq": "Gadwal",
+   "lat": 16.23,
+   "lon": 77.8
+  },
+  {
+   "id": "tg-kamareddy",
+   "state": "Telangana",
+   "district": "Kamareddy",
+   "hq": "Kamareddy",
+   "lat": 18.32,
+   "lon": 78.34
+  },
+  {
+   "id": "tg-karimnagar",
+   "state": "Telangana",
+   "district": "Karimnagar",
+   "hq": "Karimnagar",
+   "lat": 18.44,
+   "lon": 79.13
+  },
+  {
+   "id": "tg-khammam",
+   "state": "Telangana",
+   "district": "Khammam",
+   "hq": "Khammam",
+   "lat": 17.25,
+   "lon": 80.15
+  },
+  {
+   "id": "tg-komaram-bheem-asifabad",
+   "state": "Telangana",
+   "district": "Komaram Bheem Asifabad",
+   "hq": "Asifabad",
+   "lat": 19.36,
+   "lon": 79.28
+  },
+  {
+   "id": "tg-mahabubabad",
+   "state": "Telangana",
+   "district": "Mahabubabad",
+   "hq": "Mahabubabad",
+   "lat": 17.6,
+   "lon": 80.0
+  },
+  {
+   "id": "tg-mahabubnagar",
+   "state": "Telangana",
+   "district": "Mahabubnagar",
+   "hq": "Mahabubnagar",
+   "lat": 16.74,
+   "lon": 78.0
+  },
+  {
+   "id": "tg-mancherial",
+   "state": "Telangana",
+   "district": "Mancherial",
+   "hq": "Mancherial",
+   "lat": 18.87,
+   "lon": 79.44
+  },
+  {
+   "id": "tg-medak",
+   "state": "Telangana",
+   "district": "Medak",
+   "hq": "Medak",
+   "lat": 18.05,
+   "lon": 78.26
+  },
+  {
+   "id": "tg-medchal-malkajgiri",
+   "state": "Telangana",
+   "district": "Medchal-Malkajgiri",
+   "hq": "Medchal",
+   "lat": 17.63,
+   "lon": 78.48
+  },
+  {
+   "id": "tg-mulugu",
+   "state": "Telangana",
+   "district": "Mulugu",
+   "hq": "Mulugu",
+   "lat": 18.19,
+   "lon": 79.94
+  },
+  {
+   "id": "tg-nagarkurnool",
+   "state": "Telangana",
+   "district": "Nagarkurnool",
+   "hq": "Nagarkurnool",
+   "lat": 16.48,
+   "lon": 78.31
+  },
+  {
+   "id": "tg-nalgonda",
+   "state": "Telangana",
+   "district": "Nalgonda",
+   "hq": "Nalgonda",
+   "lat": 17.05,
+   "lon": 79.27
+  },
+  {
+   "id": "tg-narayanpet",
+   "state": "Telangana",
+   "district": "Narayanpet",
+   "hq": "Narayanpet",
+   "lat": 16.74,
+   "lon": 77.5
+  },
+  {
+   "id": "tg-nirmal",
+   "state": "Telangana",
+   "district": "Nirmal",
+   "hq": "Nirmal",
+   "lat": 19.1,
+   "lon": 78.34
+  },
+  {
+   "id": "tg-nizamabad",
+   "state": "Telangana",
+   "district": "Nizamabad",
+   "hq": "Nizamabad",
+   "lat": 18.67,
+   "lon": 78.09
+  },
+  {
+   "id": "tg-peddapalli",
+   "state": "Telangana",
+   "district": "Peddapalli",
+   "hq": "Peddapalli",
+   "lat": 18.61,
+   "lon": 79.38
+  },
+  {
+   "id": "tg-rajanna-sircilla",
+   "state": "Telangana",
+   "district": "Rajanna Sircilla",
+   "hq": "Sircilla",
+   "lat": 18.39,
+   "lon": 78.81
+  },
+  {
+   "id": "tg-ranga-reddy",
+   "state": "Telangana",
+   "district": "Ranga Reddy",
+   "hq": "Kongara Kalan",
+   "lat": 17.23,
+   "lon": 78.53
+  },
+  {
+   "id": "tg-sangareddy",
+   "state": "Telangana",
+   "district": "Sangareddy",
+   "hq": "Sangareddy",
+   "lat": 17.62,
+   "lon": 78.08
+  },
+  {
+   "id": "tg-siddipet",
+   "state": "Telangana",
+   "district": "Siddipet",
+   "hq": "Siddipet",
+   "lat": 18.1,
+   "lon": 78.85
+  },
+  {
+   "id": "tg-suryapet",
+   "state": "Telangana",
+   "district": "Suryapet",
+   "hq": "Suryapet",
+   "lat": 17.14,
+   "lon": 79.62
+  },
+  {
+   "id": "tg-vikarabad",
+   "state": "Telangana",
+   "district": "Vikarabad",
+   "hq": "Vikarabad",
+   "lat": 17.34,
+   "lon": 77.9
+  },
+  {
+   "id": "tg-wanaparthy",
+   "state": "Telangana",
+   "district": "Wanaparthy",
+   "hq": "Wanaparthy",
+   "lat": 16.36,
+   "lon": 78.06
+  },
+  {
+   "id": "tg-warangal",
+   "state": "Telangana",
+   "district": "Warangal",
+   "hq": "Warangal",
+   "lat": 17.97,
+   "lon": 79.59
+  },
+  {
+   "id": "tg-yadadri-bhuvanagiri",
+   "state": "Telangana",
+   "district": "Yadadri Bhuvanagiri",
+   "hq": "Bhongir",
+   "lat": 17.51,
+   "lon": 78.89
+  }
+ ],
+ "updated": "2026-10-25T14:26Z"
+}

@@ -24,6 +24,8 @@
   .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
   .pill.region{padding:8px 16px;font-size:14px;font-weight:600}
   .pill.region.on{background:var(--ok);border-color:var(--ok);color:#03150d}
+  .pill[disabled]{opacity:.45;cursor:not-allowed}
+  .pill small{font-weight:400;opacity:.85;margin-left:4px;font-size:11px}
   .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
   .btn:hover{border-color:var(--accent)}
   .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
@@ -105,6 +107,8 @@
   const KIND_ORDER = ['live','daily','accum','month'];
   const KIND_SHORT = {live:'Rain so far', daily:'24-hour', accum:'Multi-day', month:'Monthly'};
   const LANG = {ta:'Tamil', en:'English', ml:'Malayalam'};
+  const STATE = {tn:{name:'Tamil Nadu', next:'10:45 am'}, kl:{name:'Kerala', next:'12:15 pm'},
+                 ka:{name:'Karnataka', next:'10:45 am'}, ap:{name:'Andhra Pradesh', next:'10:45 am'}};
   const S = {all:[], region:null, kind:null, lang:null, cur:null};
 
   const url = p => /^https?:/.test(p) ? p : BASE + p;
@@ -128,8 +132,17 @@
   const filtered = () => inKind().filter(r => !S.lang || r.lang === S.lang);
 
   function buildFilters(){
-    const regions = REGION_ORDER.filter(g => S.all.some(r => r.region === g));
-    pills($('regions'), regions, S.region, g => S.all.find(r => r.region === g).region_name, 'region', g => pick({region:g}));
+    // every state is listed; one with no report yet is greyed out with its next report time
+    const box0 = $('regions'); box0.innerHTML = '';
+    REGION_ORDER.forEach(g=>{
+      const have = S.all.some(r => r.region === g);
+      const b = document.createElement('button');
+      b.className = 'pill region' + (g === S.region ? ' on' : '');
+      b.innerHTML = STATE[g].name + (have ? '' : '<small>(next ' + STATE[g].next + ')</small>');
+      b.disabled = !have;
+      b.onclick = () => pick({region:g});
+      box0.appendChild(b);
+    });
     const kinds = KIND_ORDER.filter(k => inRegion().some(r => r.kind === k));
     pills($('kinds'), kinds, S.kind, k => KIND_SHORT[k], '', k => pick({region:S.region, kind:k}));
     const langs = [...new Set(inKind().map(r => r.lang))];

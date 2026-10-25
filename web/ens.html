@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ensemble Rain · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px;min-width:64px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .pill.state.on{background:var(--ok);border-color:var(--ok);color:#03150d}
+  .pill small{font-weight:400;opacity:.85;margin-left:4px;font-size:11px}
+  select,input{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:8px;font:inherit;font-size:13px}
+  input{min-width:200px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .viewer{background:#fff;border-radius:10px;overflow:auto;border:1px solid var(--line);margin-top:6px}
+  .viewer img{display:block;width:100%;min-width:900px;height:auto}
+  .info{color:var(--muted);font-size:12.5px;margin:8px 0}
+  .empty{color:var(--muted);padding:40px 0;text-align:center;background:var(--panel);border-radius:10px}
+  footer{color:var(--muted);font-size:12px;margin-top:16px;line-height:1.6}
+  @media (max-width:640px){header h1{font-size:15px}.label{min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>MasRainman · <span>Ensemble Rain by District</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Model maps</a>
+  <a class="btn" href="rain.html">🌧 Rain reports</a>
+</header>
+
+<main>
+  <div class="bar"><span class="label">Model</span><div class="seg" id="models"></div></div>
+  <div class="bar"><span class="label">Run</span><div class="seg" id="runs"></div></div>
+  <div class="bar"><span class="label">State</span><div class="seg" id="states"></div></div>
+  <div class="bar"><span class="label">District</span>
+    <select id="district"></select>
+    <input id="search" list="allDistricts" placeholder="Type a district or town…">
+    <datalist id="allDistricts"></datalist>
+    <button class="btn" id="prev" title="Previous district (←)">◀</button>
+    <button class="btn" id="next" title="Next district (→)">▶</button>
+    <a class="btn primary" id="dl" download>⬇ PNG</a>
+  </div>
+  <div class="info" id="info"></div>
+  <div class="viewer" id="viewer"></div>
+
+  <footer>
+    Each column is the rain (mm) in the 24 hours ending at that time (UTC; add 5 h 30 min for IST).
+    <b>ECMWF ENS</b>: one row per member (c00 = control, 01–50 = perturbed), from ECMWF open data (CC BY 4.0).
+    <b>WeatherNext 3</b>: the data available has the ensemble mean and percentiles of hourly rain, not the members;
+    the 24-hour mean row is exact, the percentile rows are sums of hourly percentiles and are only a guide.
+    Values are at the model grid point nearest to the district headquarters.
+    These charts are not official forecasts — please follow IMD for forecasts and warnings.
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let M = null, st = {model:null, run:null, state:null, id:null};
+const STATES = ["Tamil Nadu","Kerala","Karnataka","Andhra Pradesh","Telangana"];
+
+function save(){ try{ localStorage.setItem("ens_sel", JSON.stringify({model:st.model,state:st.state,id:st.id})); }catch(e){} }
+function load(){ try{ return JSON.parse(localStorage.getItem("ens_sel")||"{}"); }catch(e){ return {}; } }
+
+function fmtInit(iso){
+  const d = new Date(iso.replace("Z",":00Z"));
+  const z = String(d.getUTCHours()).padStart(2,"0")+"z";
+  return `${z} ${d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",timeZone:"UTC"})}`;
+}
+
+function pills(el, items, cur, cls, onPick){
+  el.innerHTML = "";
+  for(const it of items){
+    const b = document.createElement("button");
+    b.className = "pill "+(cls||"")+(it.v===cur?" on":"");
+    b.innerHTML = it.html;
+    b.onclick = () => onPick(it.v);
+    el.appendChild(b);
+  }
+}
+
+function render(){
+  const models = Object.entries(M.models).filter(([k,m]) => m.runs.length);
+  if(!models.length){ $("viewer").innerHTML = '<div class="empty">No charts yet — they appear after the first run.</div>'; return; }
+  if(!M.models[st.model] || !M.models[st.model].runs.length) st.model = models[0][0];
+  pills($("models"), models.map(([k,m]) => ({v:k, html:m.label})), st.model, "", v => {st.model=v; st.run=null; render();});
+
+  const runs = M.models[st.model].runs;
+  if(!runs.find(r => r.run===st.run)) st.run = runs[0].run;
+  pills($("runs"), runs.map((r,i) => ({v:r.run, html:fmtInit(r.init)+(i===0?"<small>latest</small>":"")})), st.run, "", v => {st.run=v; render();});
+
+  const states = STATES.filter(s => M.districts.some(d => d.state===s));
+  if(!states.includes(st.state)) st.state = states[0];
+  pills($("states"), states.map(s => ({v:s, html:s})), st.state, "state", v => {
+    st.state=v; const first = M.districts.find(d => d.state===v); st.id = first && first.id; render();
+  });
+
+  const list = M.districts.filter(d => d.state===st.state);
+  if(!list.find(d => d.id===st.id)) st.id = list[0].id;
+  $("district").innerHTML = list.map(d => `<option value="${d.id}"${d.id===st.id?" selected":""}>${d.district}${d.hq!==d.district?" ("+d.hq+")":""}</option>`).join("");
+
+  const d = M.districts.find(x => x.id===st.id);
+  const run = runs.find(r => r.run===st.run);
+  const src = `ens/${st.model}/${st.run}/${st.id}.png`;
+  $("viewer").innerHTML = `<img src="${src}" alt="${M.models[st.model].label} 24-hour rain for ${d.hq}">`;
+  $("dl").href = src;
+  $("dl").setAttribute("download", `${st.model}_${st.run}_${st.id}.png`);
+  $("info").textContent = `${d.hq}, ${d.district} district, ${d.state} · ${M.models[st.model].label} · run ${fmtInit(run.init)} · ${run.grid_deg}° grid · made ${run.made.replace("T"," ").replace("+05:30"," IST")}`;
+  save();
+}
+
+function step(k){
+  const list = M.districts.filter(d => d.state===st.state);
+  const i = list.findIndex(d => d.id===st.id);
+  st.id = list[(i+k+list.length)%list.length].id; render();
+}
+
+fetch("ens/manifest.json?t="+Date.now()).then(r => r.json()).then(m => {
+  M = m;
+  Object.assign(st, load());
+  $("upd").textContent = m.updated ? "Updated "+m.updated.replace("T"," ").replace("Z"," UTC") : "";
+  $("allDistricts").innerHTML = m.districts.map(d => `<option value="${d.hq} — ${d.district}, ${d.state}">`).join("");
+  render();
+}).catch(() => { $("upd").textContent = ""; $("viewer").innerHTML = '<div class="empty">No charts yet — they appear after the first run.</div>'; });
+
+$("district").onchange = e => { st.id = e.target.value; render(); };
+$("prev").onclick = () => step(-1);
+$("next").onclick = () => step(1);
+$("search").onchange = e => {
+  const q = e.target.value.toLowerCase().split(" — ")[0].trim();
+  if(!q || !M) return;
+  const d = M.districts.find(x => x.hq.toLowerCase()===q || x.district.toLowerCase()===q)
+         || M.districts.find(x => (x.hq+" "+x.district).toLowerCase().includes(q));
+  if(d){ st.state = d.state; st.id = d.id; e.target.value = ""; render(); }
+};
+document.addEventListener("keydown", e => {
+  if(e.target.tagName==="INPUT" || e.target.tagName==="SELECT") return;
+  if(e.key==="ArrowLeft") step(-1);
+  if(e.key==="ArrowRight") step(1);
+});
+</script>
+</body>
+</html>

@@ -114,6 +114,10 @@ jobs:
         if: steps.render.outcome == 'success'
         run: bash get_rain_reports.sh site
 
+      - name: Add ensemble rain charts (ens-data branch)
+        if: steps.render.outcome == 'success'
+        run: bash get_ens.sh site
+
       - name: Publish to Cloudflare Pages (login-protected)
         if: steps.render.outcome == 'success'
         env:

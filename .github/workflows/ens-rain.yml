@@ -1,0 +1,129 @@
+name: Ensemble rain charts (ECMWF ENS + WeatherNext 3, by district)
+
+# 24-hour rain plume charts for every district headquarters of TN, Kerala,
+# Karnataka, AP and Telangana (ens/districts.csv), like WeatherBell's
+# "ECMWF Ens 24-Hour QPF". Draws only runs the site does not have yet.
+#   ECMWF ENS 00Z is fully published around 08:30–09:30 UTC, 12Z around 20:30–21:30 UTC.
+on:
+  schedule:
+    - cron: "40 */3 * * *"     # every 3 h at :40 UTC (:10 IST)
+  push:                         # TEST ONLY - removed before merging
+    branches: [claude/ens-rain-matrix]
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Model for a forced run (only used when 'run' is filled)"
+        required: false
+        type: choice
+        options: [ecmwf_ens, wn3]
+        default: ecmwf_ens
+      run:
+        description: "Force one run: ECMWF ENS 20261025_00, WN3 20261025_00hr_01_preds (empty = automatic)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ens-rain
+  cancel-in-progress: false
+
+env:
+  CF_PROJECT: masrainman-wn3
+  ENS_KEEP_RUNS: "2"
+
+jobs:
+  charts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current charts (ens-data branch)
+        run: |
+          mkdir -p site/ens
+          if git fetch -q --depth 1 origin ens-data 2>/dev/null; then
+            git --work-tree=site/ens checkout -q FETCH_HEAD -- . && git reset -q
+          fi
+          cat site/ens/manifest.json 2>/dev/null | head -c 600 || echo "(no charts yet)"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Google login (your WeatherNext access)
+        env:
+          GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          printf '%s' "$GCP_CREDS" > "$RUNNER_TEMP/gcp.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp.json" >> "$GITHUB_ENV"
+
+      - name: Install
+        run: pip install -q numpy matplotlib pillow requests google-auth "zarr>=3" "obstore>=0.6" "eccodes>=2.39"
+
+      - name: Draw new runs
+        id: draw
+        run: |
+          before=$(md5sum site/ens/manifest.json 2>/dev/null | cut -d' ' -f1)
+          # a failure of one model must not stop publishing the other: report it at the end
+          if [ -n "${{ github.event.inputs.run }}" ]; then
+            python ens_meteogram.py --model "${{ github.event.inputs.model }}" --run "${{ github.event.inputs.run }}" \
+              || echo "failed=true" >> "$GITHUB_OUTPUT"
+          else
+            python ens_meteogram.py || echo "failed=true" >> "$GITHUB_OUTPUT"
+          fi
+          after=$(md5sum site/ens/manifest.json 2>/dev/null | cut -d' ' -f1)
+          if [ "$before" != "$after" ] && ls site/ens/*/*/*.png >/dev/null 2>&1; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"; echo "Nothing new."
+          fi
+
+      - name: Save charts (ens-data branch)
+        if: steps.draw.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site/ens
+          publish_branch: ens-data
+          force_orphan: true   # keeps the repo small: no image history
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "Ensemble rain charts update"
+
+      - name: Build the whole site (maps + rain reports + charts)
+        if: steps.draw.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          mv site/ens "$RUNNER_TEMP/ens" && rm -rf site && mkdir site
+          if git fetch -q --depth 1 origin site-data 2>/dev/null; then
+            git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
+          fi
+          bash get_rain_reports.sh site
+          cp web/index.html web/rain.html web/ens.html site/
+          rm -rf site/ens && mv "$RUNNER_TEMP/ens" site/ens
+
+      - name: Publish to Cloudflare Pages (login-protected)
+        if: steps.draw.outputs.changed == 'true' && github.ref == 'refs/heads/main'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
+
+      - name: Sample charts (test)
+        if: always() && github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ens-sample
+          path: |
+            site/ens/manifest.json
+            site/ens/*/*/tn-chennai.png
+            site/ens/*/*/ka-kodagu.png
+            site/ens/*/*/values.json
+
+      - name: Report a failed model run
+        if: steps.draw.outputs.failed == 'true'
+        run: |
+          echo "::error::A model run failed to draw - see the 'Draw new runs' step log."
+          exit 1

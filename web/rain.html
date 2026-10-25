@@ -183,7 +183,7 @@
     $('title').innerHTML = nameFor(r) + tagFor(r);
     $('when').textContent = r.label + ' · made ' + fmtIST(r.made);
     const dl = $('dl'); dl.innerHTML = '';
-    [['mp4','⬇ MP4 video','primary'],['gif','⬇ GIF','gif'],['png','⬇ PNG picture','']].forEach(([e,t,c])=>{
+    [['mp4','⬇ MP4 video','primary'],['gif','⬇ GIF','gif'],['png','⬇ PNG picture',''],['list','⬇ Station list (PNG)','']].forEach(([e,t,c])=>{
       if(!f[e]) return;
       const a = document.createElement('a');
       a.className = 'btn' + (c ? ' ' + c : '');

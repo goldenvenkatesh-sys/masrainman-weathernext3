@@ -81,7 +81,7 @@ jobs:
 
       # A public copy of those files for the rain report, which has no token for this private repo:
       # one small file per rain-day, wn3_<YYYY-MM-DD>.json, from the 12 UTC run two days before
-      # (the run the scorecard uses). Its own Cloudflare Pages project, outside the site's login.
+      # (the run the scorecard uses). A 'wn3data' branch copy of the site's Cloudflare project, outside its login.
       - name: Publish WeatherNext 3 rain for the rain report
         if: steps.rain24.outcome == 'success'
         continue-on-error: true
@@ -101,8 +101,7 @@ jobs:
                       json.dump(w, open(os.path.join(out, f"wn3_{d}.json"), "w"))
           print("files:", " ".join(sorted(os.listdir(out))))
           EOF
-          npx --yes wrangler@3 pages project create masrainman-wn3-data --production-branch=main 2>/dev/null || true
-          npx --yes wrangler@3 pages deploy "$RUNNER_TEMP/wn3pub" --project-name=masrainman-wn3-data --branch=main --commit-dirty=true
+          npx --yes wrangler@3 pages deploy "$RUNNER_TEMP/wn3pub" --project-name="$CF_PROJECT" --branch=wn3data --commit-dirty=true
 
       # ---------- everything below runs only when there is work ----------
 

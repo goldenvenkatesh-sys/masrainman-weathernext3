@@ -6,6 +6,10 @@ Importing this module wraps matplotlib's Figure.savefig. Before a figure is save
 logo (assets/masrainman_logo.png) and the name "MasRainman" are added at its top right. With
 bbox_inches="tight" (all of render.py's figures) they sit in a slim strip just above the figure, so they
 never cover the map, the titles or the colour bars. Otherwise they go inside the top-right corner.
+
+A figure can instead reserve a header band for them: set fig.masrainman_header = (y_centre, x_right) in
+figure fractions and the logo + name are placed inside the figure, right-aligned at x_right and vertically
+centred on y_centre, so they sit on the same line as the chart title (used by the MSLP maps).
 """
 import os
 
@@ -42,12 +46,17 @@ def add_logo(fig, outside=True, dpi=None):
     fw, fh = fig.get_size_inches()
     h = HEIGHT_IN / fh
     w = h * img.shape[1] / img.shape[0] * fh / fw
-    x0 = 1 - w - 0.004
-    y0 = 1.004 if outside else 1 - h - 0.004
+    header = getattr(fig, "masrainman_header", None)
+    if header:                                   # same line as the title, inside the header band
+        y_mid, x_right = header
+        x0, y0 = x_right - w, y_mid - h * 0.5
+    else:
+        x0 = 1 - w - 0.004
+        y0 = 1.004 if outside else 1 - h - 0.004
     ax = fig.add_axes([x0, y0, w, h], label=TAG, zorder=100)
     ax.imshow(img, interpolation="nearest")
     ax.set_axis_off()
-    fig.text(x0 - 0.006, y0 + h * 0.5, "MasRainman", ha="right", va="center", fontsize=17, fontweight="bold",
+    fig.text(x0 - 0.006, y0 + h * 0.5, "MasRainman", ha="right", va="center", fontsize=19 if header else 17, fontweight="bold",
              color="white" if dark else "#1d63ba", gid=TAG)
 
 

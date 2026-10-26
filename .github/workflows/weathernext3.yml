@@ -79,6 +79,31 @@ jobs:
           pip install -q -r requirements.txt
           python export_rain24.py site
 
+      # A public copy of those files for the rain report, which has no token for this private repo:
+      # one small file per rain-day, wn3_<YYYY-MM-DD>.json, from the 12 UTC run two days before
+      # (the run the scorecard uses). Its own Cloudflare Pages project, outside the site's login.
+      - name: Publish WeatherNext 3 rain for the rain report
+        if: steps.rain24.outcome == 'success'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/wn3pub"
+          python - "$RUNNER_TEMP/wn3pub" <<'EOF'
+          import glob, json, os, sys
+          from datetime import date, timedelta
+          out = sys.argv[1]
+          for f in glob.glob("site/rain24/wn3_*_12.json"):
+              run = os.path.basename(f)[4:12]
+              for d, w in json.load(open(f)).get("windows", {}).items():
+                  if (date.fromisoformat(d) - timedelta(days=2)).strftime("%Y%m%d") == run:
+                      json.dump(w, open(os.path.join(out, f"wn3_{d}.json"), "w"))
+          print("files:", " ".join(sorted(os.listdir(out))))
+          EOF
+          npx --yes wrangler@3 pages project create masrainman-wn3-data --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy "$RUNNER_TEMP/wn3pub" --project-name=masrainman-wn3-data --branch=main --commit-dirty=true
+
       # ---------- everything below runs only when there is work ----------
 
       - name: Install packages

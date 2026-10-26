@@ -70,6 +70,15 @@ jobs:
           pip install -q google-auth requests
           python check_new.py
 
+      # WeatherNext 3 24-h rain over Tamil Nadu for the rain report's model scorecard (live24).
+      # Runs every time (not only when there is a new run) so missing days are filled in.
+      - name: Save WeatherNext 3 rain for the rain report
+        id: rain24
+        continue-on-error: true
+        run: |
+          pip install -q -r requirements.txt
+          python export_rain24.py site
+
       # ---------- everything below runs only when there is work ----------
 
       - name: Install packages
@@ -97,7 +106,7 @@ jobs:
           fi
 
       - name: Save maps (site-data branch, private)
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

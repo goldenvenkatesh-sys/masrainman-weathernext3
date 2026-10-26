@@ -1,9 +1,8 @@
 name: MasRainman model maps (WeatherNext 3 + ECMWF IFS + AIFS)
 
 on:
-  # Manual only (scheduled runs switched off on request). To turn them back on, add:
-  #   schedule:
-  #     - cron: "20 */3 * * *"
+  schedule:
+    - cron: "20 */3 * * *"   # every 3 hours at :20 UTC
   workflow_dispatch:
     inputs:
       model:

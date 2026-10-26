@@ -8,7 +8,7 @@ bbox_inches="tight" (all of render.py's figures) they sit in a slim strip just a
 never cover the map, the titles or the colour bars. Otherwise they go inside the top-right corner.
 
 A figure can instead reserve a header band for them: set fig.masrainman_header = (y_centre, x_right) in
-figure fractions and the logo + name are placed inside the figure, right-aligned at x_right and vertically
+figure fractions and the logo, then the name, are placed inside the figure, ending at x_right and vertically
 centred on y_centre, so they sit on the same line as the chart title (used by the MSLP maps).
 """
 import os
@@ -53,11 +53,21 @@ def add_logo(fig, outside=True, dpi=None):
     else:
         x0 = 1 - w - 0.004
         y0 = 1.004 if outside else 1 - h - 0.004
+    colour = "white" if dark else "#1d63ba"
+    if header:                                   # logo first, then the name, ending at x_right
+        name = fig.text(x_right, y_mid, "MasRainman", ha="right", va="center", fontsize=19,
+                        fontweight="bold", color=colour, gid=TAG)
+        name_w = name.get_window_extent(fig.canvas.get_renderer()).width / fig.bbox.width
+        x0 = x_right - name_w - 0.008 - w
+        ax = fig.add_axes([x0, y0, w, h], label=TAG, zorder=100)
+        ax.imshow(img, interpolation="nearest")
+        ax.set_axis_off()
+        return
     ax = fig.add_axes([x0, y0, w, h], label=TAG, zorder=100)
     ax.imshow(img, interpolation="nearest")
     ax.set_axis_off()
-    fig.text(x0 - 0.006, y0 + h * 0.5, "MasRainman", ha="right", va="center", fontsize=19 if header else 17, fontweight="bold",
-             color="white" if dark else "#1d63ba", gid=TAG)
+    fig.text(x0 - 0.006, y0 + h * 0.5, "MasRainman", ha="right", va="center", fontsize=17, fontweight="bold",
+             color=colour, gid=TAG)
 
 
 def _savefig_with_logo(self, *args, **kwargs):

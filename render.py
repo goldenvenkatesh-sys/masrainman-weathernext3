@@ -954,16 +954,17 @@ def draw_map(out_png, model, run_name, init_time, plot_hour, data, tracks_df,
                 fontsize=8.5, fontweight="bold", color="black",
                 transform=ccrs.PlateCarree(), zorder=21)
 
-    # Header band: title on the left (aligned with the map edge), MasRainman logo + name on the right
-    # (aligned with the colour bar edge), both on one line, with a thin rule underneath.
-    map_left = ax.get_position().x0
+    # Header band: title and valid-time line centred over the map; MasRainman logo + name on the
+    # right of the same line (ending at the colour bar edge); thin rule underneath.
+    pos = ax.get_position()
+    map_mid = pos.x0 + pos.width / 2
     header_y = 0.942
-    fig.text(map_left, header_y + 0.016, cfg["title"], ha="left", va="center",
+    fig.text(map_mid, header_y + 0.016, cfg["title"], ha="center", va="center",
              fontsize=19, fontweight="bold", color="#111111")
-    fig.text(map_left, header_y - 0.022,
+    fig.text(map_mid, header_y - 0.022,
              f"Valid: {valid_time.strftime('%a %d %b %Y, %H:%M UTC')}   |   T+{plot_hour} h   |   Run {run_name}",
-             ha="left", va="center", fontsize=12.5, color="#333333")
-    fig.add_artist(plt.Line2D([map_left, 0.985], [0.884, 0.884], transform=fig.transFigure,
+             ha="center", va="center", fontsize=12.5, color="#333333")
+    fig.add_artist(plt.Line2D([pos.x0, 0.985], [0.884, 0.884], transform=fig.transFigure,
                               color="#1d63ba", linewidth=1.6))
     fig.masrainman_header = (header_y, 0.985)
 

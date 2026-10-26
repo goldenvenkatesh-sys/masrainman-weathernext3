@@ -53,6 +53,7 @@ import pandas as pd
 
 import matplotlib
 matplotlib.use("Agg")
+import masrainman_logo  # noqa: F401  (adds the MasRainman logo to every saved figure)
 import matplotlib.pyplot as plt
 
 from scipy.ndimage import minimum_filter

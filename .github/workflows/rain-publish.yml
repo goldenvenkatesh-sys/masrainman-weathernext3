@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: rain-publish
@@ -28,6 +29,26 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+
+      # Model maps at 12 AM, 6 AM, 1 PM and 5:30 PM IST. This workflow is started about every hour,
+      # so it starts the model maps when a slot has passed since their last run (GitHub's own timer
+      # often skips them). Uses this repository's own token: no extra secret needed.
+      - name: Start model maps when due
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          last=$(gh run list -R "$GITHUB_REPOSITORY" -w weathernext3.yml -L 1 --json createdAt -q '.[0].createdAt')
+          slot=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone(timedelta(hours=5, minutes=30)))
+          slots = [now.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(days=d)
+                   for d in (0, 1) for h, m in ((0, 0), (6, 0), (13, 0), (17, 30))]
+          print(max(s for s in slots if s <= now).isoformat())")
+          echo "Last model-maps run: ${last:-none} · last slot: $slot"
+          if [ -z "$last" ] || [ "$(date -d "$last" +%s)" -lt "$(date -d "$slot" +%s)" ]; then
+            gh workflow run weathernext3.yml -R "$GITHUB_REPOSITORY" --ref main && echo "started model maps"
+          fi
 
       - name: Get current maps (site-data branch)
         run: |

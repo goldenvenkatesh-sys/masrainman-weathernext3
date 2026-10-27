@@ -1,0 +1,75 @@
+name: 3D cyclone view (GPM radar)
+
+# Once a day at about 9:10 am IST: the GPM satellite radar passes of the last 24 hours over the
+# Bay of Bengal, the Arabian Sea and South India; the (up to 3) with the most heavy rain are drawn
+# in 3D (cyclone3d.py). Pictures are kept on the `cyclone3d` branch (last 30 passes) and shown on
+# the site's "3D cyclone view" page (web/cyclone3d.html), which the site workflows publish.
+# Needs a free NASA Earthdata login as two secrets: EARTHDATA_USER and EARTHDATA_PASS.
+on:
+  schedule:
+    - cron: "40 3 * * *"        # 09:10 IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: cyclone3d
+  cancel-in-progress: false
+
+jobs:
+  cyclone3d:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        timeout-minutes: 10
+        run: pip install numpy "shapely>=2.0" pillow requests imageio-ffmpeg h5py matplotlib cartopy
+
+      - name: Check NASA login
+        env:
+          EARTHDATA_USER: ${{ secrets.EARTHDATA_USER }}
+          EARTHDATA_PASS: ${{ secrets.EARTHDATA_PASS }}
+        run: |
+          if [ -z "$EARTHDATA_USER" ] || [ -z "$EARTHDATA_PASS" ]; then
+            echo "::error::Add the EARTHDATA_USER and EARTHDATA_PASS secrets to this repo (free account at urs.earthdata.nasa.gov)."
+            exit 1
+          fi
+
+      - name: Get earlier pictures (cyclone3d branch)
+        run: |
+          mkdir -p c3d
+          if git fetch -q --depth 1 origin cyclone3d 2>/dev/null; then
+            git --work-tree=c3d checkout -q FETCH_HEAD -- . && git reset -q
+          fi
+
+      - name: Make 3D pictures
+        env:
+          EARTHDATA_USER: ${{ secrets.EARTHDATA_USER }}
+          EARTHDATA_PASS: ${{ secrets.EARTHDATA_PASS }}
+        run: python cyclone3d.py --out c3d
+
+      - name: Save pictures (cyclone3d branch)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./c3d
+          publish_branch: cyclone3d
+          force_orphan: true   # keeps repo small: no video history
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "3D cyclone view update"
+
+      - name: Republish the site
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run rain-publish.yml -R "$GITHUB_REPOSITORY" --ref main

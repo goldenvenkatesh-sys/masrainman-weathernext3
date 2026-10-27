@@ -145,6 +145,10 @@ jobs:
         if: steps.render.outcome == 'success'
         run: bash get_rain_reports.sh site
 
+      - name: Add 3D cyclone view
+        if: steps.render.outcome == 'success'
+        run: bash get_cyclone3d.sh site
+
       - name: Publish to Cloudflare Pages (login-protected)
         if: steps.render.outcome == 'success'
         env:

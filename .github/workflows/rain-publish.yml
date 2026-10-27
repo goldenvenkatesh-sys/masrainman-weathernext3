@@ -72,6 +72,9 @@ jobs:
             cp web/index.html web/rain.html site/
           fi
 
+      - name: Add 3D cyclone view
+        run: bash get_cyclone3d.sh site
+
       - name: Publish to Cloudflare Pages (login-protected)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

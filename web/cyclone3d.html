@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Cyclone View · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97; --live:#ff4d5e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .pill.region{padding:8px 16px;font-size:14px;font-weight:600}
+  .pill.region.on{background:var(--ok);border-color:var(--ok);color:#03150d}
+  .pill[disabled]{opacity:.45;cursor:not-allowed}
+  .pill small{font-weight:400;opacity:.85;margin-left:4px;font-size:11px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .btn.gif{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .btn small{font-weight:400;opacity:.75;font-size:11px}
+  h2{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 0 8px;font-weight:600}
+  .latest{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;color:var(--text);padding:0;font:inherit}
+  .tile:hover,.tile.on{border-color:var(--accent2)}
+  .tile img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#fff}
+  .tile div{padding:7px 9px}
+  .tile b{display:block;font-size:12.5px}
+  .tile small{color:var(--muted);font-size:11px}
+  .tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--live);color:#fff;margin-left:4px;vertical-align:1px}
+  .list{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:thin}
+  .chip{flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text);font:inherit;font-size:12.5px}
+  .chip.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+  .viewer{background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .viewer video,.viewer img{display:block;width:100%;height:auto;max-height:78vh;object-fit:contain;margin:0 auto;background:#000}
+  .side{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .side h3{margin:0 0 2px;font-size:15px}
+  .side .when{color:var(--muted);font-size:12px;margin-bottom:10px}
+  .dl{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  textarea{width:100%;min-height:150px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:12.5px/1.45 inherit;resize:vertical}
+  .row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .ok{color:var(--ok);font-size:12px}
+  .empty{color:var(--muted);padding:30px 0;text-align:center}
+  footer{color:var(--muted);font-size:12px;margin-top:20px}
+  @media (max-width:820px){.stage{grid-template-columns:1fr}}
+  @media (max-width:640px){header h1{font-size:15px}.latest{grid-template-columns:repeat(2,1fr)}}
+  .tile img{aspect-ratio:4/5;background:#0b0e14}
+</style>
+</head>
+<body>
+<header>
+  <h1>MasRainman · <span>3D Cyclone View</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Model maps</a>
+  <a class="btn" href="rain.html">🌧 Rain reports</a>
+</header>
+
+<main>
+  <h2>Satellite radar passes</h2>
+  <div class="latest" id="latest"></div>
+
+  <div class="stage" id="stage" style="margin-top:14px">
+    <div class="viewer" id="viewer"></div>
+    <div class="side">
+      <h3 id="title"></h3>
+      <div class="when" id="when"></div>
+      <div class="dl" id="dl"></div>
+      <span class="label">Caption</span>
+      <textarea id="cap" readonly></textarea>
+      <div class="row">
+        <button class="btn" id="copy">Copy caption</button>
+        <span class="ok" id="msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    The GPM satellite's radar (NASA/JAXA) measures rain at every height, from the sea up to about 18 km, in a
+    245 km strip under the satellite. Once a day the passes of the last 24 hours over the Bay of Bengal, the
+    Arabian Sea and South India are checked, and the ones with the most heavy rain are drawn in 3D. The
+    satellite passes a place only once or twice a day, so some days have no picture. Kept: the last 30 passes.
+  </footer>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const BASE = 'cyclone3d/';
+  const url = p => BASE + p;
+  let all = [];
+  const fmtIST = s => { if(!s) return ''; const d = new Date(s);
+    return d.toLocaleString('en-IN', {timeZone:'Asia/Kolkata', day:'numeric', month:'short', hour:'numeric', minute:'2-digit'}) + ' IST'; };
+
+  function show(r){
+    document.querySelectorAll('.tile').forEach(t => t.classList.toggle('on', t.dataset.id === r.id));
+    const f = r.files;
+    $('viewer').innerHTML = '<video controls autoplay muted loop playsinline preload="metadata" poster="' + url(f.png) + '" src="' + url(f.mp4) + '"></video>';
+    $('title').textContent = r.where;
+    $('when').textContent = 'GPM pass at ' + r.label + ' · heaviest ' + r.max_rate + ' mm/h · clouds to ' + Math.round(r.top_km) + ' km';
+    const dl = $('dl'); dl.innerHTML = '';
+    [['mp4','⬇ MP4 video','primary'],['png','⬇ PNG picture','']].forEach(([e,t,c])=>{
+      const a = document.createElement('a');
+      a.className = 'btn' + (c ? ' ' + c : ''); a.href = url(f[e]); a.setAttribute('download', f[e]); a.textContent = t;
+      dl.appendChild(a);
+    });
+    $('cap').value = r.caption || '';
+    $('msg').textContent = '';
+  }
+
+  $('copy').onclick = () => {
+    const t = $('cap').value;
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject())
+      .catch(() => { $('cap').select(); document.execCommand('copy'); })
+      .then(() => $('msg').textContent = 'Copied ✓');
+  };
+
+  fetch(BASE + 'index.json?t=' + Date.now()).then(r => { if(!r.ok) throw r.status; return r.json(); }).then(j=>{
+    all = j.passes || [];
+    $('upd').textContent = 'Updated ' + fmtIST(j.updated);
+    if(!all.length) throw 'empty';
+    const box = $('latest');
+    all.forEach(r=>{
+      const t = document.createElement('button');
+      t.className = 'tile'; t.dataset.id = r.id;
+      t.innerHTML = '<img loading="lazy" alt="" src="' + url(r.files.png) + '"><div><b>' + r.where + '</b><small>' + r.label + '</small></div>';
+      t.onclick = () => { show(r); $('stage').scrollIntoView({behavior:'smooth', block:'start'}); };
+      box.appendChild(t);
+    });
+    show(all[0]);
+  }).catch(()=>{
+    $('stage').innerHTML = '<div class="empty">No 3D radar pictures yet. They are made once a day (about 9:10 am IST) when the satellite passes over rain.</div>';
+  });
+})();
+</script>
+</body>
+</html>

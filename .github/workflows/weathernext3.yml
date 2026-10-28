@@ -129,8 +129,17 @@ jobs:
             python render.py
           fi
 
+      # Ensemble landfall maps (ECMWF ENS cyclone tracks). Cheap, so it runs every time and only
+      # draws a run that is not on the site yet.
+      - name: Landfall maps
+        id: landfall
+        continue-on-error: true
+        run: |
+          pip install -q -r requirements.txt "eccodes>=2.39"
+          python landfall.py
+
       - name: Save maps (site-data branch, private)
-        if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true'
+        if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true' || steps.landfall.outputs.new == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -142,11 +151,11 @@ jobs:
           commit_message: "MasRainman model maps update"
 
       - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true'
         run: bash get_rain_reports.sh site
 
       - name: Publish to Cloudflare Pages (login-protected)
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

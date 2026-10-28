@@ -1268,7 +1268,7 @@ def write_models_index():
                    "models": models}, f, indent=1)
 
     # Copy the viewer page
-    for fn in ("index.html", "rain.html"):
+    for fn in ("index.html", "rain.html", "landfall.html"):
         src = os.path.join(HERE, "web", fn)
         if os.path.exists(src):
             shutil.copy(src, os.path.join(SITE_DIR, fn))

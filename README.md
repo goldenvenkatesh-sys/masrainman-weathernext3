@@ -19,6 +19,14 @@ and persistent tracks, and publishes a viewer page with model and run selectors,
 frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
 The latest 4 runs of each model stay selectable. India's border is drawn as per the Government of India.
 
+**Landfall maps (ECMWF ENS):** `landfall.py` reads ECMWF's ensemble cyclone tracks (open data,
+including the genesis systems 70B, 71B … tracked before they are named) and, for each Bay of Bengal /
+Arabian Sea system, draws every member's first landfall coloured by intensity (TD / TS / Cat 1–5),
+the numbered top-5 landfall areas with the share of members, and the ensemble mean track.
+They are on `landfall.html`. Landfall means reaching the mainland or Sri Lanka; small islands
+(Andaman & Nicobar, Lakshadweep) are not counted. The page already has buttons for DeepMind FNV3,
+GFS, ICON, GEM and UKMET; they stay greyed out until those models' tracks are added.
+
 ## Files
 
 | File | What it does |
@@ -26,6 +34,8 @@ The latest 4 runs of each model stay selectable. India's border is drawn as per 
 | `check_new.py` | Quick check (no heavy installs): is there a new complete run the site doesn't have yet? |
 | `render.py` | Loads new runs, runs V3 detection + tracking, draws maps, GIFs, CSVs and manifests |
 | `web/index.html` | The viewer page (copied into the site on every run) |
+| `landfall.py` | Ensemble landfall maps from ECMWF ENS cyclone tracks (`site/landfall/`, `manifest_landfall.json`) |
+| `web/landfall.html` | The landfall maps page |
 | `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
 | `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |
 

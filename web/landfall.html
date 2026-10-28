@@ -60,7 +60,7 @@
 <script>
 // All six models get a button; the ones without data yet stay disabled.
 const ALL = [["deepmind","DeepMind FNV3"],["ecmwf","ECMWF ENS"],["gfs","GFS (GEFS)"],
-             ["icon","ICON-EPS"],["gem","GEM (GEPS)"],["ukmet","UKMET (MOGREPS-G)"]];
+             ["icon","ICON-EPS"],["gem","GEM (GEPS)"],["ukmet","UKMET"]];
 let man = {models:{}}, model = null, run = null, sys = null;
 const $ = id => document.getElementById(id);
 const fmtRun = r => { const [d,h] = r.split("_"); return `${d.slice(6,8)}/${d.slice(4,6)} ${h}Z`; };
@@ -83,7 +83,7 @@ function draw(){
   const R = runs.find(r => r.run===run);
   const systems = R ? R.systems : [];
   if (!sys && systems.length) sys = [...systems].sort((a,b)=>b.landfalls-a.landfalls)[0].storm;
-  pills($("systems"), systems.map(s => [s.storm, `${s.storm} · ${s.landfalls}/${s.members}`]), sys, k => {sys=k; draw();});
+  pills($("systems"), systems.map(s => [s.storm, s.members > 1 ? `${s.storm} · ${s.landfalls}/${s.members}` : s.storm]), sys, k => {sys=k; draw();});
   const S = systems.find(s => s.storm===sys);
   if (!S){ $("out").innerHTML = `<div class="empty">${model ? "No North Indian Ocean system makes landfall in this run." : "No landfall maps yet."}</div>`; return; }
   const rows = S.areas.map((a,i) => `<tr><td><b>${i+1}</b></td><td>${ll(a.lat,a.lon)}</td><td>${a.n}</td><td>${a.pct.toFixed(0)}%</td></tr>`).join("");
@@ -91,7 +91,8 @@ function draw(){
     <div class="viewer"><a href="${S.png}" target="_blank"><img src="${S.png}" alt="Landfall map ${S.storm}"></a></div>
     <div class="side"><h3>${man.models[model].label} · ${S.storm}</h3>
       <div class="when">Init ${fmtRun(run)} · starts near ${ll(S.start.lat,S.start.lon)}${S.start.step?` (T+${S.start.step})`:""}</div>
-      <div>${S.landfalls} of ${S.members} members make landfall (${S.tracked} track it).</div>
+      <div>${S.members > 1 ? `${S.landfalls} of ${S.members} members make landfall (${S.tracked} track it).` : (S.landfalls ? "The model track makes landfall." : "")}</div>
+      ${man.models[model].note ? `<p class="when">${man.models[model].note}</p>` : ""}
       <table><tr><th>#</th><th>Area</th><th>Members</th><th>Share</th></tr>${rows}</table>
       <div class="bar"><a class="btn" href="${S.png}" download>⬇ PNG</a><a class="btn" href="${S.csv}" download>⬇ Landfalls CSV</a></div>
     </div></div>`;

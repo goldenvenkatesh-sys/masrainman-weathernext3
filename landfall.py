@@ -3,9 +3,11 @@
 # ============================================================
 #
 # For each ensemble run it:
-#   1. Downloads the model's ensemble cyclone tracks
+#   1. Gets the model's cyclone tracks
 #        ECMWF ENS : tropical-cyclone track BUFR (…-enfo-tf.bufr) from ECMWF open data,
 #                    which also tracks genesis systems (ids 70B, 71B …) before they are named
+#        GFS (GEFS), UKMET : tracked here from the gridded fields (gridtrack.py),
+#                    starting from ECMWF's position of each system
 #   2. Keeps the North Indian Ocean systems (Bay of Bengal "B", Arabian Sea "A")
 #   3. Finds each member's first landfall (sea -> land on Natural Earth 10 m land)
 #      and its intensity there (TD / TS / Cat 1-5 from the member's 10-m wind)
@@ -19,8 +21,8 @@
 #   site/data/manifest_landfall.json
 #
 # Usage:
-#   python landfall.py                         # latest ECMWF ENS run
-#   python landfall.py --run 20261028_06       # one run
+#   python landfall.py                         # newest complete run of each model, if new
+#   python landfall.py --models gfs --run 20261028_06   # one model, one run
 #   python landfall.py --bufr file.bufr --run 20261028_06   # a local track file
 #
 # ============================================================
@@ -28,6 +30,7 @@
 import os
 import sys
 import json
+import time
 import shutil
 import argparse
 import warnings
@@ -42,7 +45,6 @@ matplotlib.use("Agg")
 import masrainman_logo  # noqa: F401  (adds the MasRainman logo to every saved figure)
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
-import matplotlib.patheffects as pe
 
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -77,6 +79,12 @@ ECMWF_URLS = [
 
 MODELS = {
     "ecmwf": {"label": "ECMWF ENS", "members": 51},
+    "gfs": {"label": "GFS ensemble (GEFS)", "members": 31,
+            "note": "Tracks found by MasRainman in the GEFS 0.5° MSLP and 10-m wind (31 members), "
+                    "starting from ECMWF's position of each system."},
+    "ukmet": {"label": "UKMET global (deterministic)", "members": 1,
+              "note": "One track found by MasRainman in the Met Office global 10 km MSLP and 10-m wind, "
+                      "starting from ECMWF's position. The MOGREPS-G ensemble is not openly published."},
 }
 
 # Saffir-Simpson classes from the member's max 10-m wind (kt)
@@ -109,17 +117,28 @@ def wind_class(kt):
 # TRACK SOURCES
 # ============================================================
 
-def ecmwf_tf_bytes(run):
-    """The ENS track BUFR for run 'YYYYMMDD_HH' (00/12Z run to 360 h, 06/18Z to 144 h)."""
+def ecmwf_tf_path(run):
+    """The ENS track BUFR for run 'YYYYMMDD_HH' (00/12Z run to 360 h, 06/18Z to 144 h), downloaded once
+    into RUNNER_TEMP. None if it is not online."""
+    path = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), f"ecmwf_tf_{run}.bufr")
+    if os.path.exists(path):
+        return path
     d, h = run.split("_")
     s = 360 if h in ("00", "12") else 144
-    for url in ECMWF_URLS:
-        try:
-            r = requests.get(url.format(d=d, h=h, s=s), timeout=120)
-            if r.status_code == 200 and r.content[:4] == b"BUFR":
-                return r.content
-        except requests.RequestException:
-            pass
+    for attempt in range(4):
+        missing = 0
+        for url in ECMWF_URLS:
+            try:
+                r = requests.get(url.format(d=d, h=h, s=s), timeout=120)
+                if r.status_code == 200 and r.content[:4] == b"BUFR":
+                    open(path, "wb").write(r.content)
+                    return path
+                missing += r.status_code == 404
+            except requests.RequestException:
+                pass
+        if missing == len(ECMWF_URLS):
+            return None
+        time.sleep(10 * (attempt + 1))      # busy mirror (S3 "SlowDown"): wait and retry
     return None
 
 
@@ -163,25 +182,6 @@ def read_ecmwf_tf(path):
             finally:
                 eccodes.codes_release(h)
     return pd.DataFrame(rows, columns=["storm", "member", "step", "lat", "lon", "mslp", "wind"])
-
-
-def latest_ecmwf_run(now=None):
-    """Newest 00/06/12/18Z run whose track file is online (tracks follow the run by ~7-8 h)."""
-    now = now or datetime.now(timezone.utc)
-    t = now.replace(minute=0, second=0, microsecond=0)
-    t -= timedelta(hours=t.hour % 6)
-    for _ in range(8):
-        run = t.strftime("%Y%m%d_%H")
-        d, h = run.split("_")
-        s = 360 if h in ("00", "12") else 144
-        for url in ECMWF_URLS:
-            try:
-                if requests.head(url.format(d=d, h=h, s=s), timeout=30).status_code == 200:
-                    return run
-            except requests.RequestException:
-                pass
-        t -= timedelta(hours=6)
-    return None
 
 
 # ============================================================
@@ -246,7 +246,7 @@ def top_areas(lf, n_members):
 def mean_track(tr, n_members):
     """Mean position per step over the members still tracked (at least half of those that track it)."""
     g = tr.groupby("step").agg(lat=("lat", "mean"), lon=("lon", "mean"), n=("member", "nunique"))
-    return g[g.n >= max(2, tr.member.nunique() / 2)].reset_index()
+    return g[g.n >= max(min(2, n_members), tr.member.nunique() / 2)].reset_index()
 
 
 # ============================================================
@@ -327,7 +327,7 @@ def draw(model, run, storm, tr, lf, areas, mt, n_members, out_png):
     # legend box
     used = sorted(set(lf.cls))
     handles = [Line2D([], [], ls="", marker="o", color=CLASSES[k][2], label=CLASSES[k][0]) for k in used]
-    handles.append(Line2D([], [], color="white", lw=2, label="ensemble mean"))
+    handles.append(Line2D([], [], color="white", lw=2, label="ensemble mean" if n_members > 1 else "model track"))
     leg = ax.legend(handles=handles, loc="lower left", fontsize=8, frameon=True, ncol=1,
                     facecolor="#0f1626", edgecolor="#2e4a6a", labelcolor=TEXT,
                     title=f"Not an official forecast\n{label} · {len(lf)}/{n_members} members land\n"
@@ -350,20 +350,32 @@ def draw(model, run, storm, tr, lf, areas, mt, n_members, out_png):
 # RUN
 # ============================================================
 
+def drop_duplicates(tracks):
+    """Genesis ids (70B, 71B …) that start on a named storm are the same system: keep the named one."""
+    first = tracks[tracks.step == tracks.groupby("storm").step.transform("min")]
+    starts = first.groupby("storm")[["lat", "lon"]].median()
+    named = starts[~starts.index.str.startswith("7")]
+    for storm, (la, lo) in starts.iterrows():
+        if storm.startswith("7") and len(named) and \
+                haversine_km(la, lo, named.lat.values, named.lon.values).min() < 250:
+            print(f"  {storm}: same system as a named storm, skipped")
+            tracks = tracks[tracks.storm != storm]
+    return tracks
+
+
+def seeds_from_ecmwf(tracks, min_share=0.25):
+    """Starting positions (median of the ECMWF members at T+0) of the systems most members have at T+0."""
+    t0 = tracks[tracks.step == 0]
+    n = max(MODELS["ecmwf"]["members"], tracks.member.nunique())
+    return {s: (float(g.lat.median()), float(g.lon.median()))
+            for s, g in t0.groupby("storm") if g.member.nunique() >= min_share * n}
+
+
 def process(model, run, tracks):
     out_dir = os.path.join(SITE_DIR, "landfall", model, run)
     os.makedirs(out_dir, exist_ok=True)
     systems = []
     n_members = max(MODELS[model]["members"], int(tracks.member.nunique()))
-    # genesis ids (70B, 71B …) that start on a named storm are the same system: keep the named one
-    first = tracks[tracks.step == tracks.groupby("storm").step.transform("min")]
-    starts = first.groupby("storm")[["lat", "lon"]].mean()
-    named = starts[~starts.index.str.startswith("7")]
-    for storm, (la, lo) in starts.iterrows():
-        if storm.startswith("7") and len(named) and \
-                haversine_km(la, lo, named.lat.values, named.lon.values).min() < 250:
-            print(f"  {model} {run} {storm}: same system as a named storm, skipped")
-            tracks = tracks[tracks.storm != storm]
     for storm, tr in tracks.groupby("storm"):
         tr = tr.sort_values(["member", "step"])
         rows = []
@@ -374,7 +386,7 @@ def process(model, run, tracks):
                 kt = w * MS_TO_KT if np.isfinite(w) else 0.0
                 rows.append((m, la, lo, step, kt, wind_class(kt)))
         lf = pd.DataFrame(rows, columns=["member", "lat", "lon", "step", "wind_kt", "cls"])
-        if len(lf) < MIN_LANDFALLS:
+        if len(lf) < min(MIN_LANDFALLS, n_members):
             print(f"  {model} {run} {storm}: {len(lf)} landfalls, skipped")
             continue
         areas = top_areas(lf, n_members)
@@ -401,7 +413,9 @@ def update_manifest(model, run, systems):
     path = os.path.join(SITE_DIR, "data", "manifest_landfall.json")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     man = json.load(open(path)) if os.path.exists(path) else {"models": {}}
-    runs = man["models"].setdefault(model, {"label": MODELS[model]["label"], "runs": []})["runs"]
+    entry = man["models"].setdefault(model, {"runs": []})
+    entry.update(label=MODELS[model]["label"], note=MODELS[model].get("note", ""))
+    runs = entry["runs"]
     runs[:] = [r for r in runs if r["run"] != run]
     runs.append({"run": run, "systems": systems})
     runs.sort(key=lambda r: r["run"], reverse=True)
@@ -414,36 +428,77 @@ def update_manifest(model, run, systems):
     json.dump(man, open(path, "w"), indent=1)
 
 
+def ecmwf_tracks(run, bufr=None):
+    """ECMWF ENS tracks for a run (North Indian Ocean, duplicates dropped), or None if not online."""
+    path = bufr or ecmwf_tf_path(run)
+    return drop_duplicates(read_ecmwf_tf(path)) if path else None
+
+
+def candidate_runs(model, now=None):
+    """Recent runs, newest first: every 6 h (UKMET: 00Z and 12Z, the runs that reach T+168)."""
+    t = (now or datetime.now(timezone.utc)).replace(minute=0, second=0, microsecond=0)
+    t -= timedelta(hours=t.hour % 6)
+    out = []
+    for _ in range(8):
+        if model != "ukmet" or t.hour in (0, 12):
+            out.append(t.strftime("%Y%m%d_%H"))
+        t -= timedelta(hours=6)
+    return out
+
+
+def done_runs(model):
+    man = os.path.join(SITE_DIR, "data", "manifest_landfall.json")
+    if not os.path.exists(man):
+        return set()
+    return {r["run"] for r in json.load(open(man))["models"].get(model, {}).get("runs", [])}
+
+
+def do_model(model, run, bufr=None):
+    """Draw one run of one model. Returns True when the site changed."""
+    import gridtrack
+    ec = ecmwf_tracks(run, bufr)
+    if ec is None:
+        print(f"{model} {run}: no ECMWF ENS tracks for this run")
+        return False
+    if model == "ecmwf":
+        tracks = ec
+    else:
+        seeds = seeds_from_ecmwf(ec)
+        print(f"{model} {run}: tracking {', '.join(seeds) or 'nothing'} from ECMWF starting positions")
+        tracks = gridtrack.tracks(model, run, seeds, lambda la, lo: land().contains(Point(lo, la)))
+    print(f"{MODELS[model]['label']} {run}: {tracks.storm.nunique()} North Indian Ocean systems")
+    update_manifest(model, run, process(model, run, tracks))
+    return True
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--run", help="YYYYMMDD_HH (default: latest online)")
-    ap.add_argument("--bufr", help="use a local ECMWF track BUFR instead of downloading")
+    ap.add_argument("--models", default=",".join(MODELS), help="e.g. ecmwf,gfs,ukmet")
+    ap.add_argument("--run", help="YYYYMMDD_HH (default: newest complete run not on the site yet)")
+    ap.add_argument("--bufr", help="use a local ECMWF track BUFR for --run instead of downloading")
     a = ap.parse_args()
 
-    run = a.run or latest_ecmwf_run()
-    if not run:
-        print("No ECMWF ENS track file found.")
-        return 0
-    man = os.path.join(SITE_DIR, "data", "manifest_landfall.json")
-    if not a.run and os.path.exists(man) and \
-            any(r["run"] == run for r in json.load(open(man))["models"].get("ecmwf", {}).get("runs", [])):
-        print(f"ECMWF ENS {run}: landfall maps already on the site.")
-        return 0
-    path = a.bufr
-    if not path:
-        data = ecmwf_tf_bytes(run)
-        if data is None:
-            print(f"ECMWF ENS tracks for {run} not online.")
-            return 0
-        path = os.path.join(os.environ.get("RUNNER_TEMP", "/tmp"), f"ecmwf_tf_{run}.bufr")
-        open(path, "wb").write(data)
-    tracks = read_ecmwf_tf(path)
-    print(f"ECMWF ENS {run}: {tracks.storm.nunique()} North Indian Ocean systems")
-    update_manifest("ecmwf", run, process("ecmwf", run, tracks))
-    shutil.copy(os.path.join(HERE, "web", "landfall.html"), SITE_DIR)
-    if os.environ.get("GITHUB_OUTPUT"):
-        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
-            f.write("new=true\n")
+    import gridtrack
+    complete = {"ecmwf": lambda r: ecmwf_tf_path(r) is not None,
+                "gfs": gridtrack.gefs_complete, "ukmet": gridtrack.ukmo_complete}
+    changed = False
+    for model in a.models.split(","):
+        try:
+            if a.run:
+                run = a.run
+            else:
+                run = next((r for r in candidate_runs(model) if complete[model](r)), None)
+                if run is None or run in done_runs(model):
+                    print(f"{model}: nothing new ({run or 'no complete run'})")
+                    continue
+            changed |= do_model(model, run, a.bufr)
+        except Exception as e:      # one model failing must not stop the others
+            print(f"{model}: failed: {e!r}")
+    if changed:
+        shutil.copy(os.path.join(HERE, "web", "landfall.html"), SITE_DIR)
+        if os.environ.get("GITHUB_OUTPUT"):
+            with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+                f.write("new=true\n")
     return 0
 
 

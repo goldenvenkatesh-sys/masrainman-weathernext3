@@ -129,13 +129,14 @@ jobs:
             python render.py
           fi
 
-      # Ensemble landfall maps (ECMWF ENS cyclone tracks). Cheap, so it runs every time and only
-      # draws a run that is not on the site yet.
+      # Ensemble landfall maps: ECMWF ENS tracks, plus GEFS and UKMET tracked from their fields.
+      # Runs every time and only draws runs that are not on the site yet (a few minutes when it does).
       - name: Landfall maps
         id: landfall
         continue-on-error: true
+        timeout-minutes: 40
         run: |
-          pip install -q -r requirements.txt "eccodes>=2.39"
+          pip install -q -r requirements.txt
           python landfall.py
 
       - name: Save maps (site-data branch, private)

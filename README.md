@@ -19,6 +19,23 @@ and persistent tracks, and publishes a viewer page with model and run selectors,
 frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
 The latest 4 runs of each model stay selectable. India's border is drawn as per the Government of India.
 
+**Landfall maps:** `landfall.py` draws, for each Bay of Bengal / Arabian Sea system, every member's
+first landfall coloured by intensity (TD / TS / Cat 1–5), the numbered top-5 landfall areas with the
+share of members, and the ensemble mean track. They are on `landfall.html`.
+
+| Model | Tracks from | Runs |
+|---|---|---|
+| ECMWF ENS (51) | ECMWF's own ensemble cyclone tracks (open data BUFR), genesis systems 70B, 71B … included | 00/06/12/18 UTC |
+| GFS ensemble GEFS (31) | tracked here (`gridtrack.py`) in GEFS 0.5° MSLP + 10-m wind, NOAA open data on AWS | 00/06/12/18 UTC |
+| UKMET global (1 track) | tracked here in Met Office global 10 km MSLP + 10-m wind, Met Office open data on AWS | 00/12 UTC (T+168) |
+
+The GEFS and UKMET tracks start from ECMWF's position of each system in the same run, so each system has
+the same id (e.g. 71B) on every model. Landfall means reaching the mainland or Sri Lanka; small islands
+(Andaman & Nicobar, Lakshadweep) are not counted.
+DeepMind FNV3, ICON-EPS and GEM GEPS have buttons on the page but stay greyed out: their member tracks/fields
+are on deepmind.google.com, opendata.dwd.de and dd.weather.gc.ca only, which this repo's builder cannot use yet.
+The UKMET ensemble (MOGREPS-G) is not openly published, hence one deterministic track.
+
 ## Files
 
 | File | What it does |
@@ -26,6 +43,9 @@ The latest 4 runs of each model stay selectable. India's border is drawn as per 
 | `check_new.py` | Quick check (no heavy installs): is there a new complete run the site doesn't have yet? |
 | `render.py` | Loads new runs, runs V3 detection + tracking, draws maps, GIFs, CSVs and manifests |
 | `web/index.html` | The viewer page (copied into the site on every run) |
+| `landfall.py` | Ensemble landfall maps (`site/landfall/<model>/<run>/`, `site/data/manifest_landfall.json`) |
+| `gridtrack.py` | Cyclone tracker for models without track files (GEFS, UKMET) |
+| `web/landfall.html` | The landfall maps page |
 | `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
 | `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |
 

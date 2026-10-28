@@ -69,7 +69,7 @@ jobs:
             mv site/rain "$RUNNER_TEMP/rain" && rm -rf site && mkdir site
             git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
             mv "$RUNNER_TEMP/rain" site/rain
-            cp web/index.html web/rain.html site/
+            cp web/index.html web/rain.html web/landfall.html site/
           fi
 
       - name: Publish to Cloudflare Pages (login-protected)

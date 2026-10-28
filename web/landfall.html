@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Landfall Maps · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1100px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .pill[disabled]{opacity:.45;cursor:not-allowed}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start}
+  .viewer{background:#121826;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .viewer img{display:block;width:100%;height:auto}
+  .side{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .side h3{margin:0 0 2px;font-size:15px}
+  .side .when{color:var(--muted);font-size:12px;margin-bottom:10px}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 12px}
+  td,th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  .empty{color:var(--muted);padding:30px 0;text-align:center}
+  footer{color:var(--muted);font-size:12px;margin-top:20px}
+  @media (max-width:820px){.stage{grid-template-columns:1fr}}
+  @media (max-width:640px){header h1{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>Ensemble landfall</span> · North Indian Ocean</h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Model maps</a>
+  <a class="btn" href="rain.html">🌧 Rain reports</a>
+</header>
+<main>
+  <div class="bar"><span class="label">Model</span><div class="seg" id="models"></div></div>
+  <div class="bar"><span class="label">Run</span><div class="seg" id="runs"></div></div>
+  <div class="bar"><span class="label">System</span><div class="seg" id="systems"></div></div>
+  <div id="out"></div>
+  <footer>Each dot is one ensemble member's first landfall on the mainland or Sri Lanka, coloured by its
+    10-m wind just before landfall (TD &lt;34 kt, TS 34–63 kt, Cat 1 64–82, Cat 2 83–95, Cat 3 96–112,
+    Cat 4 113–136, Cat 5 137+). Numbered circles are the busiest landfall areas, with the share of all members.
+    These maps are not official forecasts. Please follow IMD for official forecasts and warnings.</footer>
+</main>
+<script>
+// All six models get a button; the ones without data yet stay disabled.
+const ALL = [["deepmind","DeepMind FNV3"],["ecmwf","ECMWF ENS"],["gfs","GFS (GEFS)"],
+             ["icon","ICON-EPS"],["gem","GEM (GEPS)"],["ukmet","UKMET"]];
+let man = {models:{}}, model = null, run = null, sys = null;
+const $ = id => document.getElementById(id);
+const fmtRun = r => { const [d,h] = r.split("_"); return `${d.slice(6,8)}/${d.slice(4,6)} ${h}Z`; };
+const ll = (a,o) => `${Math.abs(a).toFixed(1)}°${a>=0?"N":"S"} ${Math.abs(o).toFixed(1)}°${o>=0?"E":"W"}`;
+
+function pills(el, items, cur, pick){
+  el.innerHTML = "";
+  for (const [k, label, off] of items){
+    const b = document.createElement("button");
+    b.className = "pill" + (k===cur ? " on" : ""); b.textContent = label; b.disabled = !!off;
+    if (off) b.title = "No data yet"; else b.onclick = () => pick(k);
+    el.appendChild(b);
+  }
+}
+function draw(){
+  pills($("models"), ALL.map(([k,l]) => [k, l, !(man.models[k]||{runs:[]}).runs.length]), model, k => {model=k; run=null; sys=null; draw();});
+  const runs = model ? man.models[model].runs : [];
+  if (!run && runs.length) run = runs[0].run;
+  pills($("runs"), runs.map(r => [r.run, fmtRun(r.run)]), run, k => {run=k; sys=null; draw();});
+  const R = runs.find(r => r.run===run);
+  const systems = R ? R.systems : [];
+  if (!sys && systems.length) sys = [...systems].sort((a,b)=>b.landfalls-a.landfalls)[0].storm;
+  pills($("systems"), systems.map(s => [s.storm, s.members > 1 ? `${s.storm} · ${s.landfalls}/${s.members}` : s.storm]), sys, k => {sys=k; draw();});
+  const S = systems.find(s => s.storm===sys);
+  if (!S){ $("out").innerHTML = `<div class="empty">${model ? "No North Indian Ocean system makes landfall in this run." : "No landfall maps yet."}</div>`; return; }
+  const rows = S.areas.map((a,i) => `<tr><td><b>${i+1}</b></td><td>${ll(a.lat,a.lon)}</td><td>${a.n}</td><td>${a.pct.toFixed(0)}%</td></tr>`).join("");
+  $("out").innerHTML = `<div class="stage">
+    <div class="viewer"><a href="${S.png}" target="_blank"><img src="${S.png}" alt="Landfall map ${S.storm}"></a></div>
+    <div class="side"><h3>${man.models[model].label} · ${S.storm}</h3>
+      <div class="when">Init ${fmtRun(run)} · starts near ${ll(S.start.lat,S.start.lon)}${S.start.step?` (T+${S.start.step})`:""}</div>
+      <div>${S.members > 1 ? `${S.landfalls} of ${S.members} members make landfall (${S.tracked} track it).` : (S.landfalls ? "The model track makes landfall." : "")}</div>
+      ${man.models[model].note ? `<p class="when">${man.models[model].note}</p>` : ""}
+      <table><tr><th>#</th><th>Area</th><th>Members</th><th>Share</th></tr>${rows}</table>
+      <div class="bar"><a class="btn" href="${S.png}" download>⬇ PNG</a><a class="btn" href="${S.csv}" download>⬇ Landfalls CSV</a></div>
+    </div></div>`;
+}
+fetch("data/manifest_landfall.json", {cache:"no-store"}).then(r => r.ok ? r.json() : {models:{}}).catch(() => ({models:{}}))
+  .then(m => { man = m; $("upd").textContent = m.updated ? `Updated ${m.updated}` : "";
+    model = ALL.map(a=>a[0]).find(k => (m.models[k]||{runs:[]}).runs.length) || null; draw(); });
+</script>
+</body>
+</html>

@@ -1849,7 +1849,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", help="YYYYMMDD_HH (00 or 12)")
     ap.add_argument("--demo", action="store_true", help="synthetic data, no downloads")
-    ap.add_argument("--backfill-days", type=int, default=int(os.environ.get("OUTLOOK_BACKFILL_DAYS", "0")))
+    ap.add_argument("--backfill-days", type=int, default=int(os.environ.get("OUTLOOK_BACKFILL_DAYS") or 0))
     ap.add_argument("--force", action="store_true", help="redo a run that is already on the site")
     a = ap.parse_args()
     if not a.run and os.environ.get("OUTLOOK_RUN"):

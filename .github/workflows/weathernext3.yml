@@ -35,7 +35,7 @@ env:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 210
 
     steps:
       - name: Checkout code
@@ -129,12 +129,12 @@ jobs:
             python render.py
           fi
 
-      # Ensemble landfall maps: ECMWF ENS tracks, plus GEFS and UKMET tracked from their fields.
-      # Runs every time and only draws runs that are not on the site yet (a few minutes when it does).
+      # Ensemble landfall maps: ECMWF ENS and DeepMind tracks, plus GEFS, ICON-EPS, GEPS and UKMET
+      # tracked from their fields. Runs every time and only draws runs that are not on the site yet.
       - name: Landfall maps
         id: landfall
         continue-on-error: true
-        timeout-minutes: 40
+        timeout-minutes: 60
         run: |
           pip install -q -r requirements.txt
           python landfall.py

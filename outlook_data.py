@@ -461,11 +461,13 @@ def _cfs_idx_ranges(text, need_h):
     offs = [int(l[1]) for l in lines]
     last = None
     for i, l in enumerate(lines):
-        m = re.search(r"(\d+)-(\d+) hour", ":".join(l))
-        if m and int(m.group(2)) <= need_h:
+        t = ":".join(l)
+        m = re.search(r"(\d+)-(\d+) hour", t) or re.search(r":(\d+) hour (?:fcst|ave)", t)
+        if m and int(m.groups()[-1]) <= need_h:
             last = i
     if last is None:
-        return None
+        # unknown inventory wording: messages are 6-hourly in time order, so take enough of them
+        last = min(len(lines) - 1, need_h // 6 + 4)
     end = offs[last + 1] - 1 if last + 1 < len(offs) else None
     return 0, end
 
@@ -477,13 +479,16 @@ def cfs_member_rain(init, member, valid_from, valid_to):
     url = f"{CFS_ROOT}/cfs.{ymd}/{hh}/time_grib_{member:02d}/prate.{member:02d}.{ymd}{hh}.daily.grb2"
     need_h = int((valid_to - init).total_seconds() // 3600) + 6
     idx = _get(url + ".idx", retries=2)
-    print(f"    CFS {url.split('/')[-1]}: idx {'found' if idx is not None else 'missing'}")
+    if idx is not None and not getattr(cfs_member_rain, "shown", False):
+        cfs_member_rain.shown = True
+        print("    CFS idx sample: " + " | ".join(idx.text.splitlines()[:2] + idx.text.splitlines()[-1:]))
     if idx is not None:
         rg = _cfs_idx_ranges(idx.text, need_h)
         if rg is None:
             return None
         hdr = {"Range": f"bytes={rg[0]}-{'' if rg[1] is None else rg[1]}"}
         r = _get(url, headers=hdr, timeout=(10, 600))
+        print(f"    CFS {url.split('/')[-1]}: {'%.0f MB' % (len(r.content) / 1e6) if r is not None else 'download failed'}")
     else:
         try:
             hd = http().head(url, timeout=(5, 20))

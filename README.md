@@ -26,15 +26,19 @@ share of members, and the ensemble mean track. They are on `landfall.html`.
 | Model | Tracks from | Runs |
 |---|---|---|
 | ECMWF ENS (51) | ECMWF's own ensemble cyclone tracks (open data BUFR), genesis systems 70B, 71B … included | 00/06/12/18 UTC |
+| DeepMind FNV3 (50) | Google DeepMind Weather Lab ensemble track CSV (`OPER`, else `FNV3_LARGE_ENSEMBLE`) | 00/06/12/18 UTC |
 | GFS ensemble GEFS (31) | tracked here (`gridtrack.py`) in GEFS 0.5° MSLP + 10-m wind, NOAA open data on AWS | 00/06/12/18 UTC |
+| ICON-EPS (40 + control) | tracked here in ICON-EPS icosahedral MSLP + 10-m wind from opendata.dwd.de, regridded to 0.25° | 00/12 UTC to T+180, 06/18 to T+120 |
+| GEM ensemble GEPS (21) | tracked here in GEPS 0.5° MSLP + 10-m wind from dd.weather.gc.ca | 00/12 UTC |
 | UKMET global (1 track) | tracked here in Met Office global 10 km MSLP + 10-m wind, Met Office open data on AWS | 00/12 UTC (T+168) |
 
-The GEFS and UKMET tracks start from ECMWF's position of each system in the same run, so each system has
-the same id (e.g. 71B) on every model. Landfall means reaching the mainland or Sri Lanka; small islands
-(Andaman & Nicobar, Lakshadweep) are not counted.
-DeepMind FNV3, ICON-EPS and GEM GEPS have buttons on the page but stay greyed out: their member tracks/fields
-are on deepmind.google.com, opendata.dwd.de and dd.weather.gc.ca only, which this repo's builder cannot use yet.
-The UKMET ensemble (MOGREPS-G) is not openly published, hence one deterministic track.
+The tracked models start from ECMWF's position of each system in the same run, and DeepMind's tracks are
+matched to ECMWF's systems by position, so each system has the same id (e.g. 71B) on every model.
+Landfall means reaching the mainland or Sri Lanka; small islands (Andaman & Nicobar, Lakshadweep) are
+not counted. ICON and GEM files are found from the DWD / MSC directory listings. The UKMET ensemble
+(MOGREPS-G) is not openly published, hence one deterministic track.
+DeepMind Weather Lab data is experimental research data under Google's terms: real-time data (last 48 h)
+is under the GDM Real-Time Weather Forecasting Experimental Data Terms, older data is CC BY 4.0.
 
 ## Files
 
@@ -44,7 +48,7 @@ The UKMET ensemble (MOGREPS-G) is not openly published, hence one deterministic 
 | `render.py` | Loads new runs, runs V3 detection + tracking, draws maps, GIFs, CSVs and manifests |
 | `web/index.html` | The viewer page (copied into the site on every run) |
 | `landfall.py` | Ensemble landfall maps (`site/landfall/<model>/<run>/`, `site/data/manifest_landfall.json`) |
-| `gridtrack.py` | Cyclone tracker for models without track files (GEFS, UKMET) |
+| `gridtrack.py` | Cyclone tracker for models without track files (GEFS, ICON-EPS, GEPS, UKMET) |
 | `web/landfall.html` | The landfall maps page |
 | `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
 | `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |

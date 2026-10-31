@@ -16,6 +16,10 @@ on:
         description: "Force one run: WN3 20261019_00hr_01_preds, IFS/AIFS 20261019_12 (empty = automatic)"
         required: false
         default: ""
+      outlook_run:
+        description: "NEM outlook: redo one ECMWF run, e.g. 20261031_00 (empty = newest new run)"
+        required: false
+        default: ""
       outlook_backfill:
         description: "NEM outlook: archive this many past days of ECMWF ENS tracks for verification (e.g. 30; empty = none)"
         required: false
@@ -151,6 +155,7 @@ jobs:
         timeout-minutes: 75
         env:
           OUTLOOK_BACKFILL_DAYS: ${{ github.event.inputs.outlook_backfill }}
+          OUTLOOK_RUN: ${{ github.event.inputs.outlook_run }}
         run: |
           pip install -q -r requirements.txt
           pip install -q xarray cfgrib netCDF4 "eccodes>=2.39"

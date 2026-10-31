@@ -626,7 +626,9 @@ def draw_system_track(run, storm, tr, info, path):
     cb = fig.colorbar(cf, cax=cax, ticks=lv)
     cb.set_label(f"Strike probability within {STRIKE_RADIUS_KM} km (%)", color=TEXT)
     cb.ax.tick_params(colors=MUTED, labelsize=7)
-    fig.text(0.04, 0.955, f"System {storm} · ECMWF ENS tracks, days 1-15", fontsize=12.5, fontweight="bold")
+    alias = {v: k for k, v in NAMES.items()}.get(storm)
+    fig.text(0.04, 0.955, f"System {storm}{' (Invest)' if storm[:1] == '9' else ''} · ECMWF ENS tracks, days 1-15"
+             + (f" · ECMWF id {alias}" if alias else ""), fontsize=12.5, fontweight="bold")
     fig.text(0.04, 0.925, f"Init {fmt_run(run)} · {info['tracked']}/{N_ENS} members track it · "
                           f"P(≥ depression) {info['reach']['D']:.0f}% · P(≥ cyclonic storm) {info['reach']['CS']:.0f}%",
              fontsize=8.5, color=MUTED)
@@ -1010,6 +1012,8 @@ def mjo_now():
 
 
 def section_active_break(run, hres, outdir):
+    if not hres:
+        raise RuntimeError("no ECMWF HRES fields for this run")
     t0 = run_time(run)
     steps = sorted(s for s in hres if s % 24 == 0)
     mjo = mjo_now()
@@ -1056,7 +1060,8 @@ def section_active_break(run, hres, outdir):
     ax2.plot(xs, rr, color=ACCENT, marker="o", lw=1.6, label="HRES TN mean rain next 24 h")
     ax2.set_ylabel("TN area-mean rain (mm/24 h)", color=ACCENT)
     ax2.tick_params(axis="y", colors=ACCENT)
-    ax2.set_ylim(0, max(10, np.nanmax(rr) * 1.3) if np.isfinite(np.nanmax(rr)) else 10)
+    top = np.nanmax(rr) if len(rr) and np.isfinite(rr).any() else 0
+    ax2.set_ylim(0, max(10, top * 1.3))
     handles = [Patch(color="#3ddc97", label="Active (≥60)"), Patch(color="#f5b43c", label="Moderate (40-60)"),
                Patch(color="#5b6b88", label="Subdued / break-like (<40)"),
                Line2D([], [], color=ACCENT, marker="o", label="HRES TN mean rain")]
@@ -1704,7 +1709,10 @@ def drop_duplicates(tracks):
     return tracks
 
 
-def get_tracks(run):
+NAMES = {}
+
+
+def get_tracks(run, rename=True):
     if DEMO:
         k = int(run[-2:]) / 12 + (int(run[6:8]) % 3)
         return od.demo_ens_tracks(run, shift=0.3 * k), od.demo_hres_tracks(run)
@@ -1715,7 +1723,15 @@ def get_tracks(run):
         hres = od.hres_tracks(run)
     except Exception:
         hres = None
-    return drop_duplicates(ens), (drop_duplicates(hres) if hres is not None else None)
+    ens = drop_duplicates(ens)
+    hres = drop_duplicates(hres) if hres is not None else None
+    names = od.official_names(ens, run_time(run)) if rename else {}
+    NAMES.update(names)
+    if names:                     # show JTWC ids (e.g. Invest 91B) instead of ECMWF's genesis ids (70B …)
+        ens = ens.assign(storm=ens.storm.replace(names))
+        if hres is not None:
+            hres = hres.assign(storm=hres.storm.replace(names))
+    return ens, hres
 
 
 def process(run):
@@ -1725,6 +1741,7 @@ def process(run):
         shutil.rmtree(outdir)
     os.makedirs(outdir)
     print(f"\n=== Outlook for ECMWF {run} ===")
+    NAMES.clear()
     tracks, hres_tracks = get_tracks(run)
     if tracks is None:
         print("  no ENS tracks for this run")
@@ -1769,6 +1786,7 @@ def process(run):
         traceback.print_exc()
         s["errors"]["archive"] = repr(e)
     step("verification", lambda: section_verification(datetime.now(timezone.utc), outdir))
+    s["names"] = {v: k for k, v in NAMES.items()}       # shown id -> ECMWF id
     s["takeaways"] = takeaways(s)
     json.dump(s, open(os.path.join(outdir, "summary.json"), "w"), indent=1, default=str)
     update_manifest(run)
@@ -1813,7 +1831,7 @@ def backfill(days, now):
     for run in reversed(candidate_runs(now - timedelta(hours=12), n=days * 2)):
         if run in have:
             continue
-        tr, hr = get_tracks(run)
+        tr, hr = get_tracks(run, rename=False)
         if tr is None:
             print(f"  backfill {run}: no tracks")
             continue
@@ -1834,6 +1852,8 @@ def main():
     ap.add_argument("--backfill-days", type=int, default=int(os.environ.get("OUTLOOK_BACKFILL_DAYS", "0")))
     ap.add_argument("--force", action="store_true", help="redo a run that is already on the site")
     a = ap.parse_args()
+    if not a.run and os.environ.get("OUTLOOK_RUN"):
+        a.run, a.force = os.environ["OUTLOOK_RUN"], True
     DEMO = a.demo
     for d in ("genesis", "verif/tracks", "verif/rain", "obs"):
         os.makedirs(os.path.join(STATE, d), exist_ok=True)

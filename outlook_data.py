@@ -102,8 +102,12 @@ def grib_fields(blob):
     """Decode GRIB message bytes -> list of (keys, lats, lons, values cut to the domain).
     Regular lat/lon and regular Gaussian grids; lons returned in -180..180, ascending."""
     import eccodes
+    import tempfile
     out = []
-    f = io.BytesIO(blob)
+    tmp = tempfile.NamedTemporaryFile(suffix=".grib", delete=False)   # eccodes needs a real file
+    tmp.write(blob)
+    tmp.close()
+    f = open(tmp.name, "rb")
     while True:
         h = eccodes.codes_new_from_file(f, eccodes.CODES_PRODUCT_GRIB)
         if h is None:
@@ -140,6 +144,8 @@ def grib_fields(blob):
         la = (lats >= LAT0 - 1) & (lats <= LAT1 + 1)
         lo = (lons >= LON0 - 1) & (lons <= LON1 + 1)
         out.append((keys, lats[la], lons[lo], vals[np.ix_(la, lo)].astype(np.float32)))
+    f.close()
+    os.remove(tmp.name)
     return out
 
 
@@ -332,6 +338,90 @@ def ens_run_complete(run):
         except Exception:
             pass
     return False
+
+
+# ============================================================
+# JTWC names (invests 90-99 and numbered systems) for ECMWF's own ids
+# ============================================================
+# ECMWF's track files call a disturbance it is following 70B, 71B … (its own genesis ids) until the
+# system gets an official number (e.g. 02B). JTWC's best-track files (b-decks, mirrored by NOAA/SSD)
+# carry the names forecasters use, such as Invest 91B.
+
+JTWC_DIRS = ["https://www.ssd.noaa.gov/PS/TROP/DATA/ATCF/JTWC/"]
+
+
+def _ll(v):
+    v = v.strip()
+    x = float(v[:-1]) / 10.0
+    return -x if v[-1] in "SW" else x
+
+
+def jtwc_systems(now, max_age_h=36):
+    """Active North Indian Ocean systems in JTWC b-decks: [{id, name, time, lat, lon, wind_kt}]."""
+    import re as _re
+    out = []
+    for d in JTWC_DIRS:
+        r = _get(d, retries=2, timeout=(10, 30))
+        if r is None:
+            continue
+        files = sorted(set(_re.findall(r"bio(\d\d)(\d{4})\.dat", r.text)))
+        for cy, yr in files:
+            if int(yr) != now.year:
+                continue
+            b = _get(f"{d}bio{cy}{yr}.dat", retries=2, timeout=(10, 30))
+            if b is None or not b.text.strip():
+                continue
+            last = [p.strip() for p in b.text.strip().splitlines()[-1].split(",")]
+            try:
+                t = datetime.strptime(last[2], "%Y%m%d%H").replace(tzinfo=timezone.utc)
+                lat, lon, w = _ll(last[6]), _ll(last[7]), float(last[8])
+            except (IndexError, ValueError):
+                continue
+            if (now - t).total_seconds() > max_age_h * 3600:
+                continue
+            suf = "A" if lon < 77.5 else "B"
+            sid = f"{int(cy):02d}{suf}"
+            name = last[27] if len(last) > 27 and last[27] and last[27].upper() not in ("INVEST", "") else ""
+            out.append({"id": sid, "name": (f"Invest {sid}" if int(cy) >= 90 else (name.title() or sid)),
+                        "time": t, "lat": lat, "lon": lon, "wind_kt": w})
+        if out:
+            break
+    return out
+
+
+def official_names(tracks, run_dt, now=None, radius_km=350):
+    """Map ECMWF storm ids to JTWC ids for systems that exist at the start of the run:
+    {'70B': '91B', …}. Empty when JTWC data is not reachable."""
+    if tracks is None or not len(tracks):
+        return {}
+    try:
+        js = jtwc_systems(now or datetime.now(timezone.utc))
+    except Exception as e:
+        print(f"  JTWC names not available: {e}")
+        return {}
+    if not js:
+        return {}
+    first = tracks[tracks.step == tracks.groupby("storm").step.transform("min")]
+    start = first.groupby("storm").agg(lat=("lat", "median"), lon=("lon", "median"), step=("step", "min"))
+    out = {}
+    for storm, r in start.iterrows():
+        if r.step > 12 or not str(storm)[:1] == "7":
+            continue            # only systems present at T+0 that ECMWF knows by a genesis id
+        best, bd = None, radius_km
+        for j in js:
+            if abs((j["time"] - run_dt).total_seconds()) > 36 * 3600:
+                continue
+            p = np.pi / 180
+            a = (np.sin((j["lat"] - r.lat) * p / 2) ** 2 + np.cos(r.lat * p) * np.cos(j["lat"] * p)
+                 * np.sin((j["lon"] - r.lon) * p / 2) ** 2)
+            d = 12742 * np.arcsin(np.sqrt(a))
+            if d < bd:
+                best, bd = j, d
+        if best and best["id"] not in out.values():
+            out[storm] = best["id"]
+    if out:
+        print("  JTWC names: " + ", ".join(f"ECMWF {k} = {v}" for k, v in out.items()))
+    return out
 
 
 # ============================================================

@@ -431,7 +431,17 @@ def update_manifest(model, run, systems):
 def ecmwf_tracks(run, bufr=None):
     """ECMWF ENS tracks for a run (North Indian Ocean, duplicates dropped), or None if not online."""
     path = bufr or ecmwf_tf_path(run)
-    return drop_duplicates(read_ecmwf_tf(path)) if path else None
+    if not path:
+        return None
+    tracks = drop_duplicates(read_ecmwf_tf(path))
+    try:                       # JTWC ids (e.g. Invest 91B) instead of ECMWF's own genesis ids (70B …)
+        import outlook_data
+        names = outlook_data.official_names(tracks, datetime.strptime(run, "%Y%m%d_%H").replace(tzinfo=timezone.utc))
+        if names:
+            tracks = tracks.assign(storm=tracks.storm.replace(names))
+    except Exception as e:
+        print(f"  (JTWC names skipped: {e})")
+    return tracks
 
 
 def candidate_runs(model, now=None):

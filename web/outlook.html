@@ -189,7 +189,8 @@ function cyclones(){
   if (!L.find(c=>c.storm===ui.sys)) ui.sys = L[0].storm;
   const c = L.find(x=>x.storm===ui.sys);
   const env = S.environment||[];
-  let h = `<div class="bar"><span class="label">System</span><div class="seg">${pills(L.map(x=>[x.storm,`${x.storm} · ${x.tracked}/${x.members}`]), ui.sys, "sys")}</div></div>
+  let h = `<div class="bar"><span class="label">System</span><div class="seg">${pills(L.map(x=>[x.storm,`${x.storm} · ${x.tracked}/${x.members}`]), ui.sys, "sys")}</div>
+    ${(S.names||{})[c.storm] ? `<span class="note">ECMWF tracks this system as ${esc(S.names[c.storm])}; shown with its JTWC id.</span>`:""}</div>
     <div class="grid g2"><div>${img(c.track_png,"Tracks")}</div><div>${img(c.plume_png,"Intensity")}
     <div class="card" style="margin-top:14px"><h3>Chance of reaching each IMD class</h3>
       <table><tr>${Object.keys(c.reach).map(k=>`<th class="n">${k}</th>`).join("")}</tr><tr>${Object.values(c.reach).map(x=>`<td class="n">${v(x,0,"%")}</td>`).join("")}</tr></table>

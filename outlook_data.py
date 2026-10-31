@@ -348,6 +348,25 @@ def ens_run_complete(run):
 # carry the names forecasters use, such as Invest 91B.
 
 JTWC_DIRS = ["https://www.ssd.noaa.gov/PS/TROP/DATA/ATCF/JTWC/"]
+JTWC_ABIO = ["https://www.metoc.navy.mil/jtwc/products/abioweb.txt"]
+
+
+def jtwc_invests_abio(now):
+    """Invests named in JTWC's Indian Ocean outlook (ABIO): 'INVEST 91B ... NEAR 9.6N 90.9E'."""
+    import re as _re
+    out = []
+    for url in JTWC_ABIO:
+        r = _get(url, retries=2, timeout=(10, 30))
+        if r is None:
+            continue
+        txt = " ".join(r.text.split())
+        for m in _re.finditer(r"INVEST\s+(9\d[AB])\)?.{0,200}?(\d{1,2}\.\d)([NS])\s+(\d{2,3}\.\d)([EW])", txt):
+            lat = float(m.group(2)) * (1 if m.group(3) == "N" else -1)
+            lon = float(m.group(4)) * (1 if m.group(5) == "E" else -1)
+            sid = m.group(1)
+            if sid not in [o["id"] for o in out]:
+                out.append({"id": sid, "name": f"Invest {sid}", "time": now, "lat": lat, "lon": lon, "wind_kt": np.nan})
+    return out
 
 
 def _ll(v):
@@ -386,6 +405,14 @@ def jtwc_systems(now, max_age_h=36):
                         "time": t, "lat": lat, "lon": lon, "wind_kt": w})
         if out:
             break
+    print(f"  JTWC b-decks: {[o['id'] for o in out]}")
+    if not any(o["id"][:1] == "9" for o in out):
+        try:
+            ab = jtwc_invests_abio(now)
+            print(f"  JTWC ABIO invests: {[o['id'] for o in ab]}")
+            out += [a for a in ab if a["id"] not in [o["id"] for o in out]]
+        except Exception as e:
+            print(f"  JTWC ABIO failed: {e}")
     return out
 
 
@@ -450,6 +477,7 @@ def cfs_member_rain(init, member, valid_from, valid_to):
     url = f"{CFS_ROOT}/cfs.{ymd}/{hh}/time_grib_{member:02d}/prate.{member:02d}.{ymd}{hh}.daily.grb2"
     need_h = int((valid_to - init).total_seconds() // 3600) + 6
     idx = _get(url + ".idx", retries=2)
+    print(f"    CFS {url.split('/')[-1]}: idx {'found' if idx is not None else 'missing'}")
     if idx is not None:
         rg = _cfs_idx_ranges(idx.text, need_h)
         if rg is None:
@@ -480,6 +508,8 @@ def cfs_member_rain(init, member, valid_from, valid_to):
         days[day][3] += (s1 - s0)
     full = sorted(d for d, x in days.items() if x[3] >= 24)
     if not full:
+        print(f"    CFS {url.split('/')[-1]}: no full days in {valid_from:%d %b}-{valid_to:%d %b} "
+              f"({len(days)} partial days, {len(r.content) // 1e6:.0f} MB)")
         return None
     la, lo = days[full[0]][0], days[full[0]][1]
     return la, lo, full, np.stack([days[d][2] for d in full])

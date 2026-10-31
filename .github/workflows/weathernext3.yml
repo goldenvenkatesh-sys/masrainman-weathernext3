@@ -159,7 +159,9 @@ jobs:
         run: |
           pip install -q -r requirements.txt
           pip install -q xarray cfgrib netCDF4 "eccodes>=2.39"
-          python nem_outlook.py
+          mkdir -p site/outlook/state
+          set -o pipefail
+          python -u nem_outlook.py 2>&1 | tee site/outlook/state/last_log.txt
 
       - name: Save maps (site-data branch, private)
         if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'

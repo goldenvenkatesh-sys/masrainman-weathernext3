@@ -36,6 +36,22 @@ DeepMind FNV3, ICON-EPS and GEM GEPS have buttons on the page but stay greyed ou
 are on deepmind.google.com, opendata.dwd.de and dd.weather.gc.ca only, which this repo's builder cannot use yet.
 The UKMET ensemble (MOGREPS-G) is not openly published, hence one deterministic track.
 
+**NEM & cyclone outlook:** `nem_outlook.py` builds `outlook.html` after every ECMWF 00Z and 12Z run:
+
+| Part | What | Data |
+|---|---|---|
+| A · Genesis | Probability that an LPA / depression (≥17 kt) / cyclonic storm (≥34 kt) forms within 300 km, days 1-5, 6-10, 11-15, 1-15; basin-wide probabilities; run-to-run consistency map (last 4 runs) | ECMWF ENS track BUFR, 51 members |
+| B · Cyclones days 1-15 | Per system: strike probability + member tracks by IMD class, ensemble mean + HRES track, intensity plume, day-by-day table, landfall / coast / recurve / dissipate scenarios, Day 1/3/5 environment (MSLP + 850 hPa flow, vorticity, shear) | ECMWF ENS + HRES |
+| C · 30-day NEM rain | Weekly totals and departures (weeks 1-2 ENS, weeks 3-4 + days 29-30 CFSv2 lagged ensemble), Tamil Nadu + 4 TN regions + states, below/near/above probabilities, confidence | ECMWF ENS tp, NOAA CFSv2, CPC 1991-2020 gauge normal |
+| D · Active / break | Daily 0-100 score for days 0-10 from Bay vorticity, easterlies, moisture flux, mid-level humidity, pressure gradient, MJO | ECMWF HRES, BoM RMM |
+| E · Track consistency | Systems matched across the last 10 runs: appearance count, track shift, spread, intensity and landfall-region trends | stored run history |
+| F · PDI | 15-day forecast PDI vs the same window and the OND seasons 1991-2025 | IBTrACS (IMD winds) |
+| G · Verification | Track and intensity error, detection rate, false-alarm ratio, station rain MAE/RMSE and Brier skill | IBTrACS / ECMWF analyses, TN-SMART |
+
+Every probability is a share of ensemble members. The history and verification archive live in
+`site/outlook/state/` (kept on the `site-data` branch). To fill the verification archive straight away,
+run the workflow with *outlook_backfill* = 30. Test without downloads: `python nem_outlook.py --demo`.
+
 ## Files
 
 | File | What it does |
@@ -46,6 +62,10 @@ The UKMET ensemble (MOGREPS-G) is not openly published, hence one deterministic 
 | `landfall.py` | Ensemble landfall maps (`site/landfall/<model>/<run>/`, `site/data/manifest_landfall.json`) |
 | `gridtrack.py` | Cyclone tracker for models without track files (GEFS, UKMET) |
 | `web/landfall.html` | The landfall maps page |
+| `nem_outlook.py` | NEM & cyclone outlook (`site/outlook/<run>/`, `site/data/manifest_outlook.json`) |
+| `outlook_data.py` | Downloads for the outlook (ECMWF, CFSv2, CPC, IBTrACS, RMM, TN-SMART) and demo data |
+| `web/outlook.html` | The outlook dashboard |
+| `boundaries/tn_districts.geojson` | Tamil Nadu districts (for the TN regions) |
 | `boundaries/borders_india_view.geojson` | Land borders, India as per GoI (Natural Earth India view) |
 | `.github/workflows/weathernext3.yml` | Runs every 3 hours, renders only new complete runs, saves and publishes the site |
 

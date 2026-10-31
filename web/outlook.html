@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEM & Cyclone Outlook · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97; --bad:#ef5b5b;
+    --above:#35978f; --near:#9aa6bd; --below:#bf812d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1240px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  nav.tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin:4px 0 14px;position:sticky;top:0;background:var(--bg);z-index:5;padding-top:6px}
+  nav.tabs button{background:none;border:none;color:var(--muted);padding:9px 12px;cursor:pointer;font-size:13.5px;border-bottom:2px solid transparent;font-weight:600}
+  nav.tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+  .card h3{margin:0 0 8px;font-size:14.5px}
+  .card .sub{color:var(--muted);font-size:12px;margin:-4px 0 8px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .kpi .k{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi .s{color:var(--muted);font-size:12px}
+  .img{background:#121826;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .img img{display:block;width:100%;height:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+  td,th{padding:5px 7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px}
+  td.n,th.n{text-align:right}
+  .tw{overflow-x:auto}
+  ul.take{margin:0;padding-left:18px}
+  ul.take li{margin:4px 0}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap}
+  .t-above{background:rgba(53,151,143,.25);color:#7fe0d4}
+  .t-near{background:rgba(154,166,189,.2);color:#cfd8ea}
+  .t-below{background:rgba(191,129,45,.25);color:#f0c27a}
+  .t-act{background:rgba(61,220,151,.2);color:var(--ok)}
+  .t-mod{background:rgba(255,176,46,.2);color:var(--accent2)}
+  .t-sub{background:rgba(143,160,191,.2);color:var(--muted)}
+  .stack{display:flex;height:12px;border-radius:6px;overflow:hidden;min-width:120px;background:var(--panel2)}
+  .stack i{display:block;height:100%}
+  .meter{height:8px;border-radius:5px;background:var(--panel2);overflow:hidden;margin-top:3px}
+  .meter i{display:block;height:100%;background:var(--accent)}
+  .note{color:var(--muted);font-size:12px;margin-top:8px}
+  .warn{border-left:3px solid var(--accent2);padding:8px 12px;background:rgba(255,176,46,.07);border-radius:6px;color:#f3d9a6;font-size:12.5px;margin-bottom:12px}
+  .empty{color:var(--muted);padding:30px 0;text-align:center}
+  .tab{display:none}
+  .tab.on{display:block}
+  footer{color:var(--muted);font-size:12px;margin-top:24px;line-height:1.6}
+  details summary{cursor:pointer;color:var(--accent);font-size:13px}
+  @media (max-width:980px){.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.g3{grid-template-columns:1fr}}
+  @media (max-width:760px){.g2{grid-template-columns:1fr}.g6{grid-template-columns:repeat(2,minmax(0,1fr))}header h1{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>NEM &amp; Cyclone Outlook</span> · North Indian Ocean · 30 days</h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Model maps</a>
+  <a class="btn" href="landfall.html">🌀 Landfall maps</a>
+  <a class="btn" href="rain.html">🌧 Rain reports</a>
+</header>
+<main>
+  <div class="bar"><span class="label">ECMWF run</span><div class="seg" id="runs"></div>
+    <span id="dl" style="margin-left:auto"></span></div>
+  <div id="warn"></div>
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="tab" id="t-overview"></section>
+  <section class="tab" id="t-genesis"></section>
+  <section class="tab" id="t-cyclones"></section>
+  <section class="tab" id="t-nem"></section>
+  <section class="tab" id="t-ab"></section>
+  <section class="tab" id="t-consistency"></section>
+  <section class="tab" id="t-pdi"></section>
+  <section class="tab" id="t-verif"></section>
+  <section class="tab" id="t-methods"></section>
+
+  <footer>Model guidance computed automatically from open data (ECMWF ENS / IFS, NOAA CFSv2, NOAA CPC, IBTrACS, BoM RMM, TN-SMART).
+    Every probability is a share of ensemble members. These are not official forecasts —
+    please follow IMD for official forecasts and warnings. ECMWF open data © ECMWF, CC BY 4.0.</footer>
+</main>
+<script>
+const TABS = [["overview","Overview"],["genesis","A · Genesis"],["cyclones","B · Cyclones days 1-15"],
+  ["nem","C · 30-day NEM rain"],["ab","D · Active / break"],["consistency","E · Track consistency"],
+  ["pdi","F · PDI & history"],["verif","G · Verification"],["methods","Methods"]];
+let man = {runs:[]}, run = null, S = null, tab = "overview";
+const ui = {glev:"dep", gwin:"d1_15", sys:null, env:3, week:"w1", csys:null, area:"Tamil Nadu"};
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtRun = r => { const [d,h] = r.split("_"); return `${d.slice(6,8)}/${d.slice(4,6)} ${h}Z`; };
+const ll = (a,o) => a==null ? "–" : `${Math.abs(a).toFixed(1)}°${a>=0?"N":"S"} ${Math.abs(o).toFixed(1)}°${o>=0?"E":"W"}`;
+const v = (x, d=0, u="") => x==null || Number.isNaN(x) ? "–" : `${Number(x).toFixed(d)}${u}`;
+const img = (p, alt) => p ? `<div class="img"><a href="${p}" target="_blank"><img loading="lazy" src="${p}" alt="${esc(alt)}"></a></div>` : `<div class="empty">Not available for this run.</div>`;
+const catTag = c => `<span class="tag ${c==="Above normal"?"t-above":c==="Below normal"?"t-below":"t-near"}">${esc(c)}</span>`;
+const stTag = s => `<span class="tag ${s==="Active"?"t-act":s==="Moderate"?"t-mod":"t-sub"}">${esc(s)}</span>`;
+const stack = a => `<div class="stack" title="Below ${v(a.p_below)}% · Near ${v(a.p_near)}% · Above ${v(a.p_above)}%">
+  <i style="width:${a.p_below||0}%;background:var(--below)"></i><i style="width:${a.p_near||0}%;background:var(--near)"></i><i style="width:${a.p_above||0}%;background:var(--above)"></i></div>`;
+function pills(items, cur, key, onpick){
+  return items.map(([k,l]) => `<button class="pill${k===cur?" on":""}" data-k="${esc(k)}" data-g="${key}">${esc(l)}</button>`).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("button.pill[data-g]"); if (!b) return;
+  const g = b.dataset.g, k = b.dataset.k;
+  if (g === "run"){ load(k); return; }
+  ui[g] = isNaN(+k) || g==="area" || g==="week" || g==="sys" || g==="csys" ? k : +k; render();
+});
+
+function tabsBar(){
+  $("tabs").innerHTML = TABS.map(([k,l]) => `<button class="${k===tab?"on":""}" data-t="${k}">${l}</button>`).join("");
+  $("tabs").querySelectorAll("button").forEach(b => b.onclick = () => { tab = b.dataset.t; history.replaceState(null,"","#"+tab); render(); });
+  TABS.forEach(([k]) => $("t-"+k).classList.toggle("on", k===tab));
+}
+
+// ---------------- Overview ----------------
+function overview(){
+  const c = (S.cyclones||[])[0], nem = S.nem||{}, ab = S.active_break||{}, pdi = S.pdi||{};
+  const w1 = (nem.weeks||[]).find(w=>w.id==="w1"), tn1 = w1 && w1.areas.find(a=>a.area==="Tamil Nadu");
+  const act = (ab.days||[]).filter(d => (d.score||0) >= 60).length;
+  const k = (t, val, sub) => `<div class="kpi"><div class="k">${t}</div><div class="v">${val}</div><div class="s">${sub}</div></div>`;
+  let h = `<div class="grid g6" style="margin-bottom:14px">
+    ${k("Systems tracked", (S.cyclones||[]).length, "North Indian Ocean, ECMWF ENS")}
+    ${k("P(≥ depression)", c ? v(c.reach.D,0,"%") : "–", c ? `${c.storm} · ${c.basin}` : "no system")}
+    ${k("P(≥ cyclonic storm)", c ? v(c.reach.CS,0,"%") : "–", c ? `median peak ${v(c.peak_med)} kt` : "")}
+    ${k("TN week 1", tn1 ? v(tn1.mean,0," mm") : "–", tn1 ? `${tn1.category} · normal ${v(tn1.normal)} mm` : "")}
+    ${k("Active NEM days", ab.days ? `${act}/${ab.days.length}` : "–", "days 0-10, score ≥ 60")}
+    ${k("15-day PDI", pdi.forecast ? v(pdi.forecast.median,1) : "–", pdi.clim_window_mean!=null ? `normal ${v(pdi.clim_window_mean,1)} (10⁶ kt³)` : "10⁶ kt³")}
+  </div>`;
+  h += `<div class="grid g2"><div class="card"><h3>Key takeaways</h3><ul class="take">${(S.takeaways||[]).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
+  if (c){
+    h += `<div class="card"><h3>15-day scenarios · ${esc(c.storm)}</h3><div class="sub">Share of all ${c.members} ECMWF ENS members</div>
+      <table><tr><th>Scenario</th><th class="n">Members</th><th style="width:38%">Probability</th></tr>
+      ${c.scenarios.map(s=>`<tr><td>${esc(s.scenario)}</td><td class="n">${s.members}</td><td>${v(s.pct,0,"%")}<div class="meter"><i style="width:${s.pct}%"></i></div></td></tr>`).join("")}</table></div>`;
+  } else h += `<div class="card"><h3>Cyclone scenarios</h3><div class="empty">No North Indian Ocean system in the ENS tracks.</div></div>`;
+  h += `</div><div class="grid g2" style="margin-top:14px">
+    <div>${img(c && c.track_png, "Tracks")}</div>
+    <div>${img(S.genesis && S.genesis.windows.find(w=>w.id==="d1_15").maps.dep.png, "Genesis")}</div>
+    <div>${img(w1 && w1.png, "Week 1 rain")}</div>
+    <div>${img(ab.png, "Active / break")}</div></div>`;
+  return h;
+}
+
+// ---------------- A. Genesis ----------------
+function genesis(){
+  const g = S.genesis; if (!g) return `<div class="empty">Genesis maps not available.</div>`;
+  const W = g.windows.find(w=>w.id===ui.gwin) || g.windows[0];
+  let h = `<div class="bar"><span class="label">Level</span><div class="seg">${pills([["lpa","Low-pressure area"],["dep","Depression"],["cs","Cyclonic storm"]], ui.glev, "glev")}</div></div>
+    <div class="bar"><span class="label">Window</span><div class="seg">${pills(g.windows.map(w=>[w.id,w.label]), ui.gwin, "gwin")}</div></div>
+    <div class="grid g2"><div>${img(W.maps[ui.glev].png, "Genesis probability")}</div><div class="card">
+      <h3>Basin-wide probability of development</h3><div class="sub">Share of members forming a new system of each level in the window</div>
+      <div class="tw"><table><tr><th>Window</th><th>Basin</th><th class="n">LPA</th><th class="n">Depression</th><th class="n">Cyclonic storm</th></tr>
+      ${g.basin.map(b=>`<tr><td>${esc(g.windows.find(w=>w.id===b.window).label)}</td><td>${esc(b.basin)}</td><td class="n">${v(b.lpa,0,"%")}</td><td class="n">${v(b.dep,0,"%")}</td><td class="n">${v(b.cs,0,"%")}</td></tr>`).join("")}</table></div>
+      ${g.existing.length ? `<p class="note">Systems already present at T+0 (not counted as genesis): ${g.existing.map(e=>`${esc(e.storm)} near ${ll(e.lat,e.lon)}`).join(", ")}.</p>`:""}
+      <p class="note">Probability = share of the 51 members whose system first reaches the level within 300 km of the point during the window.
+      Depression ≥ 17 kt, cyclonic storm ≥ 34 kt (member 10-m wind; ECMWF ENS winds run lower than observed, so stronger levels are underestimated).</p></div></div>`;
+  if (g.consistency){
+    const c = g.consistency;
+    h += `<div class="grid g2" style="margin-top:14px"><div>${img(c.png,"Consistency")}</div><div class="card"><h3>Successive-run agreement</h3>
+      <div class="sub">Runs ${c.runs.map(fmtRun).join(", ")}</div>
+      <p>Shaded areas show how many of the last ${c.runs.length} runs give a ≥ 20% chance of a depression forming within 300 km during the valid period they all cover
+      (${new Date(c.valid_from).toUTCString().slice(5,17)} – ${new Date(c.valid_to).toUTCString().slice(5,17)}).
+      A signal present in all runs is more trustworthy than one appearing in a single run.</p>
+      <p>Highest agreement: <b>${c.max_runs} of ${c.runs.length}</b> runs.</p></div></div>`;
+  }
+  return h;
+}
+
+// ---------------- B. Cyclones ----------------
+function cyclones(){
+  const L = S.cyclones||[]; if (!L.length) return `<div class="empty">No North Indian Ocean system is tracked by ECMWF ENS in this run.</div>`;
+  if (!L.find(c=>c.storm===ui.sys)) ui.sys = L[0].storm;
+  const c = L.find(x=>x.storm===ui.sys);
+  const env = S.environment||[];
+  let h = `<div class="bar"><span class="label">System</span><div class="seg">${pills(L.map(x=>[x.storm,`${x.storm} · ${x.tracked}/${x.members}`]), ui.sys, "sys")}</div></div>
+    <div class="grid g2"><div>${img(c.track_png,"Tracks")}</div><div>${img(c.plume_png,"Intensity")}
+    <div class="card" style="margin-top:14px"><h3>Chance of reaching each IMD class</h3>
+      <table><tr>${Object.keys(c.reach).map(k=>`<th class="n">${k}</th>`).join("")}</tr><tr>${Object.values(c.reach).map(x=>`<td class="n">${v(x,0,"%")}</td>`).join("")}</tr></table>
+      <p class="note">Starts near ${ll(c.start.lat,c.start.lon)}${c.start.step?` at T+${c.start.step} h`:""}. Median peak ${v(c.peak_med)} kt (10-90%: ${v(c.peak_p10)}–${v(c.peak_p90)} kt) around T+${v(c.peak_step_med)} h.
+      ${c.hres ? `HRES deterministic peak: ${v(c.hres.peak)} kt.`:""}</p></div></div></div>
+    <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Day-by-day analysis (days 0-15)</h3><div class="tw"><table>
+      <tr><th>Day</th><th>Valid</th><th>Mean position</th><th class="n">Members</th><th class="n">Median wind</th><th>Class</th><th class="n">P(≥D)</th><th class="n">P(≥CS)</th><th class="n">Spread</th></tr>
+      ${c.days.filter(d=>d.members).map(d=>`<tr><td>${d.day}</td><td>${d.valid}</td><td>${ll(d.lat,d.lon)}</td><td class="n">${d.members}</td><td class="n">${v(d.wind_med,0," kt")}</td><td>${d.cls||"–"}</td><td class="n">${v(d.p_dep,0,"%")}</td><td class="n">${v(d.p_cs,0,"%")}</td><td class="n">${v(d.spread_km,0," km")}</td></tr>`).join("")}
+    </table></div></div>
+    <div class="card"><h3>Outcome scenarios</h3><table><tr><th>Scenario</th><th class="n">Members</th><th style="width:38%">Probability</th></tr>
+      ${c.scenarios.map(s=>`<tr><td>${esc(s.scenario)}</td><td class="n">${s.members}</td><td>${v(s.pct,0,"%")}<div class="meter"><i style="width:${s.pct}%"></i></div></td></tr>`).join("")}</table>
+      <p class="note">Landfall = first crossing onto the mainland or Sri Lanka (small islands ignored). "Moves close to the coast" = within 100 km without landfall.
+      Recurves = turns back east/north-east over sea.</p></div></div>`;
+  if (env.length){
+    if (!env.find(e=>e.day===ui.env)) ui.env = env[0].day;
+    h += `<div class="card" style="margin-top:14px"><h3>Environmental conditions (ECMWF HRES)</h3>
+      <div class="bar"><span class="label">Day</span><div class="seg">${pills(env.map(e=>[e.day,`Day ${e.day}`]), ui.env, "env")}</div></div>
+      ${img(env.find(e=>e.day===ui.env).png,"Environment")}</div>`;
+  }
+  return h;
+}
+
+// ---------------- C. 30-day NEM ----------------
+function nem(){
+  const n = S.nem; if (!n || !n.weeks.length) return `<div class="empty">30-day outlook not available for this run.</div>`;
+  if (!n.weeks.find(w=>w.id===ui.week)) ui.week = n.weeks[0].id;
+  const W = n.weeks.find(w=>w.id===ui.week);
+  const tnRows = n.weeks.map(w => [w, w.areas.find(a=>a.area===ui.area)]).filter(x=>x[1]);
+  const areas = W.areas.map(a=>a.area);
+  let h = `<div class="warn">Weeks 1-2: ECMWF ENS (51 members). Weeks 3-4 and days 29-30: NOAA CFSv2 lagged ensemble — skill at these leads is low,
+      so treat them as tendencies. Departures are against the CPC 1991-2020 gauge normal; raw model output, no bias correction.</div>
+    <div class="bar"><span class="label">Week</span><div class="seg">${pills(n.weeks.map(w=>[w.id,`${w.name} · ${w.from.slice(8,10)}/${w.from.slice(5,7)}–${w.to.slice(8,10)}/${w.to.slice(5,7)}`]), ui.week, "week")}</div></div>
+    ${img(W.png,"Weekly rain")}
+    <div class="grid g2" style="margin-top:14px"><div class="card"><h3>${esc(ui.area)} · weekly outlook</h3>
+      <div class="bar"><span class="label">Area</span><div class="seg">${pills(["Tamil Nadu","North coastal TN","Delta TN","Interior & west TN","South TN"].filter(a=>areas.includes(a)).map(a=>[a,a.replace(" TN","")]), ui.area, "area")}</div></div>
+      <div class="tw"><table><tr><th>Period</th><th class="n">Forecast</th><th class="n">10-90%</th><th class="n">Normal</th><th class="n">Dep.</th><th>Category</th><th>Below / near / above</th><th>Confidence</th></tr>
+      ${tnRows.map(([w,a])=>`<tr><td>${esc(w.name)}<br><span class="note">${w.from.slice(8,10)}/${w.from.slice(5,7)}–${w.to.slice(8,10)}/${w.to.slice(5,7)}</span></td><td class="n">${v(a.mean,0," mm")}</td><td class="n">${v(a.p10,0)}–${v(a.p90,0)}</td><td class="n">${v(a.normal,0," mm")}</td><td class="n">${v(a.dep,0,"%")}</td><td>${catTag(a.category)}</td><td>${stack(a)}<span class="note">${v(a.p_below,0)} / ${v(a.p_near,0)} / ${v(a.p_above,0)}%</span></td><td>${esc(a.confidence)}</td></tr>`).join("")}
+      </table></div>
+      ${(()=>{const t=(n.total||[]).find(a=>a.area===ui.area);return t?`<p class="note">Days 1-30 total: <b>${v(t.mean,0)} mm</b> vs normal ${v(t.normal,0)} mm (${v(t.dep,0,"%")}) → ${catTag(t.category)} (sum of weekly means, low confidence).</p>`:""})()}
+      <p class="note">Categories follow IMD: normal = within ±19% of the normal. Probabilities = share of members in each category. Confidence = chance of the stated category, capped by lead time.</p></div>
+    <div class="card"><h3>State-wise outlook · ${esc(W.name)}</h3><div class="sub">${esc(W.source)}</div><div class="tw"><table>
+      <tr><th>Area</th><th class="n">Forecast</th><th class="n">25-75%</th><th class="n">Normal</th><th class="n">Dep.</th><th>Category</th><th>Below / near / above</th></tr>
+      ${W.areas.map(a=>`<tr><td>${esc(a.area)}</td><td class="n">${v(a.mean,0," mm")}</td><td class="n">${v(a.p25,0)}–${v(a.p75,0)}</td><td class="n">${v(a.normal,0)}</td><td class="n">${v(a.dep,0,"%")}</td><td>${catTag(a.category)}</td><td>${stack(a)}</td></tr>`).join("")}
+    </table></div></div></div>`;
+  return h;
+}
+
+// ---------------- D. Active / break ----------------
+function activeBreak(){
+  const a = S.active_break; if (!a) return `<div class="empty">Detector not available for this run.</div>`;
+  const ind = a.indicators||[];
+  let h = `<div class="grid g2"><div>${img(a.png,"Active / break")}</div><div class="card"><h3>What the score uses</h3>
+    <table><tr><th>Indicator</th><th class="n">Quiet → active</th><th class="n">Weight</th></tr>
+    ${ind.map(i=>`<tr><td>${esc(i.label)}</td><td class="n">${i.quiet} → ${i.active} ${esc(i.units)}</td><td class="n">${Math.round(i.weight*100)}%</td></tr>`).join("")}</table>
+    <p class="note">Each indicator is scaled 0-100 between its quiet and active values and weighted. Score ≥ 60 = active NEM conditions, 40-60 = moderate, &lt; 40 = subdued / break-like.
+    ${a.mjo ? `MJO (BoM RMM, ${esc(a.mjo.date)}): phase <b>${a.mjo.phase}</b>, amplitude <b>${v(a.mjo.amp,1)}</b> — ${esc(a.mjo.effect)} for NEM rain over Tamil Nadu (phases 2-4 favour, 6-8 suppress); adds ${v(a.mjo.modifier,0)} points, fading over 15 days.` : "MJO index unavailable."}
+    This indicates favourable conditions; it is not a guarantee of rain on a particular date.</p></div></div>
+    <div class="card" style="margin-top:14px"><h3>Daily indicators</h3><div class="tw"><table><tr><th>Valid</th><th class="n">Score</th><th>State</th>
+      ${ind.map(i=>`<th class="n">${esc(i.label.split(" (")[0])}</th>`).join("")}<th class="n">HRES TN rain</th></tr>
+    ${a.days.map(d=>`<tr><td>${esc(d.valid)}</td><td class="n"><b>${v(d.score)}</b></td><td>${stTag(d.state)}</td>${ind.map(i=>{const p=d.parts[i.key];return `<td class="n">${p?`${v(p.value,1)} <span class="note">(${v(p.score)})</span>`:"–"}</td>`}).join("")}<td class="n">${v(d.tn_rain_hres,1," mm")}</td></tr>`).join("")}
+    </table></div></div>`;
+  return h;
+}
+
+// ---------------- E. Consistency ----------------
+function consistency(){
+  const c = S.consistency; if (!c || !c.systems.length) return `<div class="empty">No system to compare across runs.</div>`;
+  if (!c.systems.find(x=>x.storm===ui.csys)) ui.csys = c.systems[0].storm;
+  const s = c.systems.find(x=>x.storm===ui.csys);
+  return `<div class="bar"><span class="label">System</span><div class="seg">${pills(c.systems.map(x=>[x.storm,x.storm]), ui.csys, "csys")}</div></div>
+    ${img(s.png,"Consistency")}
+    <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Verdict</h3><ul class="take">${Object.values(s.verdict).map(t=>`<li>${esc(t)}</li>`).join("")}</ul>
+    <p class="note">Runs are matched by their ensemble-mean tracks (mean distance &lt; 450 km at common valid times), so a system keeps its history even if its ECMWF id changes.</p></div>
+    <div class="card"><h3>Run by run</h3><div class="tw"><table><tr><th>Run</th><th>Id</th><th class="n">P(≥D)</th><th class="n">P(≥CS)</th><th class="n">Peak (10-90%)</th><th class="n">Spread d3 / d5</th><th>Top landfall</th></tr>
+    ${s.chain.slice().reverse().map(r=>{const lf=Object.entries(r.landfall||{}).sort((a,b)=>b[1]-a[1])[0];return `<tr><td>${fmtRun(r.run)}</td><td>${esc(r.id)}</td><td class="n">${v(r.p_dep,0,"%")}</td><td class="n">${v(r.p_cs,0,"%")}</td><td class="n">${v(r.peak_med)} (${v(r.peak_p10)}–${v(r.peak_p90)})</td><td class="n">${v(r.spread72)} / ${v(r.spread120)} km</td><td>${lf?`${esc(lf[0])} ${v(lf[1],0,"%")}`:"none"}</td></tr>`}).join("")}
+    </table></div></div></div>`;
+}
+
+// ---------------- F. PDI ----------------
+function pdi(){
+  const p = S.pdi; if (!p) return `<div class="empty">PDI not available.</div>`;
+  const f = p.forecast, k = (t,val,sub) => `<div class="kpi"><div class="k">${t}</div><div class="v">${val}</div><div class="s">${sub}</div></div>`;
+  let h = `<div class="warn">A 15-day forecast PDI is the energy expected in this window only — it is not the final seasonal PDI.</div>
+    <div class="grid g6" style="margin-bottom:14px">
+    ${k("Forecast PDI", v(f.median,2), `median · 10-90% ${v(f.p10,1)}–${v(f.p90,1)}`)}
+    ${k("Normal, same 15 days", v(p.clim_window_mean,2), p.clim_window_p_zero!=null?`${v(p.clim_window_p_zero)}% of years had none`:"")}
+    ${k("P(above normal)", v(p.p_exceed_clim,0,"%"), "members above the 1991-2025 mean")}
+    ${k("Season so far", p.season_to_date?v(p.season_to_date.pdi,2):"–", p.season_to_date?`${p.season_to_date.cs} CS · ${p.season_to_date.dep} D since 1 Oct`:"")}
+    ${k("Normal OND season", v(p.clim_season_mean,2), p.clim_counts?`${v(p.clim_counts.dep,1)} D · ${v(p.clim_counts.cs,1)} CS per season`:"")}
+    ${k("Members with any CS", v(f.p_any,0,"%"), p.window||"")}
+    </div>${img(p.png,"PDI")}`;
+  if (p.seasons) h += `<div class="card" style="margin-top:14px"><details><summary>Season table 1991-2025 (Oct-Dec, IBTrACS)</summary><div class="tw"><table>
+    <tr><th>Year</th><th class="n">Depressions+</th><th class="n">Cyclonic storms</th><th class="n">Severe CS+</th><th class="n">PDI</th></tr>
+    ${p.seasons.slice().reverse().map(s=>`<tr><td>${s.year}</td><td class="n">${s.dep}</td><td class="n">${s.cs}</td><td class="n">${s.scs}</td><td class="n">${v(s.pdi,2)}</td></tr>`).join("")}</table></div></details>
+    <p class="note">Observed: IBTrACS v04, IMD (New Delhi) 3-min winds where present. ${p.season_to_date && p.season_to_date.last_fix ? `Latest observed fix in IBTrACS: ${esc(p.season_to_date.last_fix)} — the archive lags real time, so the current season may be incomplete.`:""}</p></div>`;
+  return h;
+}
+
+// ---------------- G. Verification ----------------
+function verif(){
+  const q = S.verification; if (!q) return `<div class="empty">Verification not available yet.</div>`;
+  const d = q.detection, ab = q.active_break||{};
+  const rr = q.rain.filter(r=>r.n);
+  let h = `<div class="grid g6" style="margin-bottom:14px">
+    ${d.bins.map(b=>`<div class="kpi"><div class="k">Detection rate ${esc(b.lead)}</div><div class="v">${v(b.pod,0,"%")}</div><div class="s">${b.hits}/${b.opportunities} chances</div></div>`).join("")}
+    <div class="kpi"><div class="k">False-alarm ratio</div><div class="v">${v(d.far,0,"%")}</div><div class="s">${d.false_alarms}/${d.predictions_verified} predictions</div></div>
+    <div class="kpi"><div class="k">Track error 72 h</div><div class="v">${v((q.track.find(t=>t.lead_h===72)||{}).ens_km,0," km")}</div><div class="s">ENS mean · n=${(q.track.find(t=>t.lead_h===72)||{}).ens_n||0}</div></div>
+    <div class="kpi"><div class="k">Rain MAE day 1</div><div class="v">${v((q.rain[0]||{}).ens_mae,1," mm")}</div><div class="s">ENS mean · ${(q.rain[0]||{}).n||0} station-days</div></div>
+    </div>${img(q.png,"Verification")}
+    <div class="grid g2" style="margin-top:14px"><div class="card"><h3>Track and intensity</h3><div class="tw"><table>
+    <tr><th>Lead</th><th class="n">ENS track</th><th class="n">HRES track</th><th class="n">ENS int. MAE / bias</th><th class="n">HRES int. MAE / bias</th></tr>
+    ${q.track.map(t=>`<tr><td>${t.lead_h} h</td><td class="n">${v(t.ens_km,0," km")} <span class="note">n=${t.ens_n}</span></td><td class="n">${v(t.hres_km,0," km")} <span class="note">n=${t.hres_n}</span></td><td class="n">${v(t.ens_int_mae,1)} / ${v(t.ens_int_bias,1)} kt</td><td class="n">${v(t.hres_int_mae,1)} / ${v(t.hres_int_bias,1)} kt</td></tr>`).join("")}</table></div></div>
+    <div class="card"><h3>Station rainfall (TN-SMART)</h3><div class="tw"><table>
+    <tr><th>Lead</th><th class="n">Station-days</th><th class="n">ENS MAE / RMSE</th><th class="n">HRES MAE / RMSE</th><th class="n">BSS ≥2.5</th><th class="n">BSS ≥15.6</th><th class="n">BSS ≥64.5</th></tr>
+    ${q.rain.map(r=>`<tr><td>Day ${r.lead_day}</td><td class="n">${r.n}</td><td class="n">${v(r.ens_mae,1)} / ${v(r.ens_rmse,1)}</td><td class="n">${v(r.hres_mae,1)} / ${v(r.hres_rmse,1)}</td><td class="n">${v(r["bss_2.5"],2)}</td><td class="n">${v(r["bss_15.6"],2)}</td><td class="n">${v(r["bss_64.5"],2)}</td></tr>`).join("")}</table></div>
+    <p class="note">BSS &gt; 0 = more skilful than always forecasting the observed frequency. Rain-day = 24 h ending 08:30 IST.</p></div>
+    <div class="card"><h3>Observed systems in the archive period</h3>${d.observed.length?`<div class="tw"><table><tr><th>System</th><th>Source</th><th>Reached depression</th><th>Position</th><th class="n">Peak</th><th class="n">Runs that predicted it</th></tr>
+    ${d.observed.map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(o.src)}</td><td>${esc(o.time)}</td><td>${ll(o.lat,o.lon)}</td><td class="n">${v(o.peak_kt)} kt</td><td class="n">${o.detected_runs}</td></tr>`).join("")}</table></div>`:`<div class="empty">None yet.</div>`}
+    ${d.false_list.length?`<p class="note">Recent false alarms: ${d.false_list.map(f=>`${esc(f.storm)} (${fmtRun(f.run)}, ${v(f.p)}%)`).join(", ")}</p>`:""}</div>
+    <div class="card"><h3>Active / break detector check</h3>${ab.summary?`<p>Day-1 score vs next-day observed TN station-mean rain over ${ab.summary.n} days:
+      correlation <b>${v(ab.summary.corr,2)}</b>. Mean observed rain on active days ${v(ab.summary.rain_active,1," mm")},
+      moderate ${v(ab.summary.rain_moderate,1," mm")}, subdued ${v(ab.summary.rain_subdued,1," mm")}.</p>`:`<div class="empty">Needs at least 5 verified days.</div>`}</div></div>
+    <p class="note">${esc(q.obs_sources)} Period ${esc(q.period)}; ${q.runs_archived} runs archived. Detection: a run "detects" an observed system if ≥ 30% of members form a depression within 500 km and 72 h of the observed genesis.
+    False alarm: a ≥ 30% prediction with no observed system within 500 km and 72 h. Samples are small early in the season — read with care.</p>`;
+  return h;
+}
+
+function methods(){
+  return `<div class="card"><h3>Methods and data</h3><ul class="take">
+  <li><b>Genesis probability</b>: ECMWF ENS tropical-cyclone track files (51 members, genesis systems 70B, 71B … included). For each member, the first time its system reaches LPA / depression (≥17 kt) / cyclonic storm (≥34 kt); probability = share of members with that event within 300 km. Systems already at that level at T+0 are excluded. Consistency: number of the last 4 runs with ≥ 20% in the common valid period.</li>
+  <li><b>Cyclone analysis</b>: strike probability (track within 120 km), member tracks coloured by IMD class, ensemble mean and HRES track, intensity plume, day-by-day mean position, spread and class probabilities, and member outcomes (landfall region from Natural Earth states, coast-skirting, recurvature, dissipation).</li>
+  <li><b>30-day NEM outlook</b>: weeks 1-2 from ECMWF ENS total precipitation; weeks 3-4 and days 29-30 from the NOAA CFSv2 lagged ensemble (4 members × last 4 cycles). Normals: NOAA CPC Unified gauge daily climatology 1991-2020 (land only). Area means on a 0.1° grid using Tamil Nadu district polygons (four TN regions) and state polygons. No bias correction is applied.</li>
+  <li><b>Active / break detector</b>: ECMWF HRES days 0-10 — SW Bay 850 hPa vorticity, 850 hPa easterlies, TCWV × easterly flux to the TN coast, 700/500 hPa humidity over TN, central-India-minus-SW-Bay pressure gradient; observed MJO phase/amplitude from BoM RMM as a small modifier.</li>
+  <li><b>Track consistency</b>: each run's systems are stored and matched across the last 10 runs by mean-track distance.</li>
+  <li><b>PDI</b>: 10⁻⁶ Σ v³ over 6-hourly fixes with v ≥ 34 kt. History from IBTrACS v04 (North Indian basin) with IMD winds; the climatological comparison uses the same 15 calendar days in 1991-2025.</li>
+  <li><b>Verification</b>: each run's ENS-mean and HRES tracks, predicted geneses and first-3-day rain fields are archived for 120 days and scored against IBTrACS / ECMWF analyses and TN-SMART station rainfall.</li>
+  </ul><p class="note">India's border is drawn as per the Government of India. Updated automatically after each ECMWF 00Z and 12Z run.</p></div>`;
+}
+
+function render(){
+  tabsBar();
+  if (!S){ return; }
+  $("runs").innerHTML = pills(man.runs.map(r=>[r.run, fmtRun(r.run)]), run, "run");
+  $("dl").innerHTML = `<a class="btn" href="outlook/${run}/summary.json" download>⬇ Data (JSON)</a>`;
+  const errs = Object.entries(S.errors||{});
+  $("warn").innerHTML = (S.demo ? `<div class="warn">Demo run made with synthetic data — not a forecast.</div>` : "") +
+    (errs.length ? `<div class="warn">Some parts could not be made for this run: ${errs.map(([k,e])=>`${esc(k)}`).join(", ")}.</div>` : "");
+  const F = {overview, genesis, cyclones, nem, ab: activeBreak, consistency, pdi, verif, methods};
+  $("t-"+tab).innerHTML = F[tab]();
+}
+function load(r){
+  run = r;
+  const R = man.runs.find(x=>x.run===r);
+  fetch(R.summary, {cache:"no-store"}).then(x=>x.json()).then(s => { S = s; render(); })
+    .catch(() => { S = null; $("t-"+tab).innerHTML = `<div class="empty">Could not load this run.</div>`; });
+}
+const h0 = location.hash.slice(1); if (TABS.find(t=>t[0]===h0)) tab = h0;
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (TABS.find(t=>t[0]===h)) { tab = h; render(); } });
+tabsBar();
+fetch("data/manifest_outlook.json", {cache:"no-store"}).then(r => r.ok ? r.json() : {runs:[]}).catch(() => ({runs:[]}))
+  .then(m => { man = m; $("upd").textContent = m.updated ? `Updated ${m.updated}` : "";
+    if (m.runs.length) load(m.runs[0].run); else $("t-overview").innerHTML = `<div class="empty">No outlook yet — it appears after the next ECMWF 00Z/12Z run is processed.</div>`; });
+</script>
+</body>
+</html>

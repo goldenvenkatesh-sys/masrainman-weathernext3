@@ -7,7 +7,7 @@ SITE=${1:-site}
 REPO=${RAIN_REPO:-https://github.com/goldenvenkatesh-sys/masrainman-rain-report}
 RAW=https://raw.githubusercontent.com/goldenvenkatesh-sys/masrainman-rain-report/reports
 
-cp web/index.html web/rain.html web/landfall.html "$SITE"/ 2>/dev/null || true
+cp web/index.html web/rain.html web/landfall.html web/outlook.html "$SITE"/ 2>/dev/null || true
 rm -rf "$SITE/rain" && mkdir -p "$SITE/rain"
 if ! git fetch -q --depth 1 "$REPO" reports 2>/dev/null; then
   echo "No rain reports yet (the rain-report repo has no 'reports' branch)."

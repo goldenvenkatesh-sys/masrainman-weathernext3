@@ -16,6 +16,10 @@ on:
         description: "Force one run: WN3 20261019_00hr_01_preds, IFS/AIFS 20261019_12 (empty = automatic)"
         required: false
         default: ""
+      outlook_backfill:
+        description: "NEM outlook: archive this many past days of ECMWF ENS tracks for verification (e.g. 30; empty = none)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -139,8 +143,21 @@ jobs:
           pip install -q -r requirements.txt
           python landfall.py
 
+      # NEM & cyclone outlook (genesis, days 1-15 cyclone analysis, 30-day NEM rain, active/break,
+      # track consistency, PDI, verification). Only new ECMWF 00Z/12Z runs; state kept in site/outlook/state.
+      - name: NEM & cyclone outlook
+        id: outlook
+        continue-on-error: true
+        timeout-minutes: 75
+        env:
+          OUTLOOK_BACKFILL_DAYS: ${{ github.event.inputs.outlook_backfill }}
+        run: |
+          pip install -q -r requirements.txt
+          pip install -q xarray cfgrib netCDF4 "eccodes>=2.39"
+          python nem_outlook.py
+
       - name: Save maps (site-data branch, private)
-        if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true' || steps.landfall.outputs.new == 'true'
+        if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -152,11 +169,11 @@ jobs:
           commit_message: "MasRainman model maps update"
 
       - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
-        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true'
+        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'
         run: bash get_rain_reports.sh site
 
       - name: Publish to Cloudflare Pages (login-protected)
-        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true'
+        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

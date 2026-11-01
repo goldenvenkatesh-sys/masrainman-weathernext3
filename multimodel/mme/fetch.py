@@ -37,23 +37,32 @@ def _cache(init, model, name):
     return os.path.join(d, name)
 
 
-def _download(url, path, timeout=180, tries=4):
+MAGIC = {".grib2": b"GRIB", ".bz2": b"BZh"}
+
+
+def _download(url, path, timeout=180, tries=5):
     if os.path.exists(path) and os.path.getsize(path) > 0:
         return path
+    magic = next((v for k, v in MAGIC.items() if path.endswith(k)), None)
     for attempt in range(tries):
         try:
             r = HTTP.get(url, timeout=timeout)
             if r.status_code == 404:
                 raise NotAvailable(url)
             r.raise_for_status()
+            # busy servers (NOMADS) sometimes answer 200 with a text page instead of data
+            if magic and not r.content.startswith(magic):
+                if b"not present" in r.content[:2000] or b"does not exist" in r.content[:2000]:
+                    raise NotAvailable(url)
+                raise RuntimeError(f"not a data file ({r.content[:80]!r})")
             break
         except NotAvailable:
             raise
-        except Exception as exc:  # timeouts, 429/5xx: wait and try again
+        except Exception as exc:  # timeouts, 429/5xx, text pages: wait and try again
             if attempt == tries - 1:
                 raise
             LOG.warning("retry %d for %s (%s)", attempt + 1, url.split("/")[-1][:80], exc)
-            time.sleep(10 * (attempt + 1))
+            time.sleep(20 * (attempt + 1))
     tmp = path + ".part"
     with open(tmp, "wb") as f:
         f.write(r.content)
@@ -175,7 +184,10 @@ def fetch_gfs(init, leads):
             for m in messages(path):
                 if m["start"] == 0:  # running total since the start
                     out[s] = regrid(m)
-        out[0] = np.zeros_like(next(v for v in out.values() if v is not None))
+        first = next((v for v in out.values() if v is not None), None)
+        if first is None:
+            raise NotAvailable("GFS: no rain fields in the downloaded files")
+        out[0] = np.zeros_like(first)
         return out
 
     return _interp(leads, steps, acc_at)
@@ -192,7 +204,9 @@ def fetch_gefs(init, leads):
             url = (f"{NOMADS}filter_gefs_atmos_0p50a.pl?dir=%2Fgefs.{ymd}%2F{hh}%2Fatmos%2Fpgrb2ap5"
                    f"&file=geavg.t{hh}z.pgrb2a.0p50.f{s:03d}&var_APCP=on{SUB}")
             path = _download(url, _cache(init, "gefs", f"f{s:03d}.grib2"))
-            m = next(x for x in messages(path) if x["end"] - x["start"] == 6)
+            m = next((x for x in messages(path) if x["end"] - x["start"] == 6), None)
+            if m is None:
+                raise NotAvailable(f"GEFS f{s:03d}: no 6-h rain in file")
             v = regrid(m)
             total = v if total is None else total + v
             out[s] = total

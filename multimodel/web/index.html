@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MasRainman Multi-model Guidance</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97; --bad:#ff5a5a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  nav{display:flex;gap:4px;padding:0 18px;background:#0e182b;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;overflow-x:auto}
+  nav a{color:var(--muted);text-decoration:none;padding:11px 16px;font-weight:600;border-bottom:3px solid transparent;white-space:nowrap;cursor:pointer}
+  nav a.on{color:var(--text);border-bottom-color:var(--accent)}
+  nav a .badge{background:var(--bad);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:6px}
+  main{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+  section{display:none}
+  section.on{display:block}
+  h2{font-size:17px;margin:6px 0 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  h2 .tag{font-size:11px;font-weight:600;color:#04121f;background:var(--accent2);padding:2px 8px;border-radius:6px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px;min-width:52px}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .frames{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
+  .fr{flex:0 0 auto;min-width:74px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer}
+  .fr b{display:block;font-size:13px}
+  .fr small{color:var(--muted);font-size:11px}
+  .fr.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300}
+  .fr.on small{color:#3b2a00}
+  .fr.off{opacity:.35;cursor:default}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
+  input[type=range]{flex:1;min-width:200px;accent-color:var(--accent2)}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04121f;font-weight:700}
+  .now{font-weight:700;font-size:15px}
+  .now small{color:var(--muted);font-weight:400;font-size:12px;margin-left:6px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px}
+  .split{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(300px,1fr);gap:14px;align-items:start}
+  .viewer{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line);min-height:120px}
+  .viewer img{display:block;width:100%;height:auto}
+  .side{display:grid;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .card h3{margin:0 0 8px;font-size:14px}
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .kpi{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+  .kpi small{color:var(--muted);font-size:11px;display:block}
+  .kpi b{font-size:19px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  .wrap{overflow-x:auto}
+  .wbar{height:8px;border-radius:4px;background:var(--accent);display:inline-block;vertical-align:middle;margin-right:6px}
+  .chip{display:inline-block;padding:1px 7px;border-radius:5px;font-size:11px;font-weight:700;color:#111}
+  .alert{background:#2a1416;border:1px solid #6b2a2f;color:#ffd5d5;border-radius:10px;padding:10px 14px;margin-bottom:12px}
+  .note{color:var(--muted);font-size:12.5px}
+  .empty{color:var(--muted);padding:20px}
+  footer{color:var(--muted);font-size:12px;margin-top:18px}
+  @media (max-width:980px){.split{grid-template-columns:1fr}}
+  @media (max-width:640px){header h1{font-size:15px} .fr{min-width:62px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>MasRainman · <span>Multi-model Ensemble Guidance</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+</header>
+<nav>
+  <a data-tab="lpa" class="on">LPA Tracker</a>
+  <a data-tab="cyclone">Cyclone Tracker <span class="badge" id="cycBadge" style="display:none"></span></a>
+  <a data-tab="rain">Rainfall Forecast</a>
+  <a href="../index.html">🗺 Model maps</a>
+  <a href="../outlook.html">📈 NEM &amp; cyclone outlook</a>
+  <a href="../landfall.html">🌀 Landfall maps</a>
+  <a href="../rain.html">🌧 Rain reports</a>
+</nav>
+
+<main>
+
+<!-- ================= LPA ================= -->
+<section id="lpa" class="on">
+  <h2>Low Pressure Area Tracker <span class="tag" id="lpaTag"></span></h2>
+  <div class="bar"><span class="label">Cycle</span><div class="seg" id="lpaCycles"></div></div>
+  <div class="bar"><span class="label">SST</span>
+    <div class="seg" id="sst"><button class="pill on" data-s="sst">SST on</button><button class="pill" data-s="nosst">SST off</button></div>
+  </div>
+  <div class="frames" id="lpaFrames"></div>
+  <div class="controls">
+    <button class="btn" id="lpaPrev">◀</button><button class="btn primary" id="lpaPlay">▶ Play</button><button class="btn" id="lpaNext">▶</button>
+    <input type="range" id="lpaSlider" min="0" max="0" value="0">
+    <a class="btn" id="lpaPng" download>⬇ PNG</a><a class="btn" id="lpaCsv" download>⬇ Member tracks CSV</a>
+  </div>
+  <div class="split">
+    <div class="viewer"><img id="lpaImg" alt="LPA tracker map"></div>
+    <div class="side">
+      <div class="card"><h3>Systems in this cycle</h3><div class="wrap"><table id="sysTable"></table></div></div>
+      <div class="card"><h3 id="trkTitle">Consensus track</h3><div class="wrap"><table id="trkTable"></table></div></div>
+      <div class="card"><h3>Models and weights</h3><div id="lpaWeights"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CYCLONE ================= -->
+<section id="cyclone">
+  <h2>Cyclone Tracker <span class="tag" id="cycTag"></span></h2>
+  <div id="cycAlert"></div>
+  <div class="bar"><span class="label">System</span><div class="seg" id="cycSystems"></div></div>
+  <div class="split">
+    <div class="viewer" id="cycViewer"><img id="cycImg" alt="Cyclone tracker map"></div>
+    <div class="side">
+      <div class="card"><div class="kpis" id="cycKpis"></div></div>
+      <div class="card"><h3>Landfall probability</h3><table id="lfTable"></table></div>
+      <div class="card"><h3>Forecast track (weighted consensus)</h3><div class="wrap"><table id="cycTrack"></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RAINFALL ================= -->
+<section id="rain">
+  <h2>Multi-model Weighted Rainfall Forecast <span class="tag">24 h · 7 day · 15 day</span></h2>
+  <div class="bar"><span class="label">Cycle</span><div class="seg" id="rainCycles"></div></div>
+  <div class="bar"><span class="label">Region</span>
+    <div class="seg" id="regions">
+      <button class="pill" data-r="south_india">South India</button>
+      <button class="pill" data-r="north_india">North India</button>
+      <button class="pill on" data-r="tamilnadu">Tamil Nadu</button>
+      <button class="pill" data-r="kerala">Kerala</button>
+      <button class="pill" data-r="karnataka">Karnataka</button>
+      <button class="pill" data-r="ap">Andhra Pradesh</button>
+      <button class="pill" data-r="telangana">Telangana</button>
+    </div>
+  </div>
+  <div class="bar"><span class="label">Models</span>
+    <div class="seg" id="groups">
+      <button class="pill on" data-g="ens">Ensemble blend</button>
+      <button class="pill" data-g="det">Deterministic blend</button>
+    </div>
+  </div>
+  <div class="bar"><span class="label">Period</span>
+    <div class="seg" id="periods">
+      <button class="pill on" data-p="24h">Daily 24 h (Day 1 – 15)</button>
+      <button class="pill" data-p="7day">7-day total</button>
+      <button class="pill" data-p="15day">15-day total</button>
+    </div>
+  </div>
+  <div class="frames" id="days"></div>
+  <div class="controls" id="dayControls">
+    <button class="btn" id="dPrev">◀</button><button class="btn primary" id="dPlay">▶ Play</button><button class="btn" id="dNext">▶</button>
+    <input type="range" id="dSlider" min="0" max="14" value="0">
+  </div>
+  <div class="controls">
+    <div class="now" id="rainNow"></div>
+    <span style="flex:1"></span>
+    <a class="btn" id="rainPng" download>⬇ PNG</a><a class="btn" id="rainCsv" download>⬇ District CSV</a>
+  </div>
+  <div class="split">
+    <div class="viewer"><img id="rainImg" alt="Rainfall map"></div>
+    <div class="side">
+      <div class="card"><h3 id="topTitle">Top districts</h3><div class="wrap"><table id="topTable"></table></div></div>
+      <div class="card"><h3>Models in this blend</h3><div id="rainModels"></div></div>
+      <div class="card"><h3>How the blend works</h3>
+        <div class="note">Two separate blends: <b style="color:var(--text)">Ensemble</b> (ensemble means of ECMWF ENS, WeatherNext 3, AIFS ENS, GEFS, GEPS) and <b style="color:var(--text)">Deterministic</b> (single runs of IFS HRES, AIFS, ICON, GFS). Every model is regridded to 0.1° and weighted; weights are shared out again over the models that reach each day. Days end at 08:30 IST.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Multi-model guidance from ECMWF Open Data (CC BY 4.0), NOAA GFS/GEFS, DWD ICON, ECCC GEPS and WeatherNext 3 —
+  experimental, not official IMD warnings or forecasts. Analysis &amp; visualisation: MasRainman.
+  Maps follow India's boundaries as per the Government of India.
+</footer>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const S = {m:null, lpaCyc:0, rainCyc:0, sst:'sst', lead:0, lpaTimer:null,
+             region:'tamilnadu', group:'ens', period:'24h', day:0, dTimer:null, sys:0, csv:{}};
+  const NAMES = {ecmwf_ens:'ECMWF ENS', wn3:'WeatherNext 3', aifs_ens:'ECMWF AIFS ENS', gefs:'NCEP GEFS', geps:'CMC GEPS',
+                 ecmwf_hres:'ECMWF IFS HRES', aifs_single:'ECMWF AIFS Single', icon:'DWD ICON', gfs:'NCEP GFS'};
+  const WEIGHTS = {ens:{ecmwf_ens:.30, wn3:.25, aifs_ens:.20, gefs:.15, geps:.10},
+                   det:{ecmwf_hres:.35, aifs_single:.25, icon:.20, gfs:.20}};
+  const CATCOL = {LPA:'#9e9e9e', D:'#4daf4a', DD:'#e6c300', CS:'#ff7f00', SCS:'#e41a1c', VSCS:'#984ea3', ESCS:'#5b1a72', SuCS:'#2b0a3d'};
+  const IMD = v => v>=204.5?['Extremely heavy','#d7191c','#fff']:v>=115.6?['Very heavy','#fd8d3c','#111']:v>=64.5?['Heavy','#fdd049','#111']:
+                   v>=15.6?['Moderate','#3ddc97','#111']:v>=2.5?['Light','#9cc3e6','#111']:['Very light / dry','#c0d8ef','#111'];
+  const d = iso => new Date(iso.replace('Z',':00Z'));
+  const fmtUTC = iso => d(iso).toLocaleString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false})+'Z';
+  const fmtIST = dt => dt.toLocaleString('en-IN',{timeZone:'Asia/Kolkata',weekday:'short',day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:true})+' IST';
+  const cycLabel = c => fmtUTC(c.cycle);
+  const chip = (t,bg,fg) => '<span class="chip" style="background:'+bg+';color:'+(fg||'#111')+'">'+t+'</span>';
+
+  document.querySelectorAll('nav a[data-tab]').forEach(a=>a.onclick=()=>{
+    document.querySelectorAll('nav a[data-tab]').forEach(x=>x.classList.toggle('on',x===a));
+    document.querySelectorAll('main section').forEach(s=>s.classList.toggle('on',s.id===a.dataset.tab));
+  });
+  const pills = (box, list, cur, onPick) => {
+    box.innerHTML='';
+    list.forEach((txt,i)=>{ const b=document.createElement('button'); b.className='pill'+(i===cur?' on':''); b.textContent=txt; b.onclick=()=>onPick(i); box.appendChild(b); });
+  };
+  const seg = (id, key, attr, after) => document.querySelectorAll('#'+id+' .pill').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#'+id+' .pill').forEach(x=>x.classList.toggle('on',x===b)); S[key]=b.dataset[attr]; after();
+  });
+  const weightsHtml = (g, models) => '<table>'+Object.entries(WEIGHTS[g]).map(([m,w])=>{
+    const ok = !models || m in models;
+    return '<tr><td>'+NAMES[m]+(ok?'':' <span class="note">(not in this cycle)</span>')+'</td><td><span class="wbar" style="width:'+(w*300)+'px;background:'+(g==='ens'?'#d62728':'#2f6bd8')+';opacity:'+(ok?1:.3)+'"></span>'+Math.round(w*100)+'%</td></tr>';
+  }).join('')+'</table>';
+
+  // ---------------- LPA ----------------
+  const T = () => S.m.tracks[S.lpaCyc];
+  const tbase = () => 'tracks/'+T().id+'/';
+  function buildLpa(){
+    if(!S.m.tracks.length){ $('lpaImg').replaceWith(Object.assign(document.createElement('div'),{className:'empty',textContent:'No tracker run yet.'})); return; }
+    pills($('lpaCycles'), S.m.tracks.map((c,i)=>cycLabel(c)+(i===0?' · latest':'')), S.lpaCyc, i=>{S.lpaCyc=i; buildLpa();});
+    const r = T();
+    $('lpaTag').textContent = r.systems.length+' system'+(r.systems.length===1?'':'s')+' · '+Object.keys(r.models.ens).length+' ensemble + '+Object.keys(r.models.det).length+' deterministic models';
+    const box = $('lpaFrames'); box.innerHTML='';
+    r.frames.forEach((f,i)=>{ const el=document.createElement('div'); el.className='fr'; el.innerHTML='<b>+'+f.lead+'h</b><small>'+fmtUTC(f.valid)+'</small>'; el.onclick=()=>{lpaStop(); showLpa(i);}; box.appendChild(el); });
+    $('lpaSlider').max = r.frames.length-1;
+    $('lpaCsv').href = tbase()+'member_tracks.csv';
+    $('lpaWeights').innerHTML = '<div class="label">Ensemble group</div>'+weightsHtml('ens', r.models.ens)+'<div class="label" style="margin-top:10px">Deterministic group</div>'+weightsHtml('det', r.models.det);
+    const st = $('sysTable');
+    st.innerHTML = r.systems.length ? '<tr><th>ID</th><th>Where</th><th>Support</th><th>Min hPa</th><th>Peak</th></tr>'+r.systems.map(s=>
+      '<tr><td><b>'+s.id+'</b></td><td>'+s.basin+'</td><td>'+Math.round(s.support*100)+'%</td><td>'+s.min_mslp+'</td><td>'+chip(s.peak_cat,CATCOL[s.peak_cat],['SCS','VSCS','ESCS','SuCS'].includes(s.peak_cat)?'#fff':'#111')+(s.peak_wind_kt?' '+Math.round(s.peak_wind_kt)+' kt':'')+'</td></tr>').join('')
+      : '<tr><td class="empty">No persistent low in the multi-model consensus.</td></tr>';
+    const s0 = r.systems[0];
+    $('trkTitle').textContent = s0 ? s0.id+' consensus track' : 'Consensus track';
+    $('trkTable').innerHTML = s0 ? '<tr><th>T+</th><th>Lat</th><th>Lon</th><th>hPa</th><th>Spread</th></tr>'+s0.track.map(p=>
+      '<tr><td>'+p.lead+' h</td><td>'+p.lat.toFixed(1)+'°N</td><td>'+p.lon.toFixed(1)+'°E</td><td>'+p.mslp.toFixed(0)+'</td><td>'+p.spread_km+' km</td></tr>').join('') : '';
+    showLpa(Math.min(S.lead, r.frames.length-1));
+  }
+  function showLpa(i){
+    S.lead=i; const f=T().frames[i]; const name=f[S.sst]||f.nosst;
+    $('lpaImg').src = tbase()+name; $('lpaPng').href = tbase()+name; $('lpaSlider').value=i;
+    document.querySelectorAll('#lpaFrames .fr').forEach((el,k)=>el.classList.toggle('on',k===i));
+  }
+  const lpaStop = () => { if(S.lpaTimer){clearInterval(S.lpaTimer); S.lpaTimer=null;} $('lpaPlay').textContent='▶ Play'; };
+  $('lpaPlay').onclick = () => { if(S.lpaTimer) return lpaStop(); $('lpaPlay').textContent='❚❚ Pause'; S.lpaTimer=setInterval(()=>showLpa((S.lead+1)%T().frames.length),900); };
+  $('lpaPrev').onclick = () => { lpaStop(); showLpa((S.lead-1+T().frames.length)%T().frames.length); };
+  $('lpaNext').onclick = () => { lpaStop(); showLpa((S.lead+1)%T().frames.length); };
+  $('lpaSlider').oninput = e => { lpaStop(); showLpa(+e.target.value); };
+  seg('sst','sst','s',()=>showLpa(S.lead));
+
+  // ---------------- CYCLONE ----------------
+  function buildCyclone(){
+    const r = S.m.tracks[0];
+    const cyc = r ? r.systems.filter(s=>s.cyclone_map) : [];
+    if(cyc.length){ $('cycBadge').style.display=''; $('cycBadge').textContent=cyc.length+' active'; }
+    if(!cyc.length){
+      $('cycTag').textContent = 'none';
+      $('cycAlert').innerHTML = '<div class="card note">No system reaches Deep Depression strength in the multi-model blend for this cycle'+(r?' ('+cycLabel(r)+')':'')+'. The LPA Tracker shows weaker lows.</div>';
+      $('cycSystems').innerHTML=''; document.querySelector('#cyclone .split').style.display='none'; return;
+    }
+    document.querySelector('#cyclone .split').style.display='';
+    pills($('cycSystems'), cyc.map(s=>s.id+' · '+s.basin), S.sys, i=>{S.sys=i; buildCyclone();});
+    const s = cyc[Math.min(S.sys,cyc.length-1)];
+    const top = s.landfall.find(x=>x.where.indexOf('No landfall')<0);
+    $('cycTag').textContent = s.id+' · peak '+s.peak_cat;
+    $('cycAlert').innerHTML = '<div class="alert"><b>'+s.id+' ('+s.basin+'):</b> multi-model consensus peaks at '+s.peak_cat+(s.peak_wind_kt?' ('+Math.round(s.peak_wind_kt)+' kt)':'')+
+      (top?'. Most likely landfall: '+top.where+' ('+Math.round(top.prob*100)+'%'+(top.lead?', around T+'+top.lead+' h':'')+')':'')+'. Model guidance only — follow IMD bulletins.</div>';
+    $('cycImg').src = 'tracks/'+r.id+'/'+s.cyclone_map;
+    const minP = s.min_mslp;
+    $('cycKpis').innerHTML = '<div class="kpi"><small>Peak (det. blend wind)</small><b>'+(s.peak_wind_kt?Math.round(s.peak_wind_kt)+' kt':'—')+'</b> '+chip(s.peak_cat,CATCOL[s.peak_cat])+'</div>'+
+      '<div class="kpi"><small>Min consensus MSLP</small><b>'+minP+' hPa</b></div>'+
+      '<div class="kpi"><small>Support</small><b>'+Math.round(s.support*100)+'%</b></div>'+
+      '<div class="kpi"><small>Members on this system</small><b>'+s.members+'</b></div>';
+    $('lfTable').innerHTML = s.landfall.map(x=>'<tr><td>'+x.where+'</td><td><span class="wbar" style="width:'+Math.round(x.prob*200)+'px;background:#e41a1c"></span>'+Math.round(x.prob*100)+'%'+(x.lead?' · ~T+'+x.lead+'h':'')+'</td></tr>').join('');
+    $('cycTrack').innerHTML = '<tr><th>T+</th><th>Lat</th><th>Lon</th><th>kt</th><th>hPa</th><th>Cat</th></tr>'+s.track.map(p=>
+      '<tr><td>'+p.lead+'</td><td>'+p.lat.toFixed(1)+'</td><td>'+p.lon.toFixed(1)+'</td><td>'+(p.wind_kt==null?'—':Math.round(p.wind_kt))+'</td><td>'+p.mslp.toFixed(0)+'</td><td>'+chip(p.cat,CATCOL[p.cat])+'</td></tr>').join('');
+  }
+
+  // ---------------- RAIN ----------------
+  const R = () => S.m.rain[S.rainCyc];
+  const rbase = () => 'rain/'+R().id+'/'+S.group+'/';
+  const key = () => S.period==='24h' ? 'd'+String(S.day+1).padStart(2,'0') : S.period;
+  function buildRain(){
+    if(!S.m.rain.length){ $('rainNow').textContent='No rainfall run yet.'; return; }
+    pills($('rainCycles'), S.m.rain.map((c,i)=>cycLabel(c)+(i===0?' · latest':'')), S.rainCyc, i=>{S.rainCyc=i; S.csv={}; buildRain();});
+    const r = R(), g = r.groups[S.group];
+    const box = $('days'); box.innerHTML='';
+    r.days.forEach((dd,i)=>{
+      const has = g && g.maps[S.region] && g.maps[S.region].includes('d'+String(i+1).padStart(2,'0'));
+      const el=document.createElement('div'); el.className='fr'+(has?'':' off');
+      el.innerHTML='<b>Day '+(i+1)+'</b><small>'+new Date(dd.end_ist).toLocaleString('en-GB',{timeZone:'Asia/Kolkata',weekday:'short',day:'2-digit',month:'short'})+'</small>';
+      if(has) el.onclick=()=>{dStop(); S.day=i; showRain();};
+      box.appendChild(el);
+    });
+    $('days').style.display = $('dayControls').style.display = S.period==='24h' ? '' : 'none';
+    $('rainModels').innerHTML = g ? weightsHtml(S.group, g.models) : '<div class="note">This blend is not available for this cycle.</div>';
+    showRain();
+  }
+  function showRain(){
+    const r=R(), g=r.groups[S.group];
+    document.querySelectorAll('#days .fr').forEach((el,k)=>el.classList.toggle('on',k===S.day && S.period==='24h'));
+    $('dSlider').value=S.day;
+    if(!g || !g.maps[S.region] || !g.maps[S.region].includes(key())){ $('rainImg').removeAttribute('src'); $('rainNow').textContent='This map is not available for this cycle.'; $('topTable').innerHTML=''; return; }
+    const src = rbase()+S.region+'_'+key()+'.png';
+    $('rainImg').src = src; $('rainPng').href = src;
+    const end = new Date(r.days[S.period==='24h'?S.day:(S.period==='7day'?6:14)].end_ist);
+    $('rainNow').innerHTML = (S.period==='24h' ? 'Day '+(S.day+1)+' · 24 h ending '+fmtIST(end) : (S.period==='7day'?'7':'15')+'-day total ending '+fmtIST(end))+'<small>'+g.title+'</small>';
+    const csvUrl = rbase()+S.region+'_districts.csv';
+    const isState = !['south_india','north_india'].includes(S.region);
+    $('rainCsv').style.display = isState ? '' : 'none'; $('rainCsv').href = csvUrl;
+    if(!isState){ $('topTitle').textContent='Top districts'; $('topTable').innerHTML='<tr><td class="note">District values are shown on the single-state maps.</td></tr>'; return; }
+    const fill = rows => {
+      const col = rows[0].indexOf(key());
+      const list = rows.slice(1).filter(x=>x[col]!=='' && x[col]!=null).map(x=>[x[0], parseFloat(x[col])]).sort((a,b)=>b[1]-a[1]).slice(0,10);
+      $('topTitle').textContent = 'Top districts · '+(S.period==='24h'?'Day '+(S.day+1):S.period.replace('day','-day total'))+' (district average)';
+      $('topTable').innerHTML = '<tr><th>District</th><th>mm</th>'+(S.period==='24h'?'<th>IMD category</th>':'')+'</tr>'+list.map(([n,v])=>{
+        const c=IMD(v); return '<tr><td>'+n+'</td><td>'+v.toFixed(0)+'</td>'+(S.period==='24h'?'<td>'+chip(c[0],c[1],c[2])+'</td>':'')+'</tr>'; }).join('');
+    };
+    if(S.csv[csvUrl]) return fill(S.csv[csvUrl]);
+    fetch(csvUrl).then(x=>x.ok?x.text():Promise.reject()).then(t=>{ S.csv[csvUrl]=t.trim().split(/\r?\n/).map(l=>l.split(',')); fill(S.csv[csvUrl]); })
+      .catch(()=>{ $('topTable').innerHTML=''; });
+  }
+  const dStop = () => { if(S.dTimer){clearInterval(S.dTimer); S.dTimer=null;} $('dPlay').textContent='▶ Play'; };
+  const dStep = k => { const n=R().days.length; S.day=(S.day+k+n)%n; showRain(); };
+  $('dPlay').onclick = () => { if(S.dTimer) return dStop(); $('dPlay').textContent='❚❚ Pause'; S.dTimer=setInterval(()=>dStep(1),1100); };
+  $('dPrev').onclick = () => { dStop(); dStep(-1); };
+  $('dNext').onclick = () => { dStop(); dStep(1); };
+  $('dSlider').oninput = e => { dStop(); S.day=+e.target.value; showRain(); };
+  seg('regions','region','r',buildRain); seg('groups','group','g',buildRain); seg('periods','period','p',buildRain);
+
+  fetch('manifest.json?t='+Date.now()).then(r=>r.json()).then(m=>{
+    S.m = m;
+    $('upd').textContent = 'Updated '+fmtIST(d(m.updated));
+    buildLpa(); buildCyclone(); buildRain();
+  }).catch(()=>{ $('upd').textContent='Could not load data'; });
+})();
+</script>
+</body>
+</html>

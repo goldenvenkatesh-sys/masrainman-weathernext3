@@ -134,3 +134,22 @@ site/data/models.json                 list of models for the page
   sharing before giving the page to others.
 - ECMWF open data is CC BY 4.0.
 - These maps are not official forecasts. Please follow IMD for official forecasts and warnings.
+
+## Multi-model page (`/mme/`) — rain, LPA tracker, cyclone tracker
+
+Code in `multimodel/`, run by `.github/workflows/mme.yml` once a day (4:00 PM IST, 00 UTC cycle)
+and whenever that code changes. Same site-data branch and Cloudflare project as the model maps.
+
+| Product | Models |
+|---|---|
+| Rain, ensemble blend | ECMWF ENS 0.30 · WeatherNext 3 0.25 · AIFS ENS 0.20 · GEFS 0.15 · GEPS 0.10 |
+| Rain, deterministic blend | IFS HRES 0.35 · AIFS Single 0.25 · ICON 0.20 · GFS 0.20 |
+| LPA / cyclone tracks | members of the ensembles (MSLP) + deterministic MSLP and 10-m wind |
+
+- Rain: Day 1–15 (08:30–08:30 IST), 7-day and 15-day totals; South India, North India, Tamil Nadu,
+  Kerala, Karnataka, Andhra Pradesh, Telangana (state maps show only the state, with district averages).
+- LPA Desk maps T+0…T+168 h (SST on/off); a cyclone map once a system reaches Deep Depression in the
+  deterministic blend, with landfall probabilities by coastal sector.
+- Weights are shared out over the models that reach each day. Members per ensemble: `env` in `mme.yml`.
+- Borders as per the Government of India (DataMeet, Survey of India based; downloaded on first run).
+

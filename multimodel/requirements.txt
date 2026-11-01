@@ -1,0 +1,9 @@
+ecmwf-opendata
+pyshp
+eccodes>=2.39
+requests
+scipy
+numpy
+matplotlib
+cartopy
+shapely

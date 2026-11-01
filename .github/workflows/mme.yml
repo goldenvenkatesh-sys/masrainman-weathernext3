@@ -1,0 +1,127 @@
+name: MasRainman multi-model (rain + LPA + cyclone)
+
+# Multi-model weighted rainfall (Day 1-15, 7-day, 15-day; ensemble + deterministic blends),
+# LPA tracker and cyclone tracker for the 00 UTC cycle, published at <site>/mme/.
+# Once a day to save GitHub minutes (about 45-60 minutes per run).
+on:
+  push:                              # also run once whenever the multi-model code changes
+    branches: [main]
+    paths: ["multimodel/**", ".github/workflows/mme.yml"]
+  schedule:
+    - cron: "30 10 * * *"           # 4:00 PM IST, when all 00 UTC models are out
+  workflow_dispatch:
+    inputs:
+      cycle:
+        description: "Cycle YYYYMMDDHH, e.g. 2026110100 (empty = latest 00/12 UTC)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weathernext3                # never runs at the same time as the model-maps job
+  cancel-in-progress: false
+
+env:
+  CF_PROJECT: masrainman-wn3
+  SITE_DIR: ${{ github.workspace }}/site/mme
+  MME_CACHE: ${{ github.workspace }}/mme_cache
+  KEEP_CYCLES: "2"
+  # Members downloaded per ensemble (more = slower). Rain uses ensemble means; tracks use members.
+  ECMWF_ENS_MEMBERS: "20"
+  AIFS_ENS_MEMBERS: "20"
+  TRACK_ECMWF_ENS_MEMBERS: "20"
+  TRACK_AIFS_ENS_MEMBERS: "20"
+  TRACK_GEFS_MEMBERS: "20"
+
+jobs:
+  mme:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get current maps (site-data branch)
+        run: |
+          mkdir -p site
+          if git ls-remote --exit-code --heads origin site-data >/dev/null 2>&1; then
+            git fetch --depth 1 origin site-data
+            git --work-tree=site checkout origin/site-data -- .
+            git reset -q
+          fi
+          ls site/mme 2>/dev/null || echo "(no multi-model maps yet)"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Google login (WeatherNext 3 access)
+        env:
+          GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          printf '%s' "$GCP_CREDS" > "$RUNNER_TEMP/gcp.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp.json" >> "$GITHUB_ENV"
+
+      - name: Install packages
+        run: |
+          pip install -q -r requirements.txt
+          pip install -q -r multimodel/requirements.txt
+
+      - name: Cache map coastlines and India boundaries
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/cartopy
+            multimodel/boundaries
+          key: mme-boundaries-v1
+
+      - name: Rainfall (ensemble + deterministic blends)
+        id: rain
+        continue-on-error: true
+        timeout-minutes: 70
+        working-directory: multimodel
+        run: python -u run_rain.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }}
+
+      - name: LPA + cyclone trackers
+        id: tracks
+        continue-on-error: true
+        timeout-minutes: 45
+        working-directory: multimodel
+        run: python -u run_tracks.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }}
+
+      - name: Page + manifest
+        id: page
+        if: steps.rain.outcome == 'success' || steps.tracks.outcome == 'success'
+        working-directory: multimodel
+        run: python mme_site.py
+
+      - name: Save maps (site-data branch, private)
+        if: steps.page.outcome == 'success'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: site-data
+          force_orphan: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "MasRainman multi-model update"
+
+      - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
+        if: steps.page.outcome == 'success'
+        run: |
+          cp web/index.html web/rain.html web/landfall.html web/outlook.html site/ 2>/dev/null || true
+          bash get_rain_reports.sh site
+
+      - name: Publish to Cloudflare Pages (login-protected)
+        if: steps.page.outcome == 'success'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true

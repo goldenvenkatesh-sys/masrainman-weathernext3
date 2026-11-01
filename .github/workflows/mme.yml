@@ -84,14 +84,19 @@ jobs:
         continue-on-error: true
         timeout-minutes: 70
         working-directory: multimodel
-        run: python -u run_rain.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }}
+        run: |
+          mkdir -p "$SITE_DIR"
+          set -o pipefail
+          python -u run_rain.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }} 2>&1 | tee "$SITE_DIR/last_log_rain.txt"
 
       - name: LPA + cyclone trackers
         id: tracks
         continue-on-error: true
         timeout-minutes: 45
         working-directory: multimodel
-        run: python -u run_tracks.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }}
+        run: |
+          set -o pipefail
+          python -u run_tracks.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }} 2>&1 | tee "$SITE_DIR/last_log_tracks.txt"
 
       - name: Page + manifest
         id: page

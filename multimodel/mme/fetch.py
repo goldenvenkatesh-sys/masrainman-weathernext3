@@ -12,6 +12,7 @@
 
 import bz2
 import os
+import time
 import logging
 from datetime import timedelta
 
@@ -36,13 +37,23 @@ def _cache(init, model, name):
     return os.path.join(d, name)
 
 
-def _download(url, path, timeout=180):
+def _download(url, path, timeout=180, tries=4):
     if os.path.exists(path) and os.path.getsize(path) > 0:
         return path
-    r = HTTP.get(url, timeout=timeout)
-    if r.status_code == 404:
-        raise NotAvailable(url)
-    r.raise_for_status()
+    for attempt in range(tries):
+        try:
+            r = HTTP.get(url, timeout=timeout)
+            if r.status_code == 404:
+                raise NotAvailable(url)
+            r.raise_for_status()
+            break
+        except NotAvailable:
+            raise
+        except Exception as exc:  # timeouts, 429/5xx: wait and try again
+            if attempt == tries - 1:
+                raise
+            LOG.warning("retry %d for %s (%s)", attempt + 1, url.split("/")[-1][:80], exc)
+            time.sleep(10 * (attempt + 1))
     tmp = path + ".part"
     with open(tmp, "wb") as f:
         f.write(r.content)

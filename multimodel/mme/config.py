@@ -107,15 +107,20 @@ NORTH_CITIES = [
     ("Jammu", 32.73, 74.86), ("Kohima", 25.67, 94.11), ("Bikaner", 28.02, 73.31),
 ]
 
-# MASRainman house colour bar
-RAIN_CL = ["#ffffff", "#c0d8ef", "#9cc3e6", "#6ea6dc", "#4a8ee0", "#1f6db3",
-           "#007500", "#00bf00", "#00ff00", "#f0f000", "#ffd23f", "#ffbf00",
-           "#ff9f00", "#ff7f00", "#f04800", "#e03020", "#c41e1e", "#a3005a",
-           "#e91e63", "#d9d9d9"]
-RAIN_LV = {
-    "24h": ([0.1, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100, 150, 200, 250, 300],
-            [0.5, 3, 10, 25, 40, 60, 100, 300]),
-    "7day": ([1, 5, 10, 20, 30, 40, 60, 80, 100, 125, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 1000],
-             [5, 30, 80, 150, 300, 500, 700, 1000]),
-}
-RAIN_LV["15day"] = RAIN_LV["7day"]
+# MASRainman house colour bars (from the MASRainman ECMWF maps), a number on every box.
+# period: (boundaries, colours between them, colour below, colour above, label)
+RAIN_24H = (
+    [0.1, 0.3, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 100, 150, 200, 300],
+    ["#ffffff", "#d8d0fc", "#bcd6ec", "#9cc0e4", "#6aa2da", "#3a7cc4", "#1452a0", "#1e6e98",
+     "#2e8a3c", "#60b04c", "#a8c84a", "#e2e822", "#f8d820", "#f49a1e", "#ea6414", "#dc3c28",
+     "#c02626", "#901438", "#b4145a", "#e01e64", "#ee5a8c", "#c4b4ba", "#808080"],
+    "#ffffff", "#606060", "Rainfall Intensity (mm)")
+RAIN_ACC = (
+    [0.1, 1, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 250,
+     300, 400, 500, 600, 800],
+    ["#f0f0f0", "#cce0ff", "#96c8ff", "#5aaaf8", "#1e8cf0", "#0a4ca0", "#1e5a28", "#00c850",
+     "#50d228", "#c8f000", "#ffd700", "#ffaa00", "#fc6e14", "#fc8c00", "#ff5a82", "#ff2a5a",
+     "#ff0a3c", "#dc0014", "#78209c", "#6400ff", "#c800ff", "#d282ff", "#ecd2fa", "#dcdcdc",
+     "#a0a0a0", "#787878", "#505050"],
+    "#ffffff", "#404040", "Rainfall Accumulation (mm)")
+RAIN_BARS = {"24h": RAIN_24H, "7day": RAIN_ACC, "15day": RAIN_ACC}

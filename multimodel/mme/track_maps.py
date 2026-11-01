@@ -18,7 +18,7 @@ from shapely.ops import unary_union
 
 from . import config as C
 from .grib import TRACK
-from .maps import boundaries, Placer
+from .maps import boundaries, Placer, add_logo_left
 from .tracker import STEPS, category, CAT
 
 PC = ccrs.PlateCarree()
@@ -96,6 +96,8 @@ def _footers(ax):
 
 def _save(fig, out):
     os.makedirs(os.path.dirname(out), exist_ok=True)
+    main_ax = next(a for a in fig.axes if hasattr(a, "projection"))
+    add_logo_left(fig, main_ax, title_mid_pt=36)
     plt.savefig(out, dpi=110, bbox_inches="tight", pad_inches=0.15, facecolor="white")
     plt.close(fig)
 
@@ -131,14 +133,17 @@ def lpa_frame(out, init, k, sst, det_fields, ens_msl, ens_sys, det_sys, links, s
                  det_fields["v10"][k][::s, ::s] * kt, length=5.5, linewidth=0.55, color="#333", alpha=.8,
                  transform=PC, zorder=18, barb_increments={"half": 5, "full": 10, "flag": 50})
 
+    # a system is drawn only until its consensus track ends (crossed the coast and weakened)
+    alive = [(n, s) for n, s in enumerate(ens_sys, 1) if k <= max(s["mean"])]
+
     # member tracks (grey), at most 60 per system so the map stays readable
-    for sysm in ens_sys:
+    for _, sysm in alive:
         mem = sorted(sysm["members"], key=lambda x: -x[0])[:60]
         for _, _, _, t in mem:
             ax.plot([p["lon"] for p in t], [p["lat"] for p in t], "-", color="#8a8a8a", lw=.7, alpha=.55,
                     transform=PC, zorder=19)
 
-    for n, sysm in enumerate(ens_sys, 1):
+    for n, sysm in alive:
         mean = sysm["mean"]
         ks = sorted(mean)
         lo, la = [mean[j]["lon"] for j in ks], [mean[j]["lat"] for j in ks]
@@ -171,8 +176,10 @@ def lpa_frame(out, init, k, sst, det_fields, ens_msl, ens_sys, det_sys, links, s
                plt.Line2D([], [], color="#d62728", lw=1.1, ls="--", label="MSLP — ensemble mean (hPa)")]
     ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.005, 0.085), fontsize=9.5,
               framealpha=.94).set_zorder(40)
-    if not ens_sys:
-        ax.text(0.5, 0.5, "No persistent low in the ensemble consensus", transform=ax.transAxes, ha="center",
+    if not alive:
+        msg = (f"No active low at +{lead}h — earlier systems have weakened" if ens_sys
+               else "No persistent low in the ensemble consensus")
+        ax.text(0.5, 0.5, msg, transform=ax.transAxes, ha="center",
                 fontsize=15, fontweight="bold", color="#9b0000", bbox=RED, zorder=40)
     _footers(ax)
     _titles(ax, "MASRainman LPA Desk — Multi-model Ensemble & Deterministic Tracker",

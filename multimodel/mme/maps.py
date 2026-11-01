@@ -91,6 +91,26 @@ def state_districts(state):
     return [(n, g) for n, g in boundaries()["districts"] if shp_.contains(g.representative_point())]
 
 
+LOGO_FILE = os.path.join(os.path.dirname(C.HERE), "assets", "masrainman_logo.png")
+LOGO_TAG = "masrainman_logo"   # same label as masrainman_logo.py, so it does not add a second logo
+
+
+def add_logo_left(fig, ax, title_mid_pt=30, height_in=0.85):
+    """MasRainman logo at the left of the figure, level with the (centred) title block above `ax`."""
+    if not os.path.exists(LOGO_FILE) or any(a.get_label() == LOGO_TAG for a in fig.axes):
+        return
+    from PIL import Image
+    im = Image.open(LOGO_FILE).convert("RGBA")
+    fw, fh = fig.get_size_inches()
+    bb = ax.get_position()
+    h = height_in / fh
+    w = h * im.width / im.height * fh / fw
+    y_mid = bb.y1 + title_mid_pt / 72 / fh
+    la = fig.add_axes([0.012, y_mid - h / 2, w, h], label=LOGO_TAG, zorder=100)
+    la.imshow(np.asarray(im))
+    la.set_axis_off()
+
+
 class Placer:
     """Greedy label placement: nudge a label until it no longer overlaps one already placed."""
 
@@ -156,19 +176,19 @@ def rain_map(field, region, period, out_png, title, when, models_line):
     figw = 13
     figh = max(6.5, min(14, figw * h / w / np.cos(np.radians((ext[2] + ext[3]) / 2)) + 0.5))
 
-    fig = plt.figure(figsize=(figw, figh + 1.6), facecolor="white")
-    ax = fig.add_axes([0.06, 0.17, 0.88, 0.72], projection=PC)
+    fig = plt.figure(figsize=(figw, max(figh, 7.5) + 1.2), facecolor="white")
+    ax = fig.add_axes([0.05, 0.09, 0.80, 0.80], projection=PC)
     ax.set_extent(ext, crs=PC)
     ax.add_feature(cfeature.OCEAN.with_scale("50m"), facecolor="#e3eef8", zorder=0)
     ax.add_feature(cfeature.LAND.with_scale("50m"), facecolor="#efede7", zorder=0)
     ax.add_geometries([B["india"]], PC, facecolor="#fdfcf8", edgecolor="none", zorder=0.5)
 
-    lv, ticks = C.RAIN_LV[period]
-    cmap = ListedColormap(C.RAIN_CL)
-    cmap.set_under("#ffffff")
-    cmap.set_over("#d9d9d9")
-    cf = ax.contourf(TLON2, TLAT2, field, levels=lv, cmap=cmap, norm=BoundaryNorm(lv, len(C.RAIN_CL)),
-                     extend="both", transform=PC, zorder=2, alpha=.95)
+    lv, colours, under, over, cb_label = C.RAIN_BARS[period]
+    cmap = ListedColormap(colours)
+    cmap.set_under(under)
+    cmap.set_over(over)
+    cf = ax.contourf(TLON2, TLAT2, field, levels=lv, cmap=cmap, norm=BoundaryNorm(lv, len(colours)),
+                     extend="both", transform=PC, zorder=2, alpha=.97)
 
     means = {}
     if state:  # only the selected state
@@ -202,24 +222,28 @@ def rain_map(field, region, period, out_png, title, when, models_line):
     gl.top_labels = gl.right_labels = False
     gl.xlabel_style = gl.ylabel_style = {"size": 9}
 
-    cax = fig.add_axes([0.16, 0.085, 0.68, 0.022])
-    cb = fig.colorbar(cf, cax=cax, orientation="horizontal", ticks=ticks, extendfrac=0.045)
-    cb.ax.set_xticklabels([f"{t:g}" for t in ticks], fontsize=10)
-    cb.ax.tick_params(length=0)
-    cb.set_label({"24h": "24-Hour Rainfall (mm)", "7day": "7-Day Accumulated Rainfall (mm)",
-                  "15day": "15-Day Accumulated Rainfall (mm)"}[period], fontsize=11, fontweight="bold")
+    # vertical colour bar on the right, a number on every box (as on the MASRainman ECMWF maps)
+    ax.apply_aspect()
+    bb = ax.get_position()
+    cax = fig.add_axes([min(bb.x1 + 0.03, 0.9), bb.y0 + 0.04 * bb.height, 0.022, 0.92 * bb.height])
+    cb = fig.colorbar(cf, cax=cax, orientation="vertical", ticks=lv, extendfrac=0.04, spacing="uniform")
+    cb.ax.set_yticklabels([f"{t:.1f}" for t in lv], fontsize=9.5)
+    cb.set_label(cb_label, fontsize=13, fontweight="bold")
 
     top = dict(xy=(0.5, 1.0), xycoords="axes fraction", textcoords="offset points", ha="center", va="bottom")
     ax.annotate(title, xytext=(0, 50), fontsize=17, fontweight="bold", **top)
     ax.annotate(f"{label} · {when}", xytext=(0, 27), fontsize=12.5, fontweight="bold", **top)
     ax.annotate(models_line, xytext=(0, 7), fontsize=10.5, color="#333", **top)
 
-    fig.text(0.5, 0.032, "Data: ECMWF Open Data (CC BY 4.0), NOAA GFS/GEFS, DWD ICON, ECCC GEPS, WeatherNext 3 | "
-             "Borders as per Government of India | © MASRainman Experimental MME",
-             ha="center", fontsize=8, color="dimgray")
-    fig.text(0.5, 0.014, "Not an official forecast — follow IMD for weather warnings.",
-             ha="center", fontsize=7.5, color="dimgray")
+    # footer just under the map, whatever its shape
+    bottom = dict(xy=(0.5, 0.0), xycoords="axes fraction", textcoords="offset points", ha="center", va="top")
+    ax.annotate("Data: ECMWF Open Data (CC BY 4.0), NOAA GFS/GEFS, DWD ICON, ECCC GEPS, WeatherNext 3 | "
+                "Borders as per Government of India | © MASRainman Experimental MME",
+                xytext=(0, -26), fontsize=8.5, color="dimgray", **bottom)
+    ax.annotate("Not an official forecast — follow IMD for weather warnings.",
+                xytext=(0, -40), fontsize=8, color="#c00000", fontweight="bold", **bottom)
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
+    add_logo_left(fig, ax, title_mid_pt=33)
     plt.savefig(out_png, dpi=120, bbox_inches="tight", pad_inches=0.12, facecolor="white")
     plt.close(fig)
     return means

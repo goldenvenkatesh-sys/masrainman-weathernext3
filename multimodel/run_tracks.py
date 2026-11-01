@@ -28,7 +28,7 @@ import numpy as np
 from mme import config as C
 from mme.track_fetch import load_track_group, ecmwf_sst
 from mme.tracker import STEPS, systems, link_det, landfall_probs, basin, category
-from mme.track_maps import lpa_frame, cyclone_map
+from mme.track_maps import lpa_frame, lpa_extent, cyclone_map
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 LOG = logging.getLogger("mme")
@@ -105,6 +105,7 @@ def main():
         LOG.warning("SST not available: %s", exc)
         sst = None
 
+    view = lpa_extent(ens_sys, links)   # zoomed on the systems, same for every frame
     frames = []
     for k, lead in enumerate(STEPS):
         names = {}
@@ -113,7 +114,8 @@ def main():
                 continue
             name = f"lpa_{tag}_T{lead:03d}.png"
             LOG.info("Drawing %s", name)
-            lpa_frame(os.path.join(out_dir, name), init, k, sst, det_fields, ens_msl, ens_sys, det_sys, links, show)
+            lpa_frame(os.path.join(out_dir, name), init, k, sst, det_fields, ens_msl, ens_sys, det_sys, links, show,
+                      extent=view)
             names[tag] = name
         frames.append({"lead": lead, "valid": (init + timedelta(hours=lead)).strftime("%Y-%m-%dT%H:%MZ"), **names})
 

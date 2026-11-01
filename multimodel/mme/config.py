@@ -19,7 +19,7 @@ TRACK_LAT = (-5.0, 35.0)
 TRACK_LON = (40.0, 105.0)
 TRACK_STEP = 0.25
 TRACK_STEPS = list(range(0, 169, 12))          # T+0 ... T+168 h, every 12 h
-DETECT_AREA = (45.0, 100.0, 0.0, 27.0)         # W, E, S, N where lows are searched
+DETECT_AREA = (50.0, 100.0, 0.0, 27.0)         # W, E, S, N where lows are searched (not the Horn of Africa)
 
 # Members used for tracking (pressure only). More members = longer downloads.
 TRACK_MEMBERS = {

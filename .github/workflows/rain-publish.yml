@@ -77,6 +77,25 @@ jobs:
             fi
           fi
 
+      # (3) The MasRainMan AI page: its own timer (masrainman-ai.yml) is often skipped too, so the
+      # site kept the morning forecast. Compare the model repo's newest forecast with the site's.
+      - name: Start MasRainMan AI page update when a new forecast is ready
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODEL_TOKEN: ${{ secrets.MASRAINMAN_MODEL_TOKEN }}
+        run: |
+          R="$GITHUB_REPOSITORY"
+          [ -n "$MODEL_TOKEN" ] || { echo "No MASRAINMAN_MODEL_TOKEN; skipping AI check"; exit 0; }
+          new=$(curl -fsS -H "Authorization: Bearer $MODEL_TOKEN" -H "Accept: application/vnd.github.raw" \
+                "https://api.github.com/repos/goldenvenkatesh-sys/masrainman-model/contents/cycle.txt?ref=live" | tr -d '[:space:]')
+          have=$(tr -d '[:space:]' < site/ai/cycle.txt 2>/dev/null || true)
+          echo "MasRainMan AI: model has '${new}', site has '${have}'"
+          busy=$(gh run list -R "$R" -w masrainman-ai.yml -L 5 --json status -q '[.[]|select(.status!="completed")]|length')
+          if [ -n "$new" ] && [ "$new" != "$have" ] && [ "$busy" = "0" ]; then
+            gh workflow run masrainman-ai.yml -R "$R" --ref main && echo "started MasRainMan AI update $new"
+          fi
+
       - name: Add rainfall reports
         run: bash get_rain_reports.sh site
 

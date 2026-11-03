@@ -30,32 +30,51 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Model maps at 12 AM, 6 AM, 1 PM and 5:30 PM IST. This workflow is started about every hour,
-      # so it starts the model maps when a slot has passed since their last run (GitHub's own timer
-      # often skips them). Uses this repository's own token: no extra secret needed.
-      - name: Start model maps when due
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          last=$(gh run list -R "$GITHUB_REPOSITORY" -w weathernext3.yml -L 1 --json createdAt -q '.[0].createdAt')
-          slot=$(python3 -c "
-          from datetime import datetime, timedelta, timezone
-          now = datetime.now(timezone(timedelta(hours=5, minutes=30)))
-          slots = [now.replace(hour=h, minute=m, second=0, microsecond=0) - timedelta(days=d)
-                   for d in (0, 1) for h, m in ((0, 0), (6, 0), (13, 0), (17, 30))]
-          print(max(s for s in slots if s <= now).isoformat())")
-          echo "Last model-maps run: ${last:-none} · last slot: $slot"
-          if [ -z "$last" ] || [ "$(date -d "$last" +%s)" -lt "$(date -d "$slot" +%s)" ]; then
-            gh workflow run weathernext3.yml -R "$GITHUB_REPOSITORY" --ref main && echo "started model maps"
-          fi
-
       - name: Get current maps (site-data branch)
         run: |
           mkdir -p site
           if git fetch -q --depth 1 origin site-data 2>/dev/null; then
             git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
             git rev-parse FETCH_HEAD > "$RUNNER_TEMP/maps_sha"
+          fi
+
+      # GitHub's own timer is often hours late or skips runs. This workflow is started about every
+      # hour, so it also starts (1) the model maps when a 3-hour slot has passed since their last run,
+      # and (2) the multi-model LPA / cyclone tracker when the newest 00/12 UTC cycle is not on the
+      # site yet. Uses this repository's own token: no extra secret needed.
+      - name: Start model maps / cyclone tracker when due
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          R="$GITHUB_REPOSITORY"
+          busy() { gh run list -R "$R" -w "$1" -L 5 --json status -q '[.[]|select(.status!="completed")]|length'; }
+          last=$(gh run list -R "$R" -w weathernext3.yml -L 1 --json createdAt -q '.[0].createdAt')
+          slot=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          slots = [now.replace(hour=h, minute=41, second=0, microsecond=0) - timedelta(days=d)
+                   for d in (0, 1) for h in range(1, 24, 3)]
+          print(max(s for s in slots if s <= now).isoformat())")
+          echo "Last model-maps run: ${last:-none} · last slot: $slot"
+          if [ "$(busy weathernext3.yml)" = "0" ] && \
+             { [ -z "$last" ] || [ "$(date -d "$last" +%s)" -lt "$(date -d "$slot" +%s)" ]; }; then
+            gh workflow run weathernext3.yml -R "$R" --ref main && echo "started model maps"
+          fi
+          cyc=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          n = datetime.now(timezone.utc) - timedelta(hours=9)
+          print(n.strftime('%Y%m%d') + ('00' if n.hour < 12 else '12'))")
+          if ls site/mme/tracks/$cyc/*.png >/dev/null 2>&1; then
+            echo "Multi-model cycle $cyc already on the site"
+          elif [ "$(busy mme.yml)" != "0" ]; then
+            echo "Multi-model run already going"
+          else
+            last=$(gh run list -R "$R" -w mme.yml -L 1 --json createdAt -q '.[0].createdAt')
+            # at most one try per 3 hours, so a failing model server can't eat all the minutes
+            if [ -z "$last" ] || [ $(( $(date +%s) - $(date -d "$last" +%s) )) -gt 10800 ]; then
+              gh workflow run mme.yml -R "$R" --ref main && echo "started multi-model cycle $cyc"
+            fi
           fi
 
       - name: Add rainfall reports
@@ -69,7 +88,7 @@ jobs:
             mv site/rain "$RUNNER_TEMP/rain" && rm -rf site && mkdir site
             git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
             mv "$RUNNER_TEMP/rain" site/rain
-            cp web/index.html web/rain.html web/landfall.html site/
+            cp web/index.html web/rain.html web/landfall.html web/outlook.html site/
           fi
 
       - name: Publish to Cloudflare Pages (login-protected)

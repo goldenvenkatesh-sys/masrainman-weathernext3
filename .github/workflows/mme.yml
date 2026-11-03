@@ -1,14 +1,19 @@
 name: MasRainman multi-model (rain + LPA + cyclone)
 
 # Multi-model weighted rainfall (Day 1-15, 7-day, 15-day; ensemble + deterministic blends),
-# LPA tracker and cyclone tracker for the 00 UTC cycle, published at <site>/mme/.
-# Once a day to save GitHub minutes (about 45-60 minutes per run).
+# LPA tracker and cyclone tracker for the 00 UTC and 12 UTC cycles, published at <site>/mme/.
+# Twice a day (about 30-45 minutes per run). GitHub's timer is often hours late or skips runs,
+# so there are backup times, and the hourly "Rain reports on the site" job also starts this one
+# when a cycle is due. A run that finds the cycle already on the site stops after ~20 seconds.
 on:
   push:                              # also run once whenever the multi-model code changes
     branches: [main]
     paths: ["multimodel/**", ".github/workflows/mme.yml"]
   schedule:
-    - cron: "30 10 * * *"           # 4:00 PM IST, when all 00 UTC models are out
+    - cron: "47 9 * * *"            # 3:17 PM IST  - 00 UTC cycle (all models out ~09 UTC)
+    - cron: "37 12 * * *"           # 6:07 PM IST  - 00 UTC backup
+    - cron: "47 21 * * *"           # 3:17 AM IST  - 12 UTC cycle
+    - cron: "37 0 * * *"            # 6:07 AM IST  - 12 UTC backup
   workflow_dispatch:
     inputs:
       cycle:
@@ -54,12 +59,32 @@ jobs:
           fi
           ls site/mme 2>/dev/null || echo "(no multi-model maps yet)"
 
+      - name: Is this cycle already on the site?
+        id: due
+        run: |
+          cyc=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          n = datetime.now(timezone.utc) - timedelta(hours=9)
+          print(n.strftime('%Y%m%d') + ('00' if n.hour < 12 else '12'))")
+          if [ -n "${{ github.event.inputs.cycle }}" ]; then cyc="${{ github.event.inputs.cycle }}"; fi
+          echo "cycle=$cyc" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.event_name }}" != "push" ] && [ -z "${{ github.event.inputs.cycle }}" ] && \
+             ls site/mme/tracks/$cyc/*.png >/dev/null 2>&1 && ls site/mme/rain/$cyc >/dev/null 2>&1; then
+            echo "::notice::Multi-model cycle $cyc is already on the site - nothing to do"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Multi-model cycle $cyc is due"
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Python
+        if: steps.due.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Google login (WeatherNext 3 access)
+        if: steps.due.outputs.run == 'true'
         env:
           GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
         run: |
@@ -67,11 +92,13 @@ jobs:
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp.json" >> "$GITHUB_ENV"
 
       - name: Install packages
+        if: steps.due.outputs.run == 'true'
         run: |
           pip install -q -r requirements.txt
           pip install -q -r multimodel/requirements.txt
 
       - name: Cache map coastlines and India boundaries
+        if: steps.due.outputs.run == 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -80,6 +107,7 @@ jobs:
           key: mme-boundaries-v1
 
       - name: Rainfall (ensemble + deterministic blends)
+        if: steps.due.outputs.run == 'true'
         id: rain
         continue-on-error: true
         timeout-minutes: 70
@@ -90,6 +118,7 @@ jobs:
           python -u run_rain.py ${{ github.event.inputs.cycle && format('--cycle {0}', github.event.inputs.cycle) || '' }} 2>&1 | tee "$SITE_DIR/last_log_rain.txt"
 
       - name: LPA + cyclone trackers
+        if: steps.due.outputs.run == 'true'
         id: tracks
         continue-on-error: true
         timeout-minutes: 45

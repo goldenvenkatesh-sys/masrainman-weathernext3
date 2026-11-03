@@ -18,13 +18,19 @@
   header h1 span{color:var(--accent)}
   header .upd{margin-left:auto;color:var(--muted);font-size:12px}
   main{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+  .bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--ok);border-color:var(--ok);color:#03150d}
   .frames{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:thin}
   .fr{flex:0 0 auto;min-width:78px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--text);font:inherit}
   .fr b{display:block;font-size:13px}
   .fr small{color:var(--muted);font-size:11px}
   .fr.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300}
   .fr.on small{color:#3b2a00}
-  .viewer{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line)}
+  .viewer{background:#fff;border-radius:10px;overflow:hidden;border:1px solid var(--line);max-width:1000px;margin:0 auto}
   .viewer img{display:block;width:100%;height:auto}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
   input[type=range]{flex:1;min-width:200px;accent-color:var(--accent2)}
@@ -48,6 +54,10 @@
 </header>
 
 <main>
+  <div class="bar">
+    <span class="label">Parameter</span>
+    <div class="seg" id="params"></div>
+  </div>
   <div class="frames" id="frames"></div>
   <div class="controls">
     <button class="btn primary" id="play">▶ Play</button>
@@ -60,9 +70,9 @@
   <div class="card">
     <b>MasRainMan AI</b> is our own AI weather model for South India (0–25°N, 65–95°E, 0.25°),
     trained on ERA5 2018–2021 with extra attention to cyclones. It starts from the latest
-    ECMWF open-data run and takes its boundaries from it. Panels: 2 m temperature + MSLP,
-    10 m wind, <b>24-h rainfall</b> on the MasRainMan standard colour bar, and total column
-    water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
+    ECMWF open-data run and takes its boundaries from it. Pick a parameter above:
+    <b>24-h rainfall</b> on the MasRainMan standard colour bar, mean sea level pressure,
+    2 m temperature, 10 m wind or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
     <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">→</span> to step through the days.
   </div>
 </main>
@@ -72,14 +82,27 @@ const $ = id => document.getElementById(id);
 const IST = {timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "numeric", minute: "2-digit"};
 const utc = s => new Date(s.length === 13 ? s + ":00:00Z" : s + ":00Z");
 const ist = s => utc(s).toLocaleString("en-IN", IST) + " IST";
+const PARAMS = [["rain", "🌧 Rainfall (24 h)"], ["mslp", "MSLP"], ["t2m", "Temperature"],
+                ["wind", "Wind"], ["tcwv", "Water vapour"]];
 let maps = [], i = 0, timer = null;
+let param = PARAMS.some(p => p[0] === location.hash.slice(1)) ? location.hash.slice(1) : "rain";
+
+// older forecasts had one 4-panel image per day ("file"); newer ones one image per parameter
+const fileOf = m => m.files ? m.files[param] : m.file;
+
+function setParam(p) {
+  param = p;
+  history.replaceState(null, "", "#" + p);
+  [...$("params").children].forEach(b => b.classList.toggle("on", b.dataset.p === p));
+  if (maps.length) show(i);
+}
 
 function show(k) {
   i = (k + maps.length) % maps.length;
-  const m = maps[i];
-  $("viewer").innerHTML = `<img src="${m.file}?v=${encodeURIComponent(m.valid)}" alt="MasRainMan AI +${m.lead} h">`;
+  const m = maps[i], file = fileOf(m);
+  $("viewer").innerHTML = `<img src="${file}?v=${encodeURIComponent(m.valid)}" alt="MasRainMan AI ${param} +${m.lead} h">`;
   $("now").innerHTML = `Day ${m.lead / 24} · +${m.lead} h<small>valid ${ist(m.valid)}</small>`;
-  $("dl").href = m.file;
+  $("dl").href = file;
   $("slider").value = i;
   [...$("frames").children].forEach((b, j) => b.classList.toggle("on", j === i));
 }
@@ -94,6 +117,11 @@ fetch("manifest.json", {cache: "no-store"})
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(doc => {
     maps = doc.maps;
+    const have = maps[0].files ? PARAMS.filter(p => p[0] in maps[0].files) : [];
+    $("params").innerHTML = have.map(([p, label]) => `<button class="pill" data-p="${p}">${label}</button>`).join("");
+    $("params").onclick = e => { const b = e.target.closest(".pill"); if (b) setParam(b.dataset.p); };
+    if (have.length && !have.some(p => p[0] === param)) param = have[0][0];
+    setParam(param);
     $("upd").textContent = `ECMWF ${doc.init.slice(0, 10)} ${doc.init.slice(11)} UTC run · made ${ist(doc.made_utc)}`;
     $("frames").innerHTML = maps.map((m, j) =>
       `<button class="fr" data-j="${j}"><b>Day ${m.lead / 24}</b><small>${utc(m.valid).toLocaleDateString("en-IN", {timeZone: "Asia/Kolkata", day: "numeric", month: "short"})}</small></button>`
@@ -103,6 +131,8 @@ fetch("manifest.json", {cache: "no-store"})
     $("slider").oninput = e => show(+e.target.value);
     $("play").onclick = play;
     document.onkeydown = e => { if (e.key === "ArrowRight") show(i + 1); if (e.key === "ArrowLeft") show(i - 1); };
+    // preload the other days of the chosen parameter so stepping and Play are instant
+    maps.forEach(m => { const im = new Image(); im.src = fileOf(m) + "?v=" + encodeURIComponent(m.valid); });
     show(0);
   })
   .catch(() => {

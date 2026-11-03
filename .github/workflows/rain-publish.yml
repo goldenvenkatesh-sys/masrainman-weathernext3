@@ -96,6 +96,35 @@ jobs:
             gh workflow run masrainman-ai.yml -R "$R" --ref main && echo "started MasRainMan AI update $new"
           fi
 
+          # The model's own timer (daily_forecast.yml) gets skipped as well. If the newest ECMWF
+          # run should be out by now (00 UTC by ~9 UTC, 12 UTC by ~21 UTC) but the model has not
+          # made it, start the model. Needs MASRAINMAN_MODEL_TOKEN to also have "Actions: Read and
+          # write" on masrainman-model; without it this just prints a notice.
+          want=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          n = datetime.now(timezone.utc)
+          if n.hour >= 21: c = n.replace(hour=12)
+          elif n.hour >= 9: c = n.replace(hour=0)
+          else: c = (n - timedelta(days=1)).replace(hour=12)
+          print(c.strftime('%Y%m%d%H'))")
+          echo "MasRainMan AI: newest ECMWF run expected $want"
+          if [ -n "$new" ] && [ "$new" -lt "$want" ]; then
+            M=https://api.github.com/repos/goldenvenkatesh-sys/masrainman-model/actions
+            H=(-H "Authorization: Bearer $MODEL_TOKEN" -H "Accept: application/vnd.github+json")
+            runs=$(curl -fsS "${H[@]}" "$M/workflows/daily_forecast.yml/runs?per_page=1") || {
+              echo "::warning::Model forecast $want is late, but MASRAINMAN_MODEL_TOKEN can't see the model's Actions. Give the token 'Actions: Read and write' on masrainman-model."; exit 0; }
+            last=$(echo "$runs" | python3 -c "import json,sys; r=json.load(sys.stdin)['workflow_runs']; print((r[0]['status']+' '+r[0]['created_at']) if r else '')")
+            st=${last%% *}; at=${last#* }
+            # at most one start every 2 hours, and never while one is running
+            if [ "$st" != "completed" ] && [ -n "$last" ]; then echo "Model run already going"
+            elif [ -n "$at" ] && [ $(( $(date +%s) - $(date -d "$at" +%s) )) -lt 7200 ]; then echo "Model was started less than 2 h ago"
+            else
+              curl -fsS -X POST "${H[@]}" "$M/workflows/daily_forecast.yml/dispatches" -d '{"ref":"main"}' \
+                && echo "started model forecast for $want" \
+                || echo "::warning::Couldn't start the model. Give MASRAINMAN_MODEL_TOKEN 'Actions: Read and write' on masrainman-model."
+            fi
+          fi
+
       - name: Add rainfall reports
         run: bash get_rain_reports.sh site
 

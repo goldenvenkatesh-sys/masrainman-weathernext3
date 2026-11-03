@@ -1,0 +1,99 @@
+name: MasRainMan AI forecast on the site
+
+# Shows our own AI model's 10-day forecast at <site>/ai/ (button "MasRainMan AI" on the main page).
+# The forecast itself is made in the private masrainman-model repo (its daily_forecast workflow,
+# 14:00 IST with backups) and published on that repo's "live" branch; this workflow copies the
+# newest maps here, saves them in site-data like the other pages, and redeploys Cloudflare.
+# Needs the secret MASRAINMAN_MODEL_TOKEN: a fine-grained GitHub token with read-only
+# "Contents" access to goldenvenkatesh-sys/masrainman-model.
+on:
+  push:                              # once whenever this page or workflow changes
+    branches: [main]
+    paths: ["web/ai.html", ".github/workflows/masrainman-ai.yml"]
+  schedule:                          # after each of the forecast's run times; quick no-op if nothing new
+    - cron: "25 9 * * *"             # 2:55 PM IST
+    - cron: "5 11 * * *"             # 4:35 PM IST
+    - cron: "35 13 * * *"            # 7:05 PM IST
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weathernext3                # never runs at the same time as the other site jobs
+  cancel-in-progress: false
+
+env:
+  CF_PROJECT: masrainman-wn3
+  MODEL_REPO: goldenvenkatesh-sys/masrainman-model
+
+jobs:
+  ai:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Newest MasRainMan AI forecast
+        id: get
+        env:
+          TOKEN: ${{ secrets.MASRAINMAN_MODEL_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::error::Secret MASRAINMAN_MODEL_TOKEN is missing"; exit 1; fi
+          git clone -q --depth 1 -b live "https://x-access-token:${TOKEN}@github.com/${MODEL_REPO}.git" "$RUNNER_TEMP/ai"
+          new=$(cat "$RUNNER_TEMP/ai/cycle.txt")
+          have=$( (git fetch -q --depth 1 origin site-data && git show FETCH_HEAD:ai/cycle.txt) 2>/dev/null || true)
+          echo "MasRainMan AI forecast $new, site has '${have}'"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$new" = "$have" ]; then
+            echo "::notice::The site already shows forecast $new"
+          else
+            echo "new=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get current maps (site-data branch)
+        if: steps.get.outputs.new == 'true'
+        run: |
+          mkdir -p site
+          if git ls-remote --exit-code --heads origin site-data >/dev/null 2>&1; then
+            git fetch --depth 1 origin site-data
+            git --work-tree=site checkout origin/site-data -- .
+            git reset -q
+          fi
+
+      - name: Add the MasRainMan AI page
+        if: steps.get.outputs.new == 'true'
+        run: |
+          rm -rf site/ai && mkdir -p site/ai
+          cp "$RUNNER_TEMP"/ai/*.png "$RUNNER_TEMP/ai/manifest.json" "$RUNNER_TEMP/ai/cycle.txt" site/ai/
+          cp web/ai.html site/ai/index.html
+          cp web/index.html site/ 2>/dev/null || true   # main page with the MasRainMan AI button
+          ls site/ai
+
+      - name: Save maps (site-data branch, private)
+        if: steps.get.outputs.new == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: site-data
+          force_orphan: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "MasRainMan AI forecast update"
+
+      - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
+        if: steps.get.outputs.new == 'true'
+        run: |
+          cp web/index.html web/rain.html web/landfall.html web/outlook.html site/ 2>/dev/null || true
+          bash get_rain_reports.sh site
+
+      - name: Publish to Cloudflare Pages (login-protected)
+        if: steps.get.outputs.new == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true

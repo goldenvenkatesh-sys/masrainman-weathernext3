@@ -1,5 +1,5 @@
 """
-Save WeatherNext 3 24-hour rain over Tamil Nadu for the MasRainman rain report.
+Save WeatherNext 3 24-hour rain over south India for the MasRainman rain report.
 
 The rain report's "Past 24 hours" video (live24) compares the models' forecasts with the rain gauges for
 the rain-day 08:30 IST to 08:30 IST (03 UTC to 03 UTC), using the run issued at 12 UTC two days before.
@@ -23,7 +23,7 @@ import numpy as np
 
 import render
 
-BOX = (7.0, 15.0, 74.5, 81.5)          # lat0, lat1, lon0, lon1
+BOX = (7.0, 20.5, 73.5, 85.0)          # lat0, lat1, lon0, lon1: Tamil Nadu, Kerala, Karnataka, AP, Telangana
 DAYS = int(os.environ.get("RAIN24_DAYS", "10"))
 WINDOWS = 3                            # windows ending 03 UTC on the 2nd, 3rd and 4th day after the run
 

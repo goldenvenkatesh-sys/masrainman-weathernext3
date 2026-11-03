@@ -80,7 +80,7 @@ jobs:
           pip install -q google-auth requests
           python check_new.py
 
-      # WeatherNext 3 24-h rain over Tamil Nadu for the rain report's model scorecard (live24).
+      # WeatherNext 3 24-h rain over south India for the rain report's model scorecard (live24).
       # Runs every time (not only when there is a new run) so missing days are filled in.
       - name: Save WeatherNext 3 rain for the rain report
         id: rain24

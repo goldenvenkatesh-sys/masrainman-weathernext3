@@ -69,12 +69,11 @@
   <div class="viewer" id="viewer"><div class="empty">Loading the latest forecast…</div></div>
 
   <div class="card">
-    <b>MasRainMan AI</b> is our own AI weather model for South India (0–25°N, 65–95°E, 0.25°),
-    trained on ERA5 2018–2021 with extra attention to cyclones. It starts from the latest
-    ECMWF open-data run and takes its boundaries from it. Pick a parameter above:
-    <b>24-h rainfall</b> on the MasRainMan standard colour bar, mean sea level pressure,
-    2 m temperature, 10 m wind or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
+    <b>MasRainMan AI</b> is our own AI weather model for South India, made by MasRainman.
+    Pick a parameter above: <b>24-h rainfall</b> on the MasRainMan standard colour bar, mean sea level
+    pressure, 2 m temperature, 10 m wind or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
     <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">→</span> to step through the days.
+    <div style="margin-top:10px;color:var(--muted);font-size:11px">Input data © ECMWF, CC BY 4.0.</div>
   </div>
 </main>
 
@@ -123,7 +122,7 @@ fetch("manifest.json", {cache: "no-store"})
     $("params").onclick = e => { const b = e.target.closest(".pill"); if (b) setParam(b.dataset.p); };
     if (have.length && !have.some(p => p[0] === param)) param = have[0][0];
     setParam(param);
-    $("upd").textContent = `ECMWF ${doc.init.slice(0, 10)} ${doc.init.slice(11)} UTC run · made ${ist(doc.made_utc)}`;
+    $("upd").textContent = `Run ${doc.init.slice(0, 10)} ${doc.init.slice(11)} UTC · made ${ist(doc.made_utc)}`;
     $("frames").innerHTML = maps.map((m, j) =>
       `<button class="fr" data-j="${j}"><b>Day ${m.lead / 24}</b><small>${utc(m.valid).toLocaleDateString("en-IN", {timeZone: "Asia/Kolkata", day: "numeric", month: "short"})}</small></button>`
     ).join("");

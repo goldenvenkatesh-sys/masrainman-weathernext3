@@ -120,7 +120,8 @@
 <script>
 const $ = id => document.getElementById(id);
 const fmtDay = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-IN", {timeZone: "UTC", day: "numeric", month: "short"});
-const COLORS = {masrainman: "#ffb02e", ifs: "#2fb5ff", aifs: "#c58bff"};
+const COLORS = new Proxy({masrainman: "#ffb02e", ifs: "#2fb5ff", aifs: "#c58bff", gfs: "#4cd964", aigfs: "#ff5c7a",
+  icon: "#00c9b7", gdps: "#ff9de2"}, {get: (o, k) => o[k] || "#9aa4b2"});
 const LEADS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 let D, day = null, lead = 1;
 

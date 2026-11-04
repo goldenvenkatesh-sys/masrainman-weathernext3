@@ -4,6 +4,9 @@ name: MasRainMan AI forecast on the site
 # The forecast itself is made in the private masrainman-model repo (its daily_forecast workflow,
 # 14:00 IST with backups) and published on that repo's "live" branch; this workflow copies the
 # newest maps here, saves them in site-data like the other pages, and redeploys Cloudflare.
+# It also redeploys when new verification scores arrive (verif-site's stamp.txt), and publishes the
+# same two pages, without login, to the public Cloudflare project masrainman-ai (embedded on the
+# MasRainman Blogger page). Only the AI forecast and verification go there, nothing else of the site.
 # Needs the secret MASRAINMAN_MODEL_TOKEN: a fine-grained GitHub token with read-only
 # "Contents" access to goldenvenkatesh-sys/masrainman-model.
 on:
@@ -26,6 +29,7 @@ concurrency:
 
 env:
   CF_PROJECT: masrainman-wn3
+  PUBLIC_PROJECT: masrainman-ai      # public, no login: AI forecast + verification for the blog
   MODEL_REPO: goldenvenkatesh-sys/masrainman-model
 
 jobs:
@@ -45,10 +49,15 @@ jobs:
           if [ -z "$TOKEN" ]; then echo "::error::Secret MASRAINMAN_MODEL_TOKEN is missing"; exit 1; fi
           git clone -q --depth 1 -b live "https://x-access-token:${TOKEN}@github.com/${MODEL_REPO}.git" "$RUNNER_TEMP/ai"
           new=$(cat "$RUNNER_TEMP/ai/cycle.txt")
-          have=$( (git fetch -q --depth 1 origin site-data && git show FETCH_HEAD:ai/cycle.txt) 2>/dev/null || true)
-          echo "MasRainMan AI forecast $new, site has '${have}'"
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$new" = "$have" ]; then
-            echo "::notice::The site already shows forecast $new"
+          git clone -q --depth 1 -b verif-site "https://x-access-token:${TOKEN}@github.com/${MODEL_REPO}.git" "$RUNNER_TEMP/verify" \
+            || echo "No verification data yet"
+          vnew=$(cat "$RUNNER_TEMP/verify/stamp.txt" 2>/dev/null || true)
+          git fetch -q --depth 1 origin site-data 2>/dev/null || true
+          have=$(git show FETCH_HEAD:ai/cycle.txt 2>/dev/null || true)
+          vhave=$(git show FETCH_HEAD:ai/verify/stamp.txt 2>/dev/null || true)
+          echo "MasRainMan AI forecast $new (site '${have}'), verification $vnew (site '${vhave}')"
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$new" = "$have" ] && [ "$vnew" = "$vhave" ]; then
+            echo "::notice::The site already shows forecast $new and the latest scores"
           else
             echo "new=true" >> "$GITHUB_OUTPUT"
           fi
@@ -65,8 +74,6 @@ jobs:
 
       - name: Add the MasRainMan AI page
         if: steps.get.outputs.new == 'true'
-        env:
-          TOKEN: ${{ secrets.MASRAINMAN_MODEL_TOKEN }}
         run: |
           rm -rf site/ai && mkdir -p site/ai
           cp "$RUNNER_TEMP"/ai/*.png "$RUNNER_TEMP/ai/manifest.json" "$RUNNER_TEMP/ai/cycle.txt" site/ai/
@@ -74,11 +81,9 @@ jobs:
           # Verification page: scores and maps from the model repo's verif-site branch
           mkdir -p site/ai/verify
           cp web/ai_verify.html site/ai/verify/index.html
-          if git clone -q --depth 1 -b verif-site "https://x-access-token:${TOKEN}@github.com/${MODEL_REPO}.git" "$RUNNER_TEMP/verify"; then
+          if [ -d "$RUNNER_TEMP/verify" ]; then
             rm -rf "$RUNNER_TEMP/verify/.git"
             cp -r "$RUNNER_TEMP"/verify/* site/ai/verify/
-          else
-            echo "No verification data yet"
           fi
           cp web/index.html site/ 2>/dev/null || true   # main page with the MasRainMan AI button
           ls site/ai
@@ -109,3 +114,20 @@ jobs:
         run: |
           npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
           npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
+
+      # Public copy for the Blogger page: only the AI forecast and its verification. Links back to the
+      # private dashboard are taken out; the blog link is added instead.
+      - name: Publish the public AI pages (masrainman-ai, no login)
+        if: steps.get.outputs.new == 'true'
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          rm -rf public && cp -r site/ai public
+          blog='<a class="btn" href="https://masrainman.blogspot.com/" target="_top">🏠 MasRainman blog</a>'
+          sed -i -e '\#href="\.\./mme/"#d' -e "s#<a class=\"btn\" href=\"\.\./\">[^<]*</a>#${blog}#" public/index.html
+          sed -i -e "s#<a class=\"btn\" href=\"\.\./\.\./\">[^<]*</a>#${blog}#" public/verify/index.html
+          grep -c 'href="\.\./\.\./"\|href="\.\./mme/"' public/index.html public/verify/index.html || true
+          npx --yes wrangler@3 pages project create "$PUBLIC_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy public --project-name="$PUBLIC_PROJECT" --branch=main --commit-dirty=true

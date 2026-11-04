@@ -9,7 +9,7 @@ name: MasRainMan AI forecast on the site
 on:
   push:                              # once whenever this page or workflow changes
     branches: [main]
-    paths: ["web/ai.html", ".github/workflows/masrainman-ai.yml"]
+    paths: ["web/ai.html", "web/ai_verify.html", ".github/workflows/masrainman-ai.yml"]
   schedule:                          # after each of the forecast's run times; quick no-op if nothing new
     - cron: "25 9 * * *"             # 2:55 PM IST
     - cron: "5 11 * * *"             # 4:35 PM IST
@@ -65,10 +65,21 @@ jobs:
 
       - name: Add the MasRainMan AI page
         if: steps.get.outputs.new == 'true'
+        env:
+          TOKEN: ${{ secrets.MASRAINMAN_MODEL_TOKEN }}
         run: |
           rm -rf site/ai && mkdir -p site/ai
           cp "$RUNNER_TEMP"/ai/*.png "$RUNNER_TEMP/ai/manifest.json" "$RUNNER_TEMP/ai/cycle.txt" site/ai/
           cp web/ai.html site/ai/index.html
+          # Verification page: scores and maps from the model repo's verif-site branch
+          mkdir -p site/ai/verify
+          cp web/ai_verify.html site/ai/verify/index.html
+          if git clone -q --depth 1 -b verif-site "https://x-access-token:${TOKEN}@github.com/${MODEL_REPO}.git" "$RUNNER_TEMP/verify"; then
+            rm -rf "$RUNNER_TEMP/verify/.git"
+            cp -r "$RUNNER_TEMP"/verify/* site/ai/verify/
+          else
+            echo "No verification data yet"
+          fi
           cp web/index.html site/ 2>/dev/null || true   # main page with the MasRainMan AI button
           ls site/ai
 

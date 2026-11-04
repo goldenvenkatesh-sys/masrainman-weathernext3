@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MasRainMan AI · Verification</title>
+<!-- Published at <site>/ai/verify/ by .github/workflows/masrainman-ai.yml, next to scores.json and
+     maps/ from the masrainman-model repo (its verif-site branch, made by masrainman/verify.py). -->
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#2fb5ff; --accent2:#ffb02e; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:linear-gradient(90deg,#0f1a30,#14223f);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1200px;margin:0 auto;padding:14px 16px 40px}
+  .bar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:12px}
+  .bar label{display:flex;flex-direction:column;gap:3px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px;font-size:13px;max-width:100%}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{border-color:var(--accent)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-top:14px;min-width:0}
+  .card h3{margin:0 0 4px;font-size:15px}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 10px}
+  .lead{font-size:17px;font-weight:600;line-height:1.35;margin:4px 0 2px}
+  .wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--muted);font-weight:600}
+  th small{display:block;font-weight:400;font-size:10px}
+  td.best{background:#3ddc9730;color:var(--ok);font-weight:700}
+  tr.ours td:first-child{color:var(--accent2);font-weight:700}
+  svg text{fill:var(--muted);font-size:11px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:4px}
+  .legend i{display:inline-block;width:14px;height:3px;margin-right:5px;vertical-align:middle}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill.on{background:var(--accent2);border-color:var(--accent2);color:#1d1300;font-weight:700}
+  .viewer{background:#fff;border-radius:10px;overflow:hidden;margin-top:10px}
+  .viewer img{display:block;width:100%;height:auto}
+  .empty{color:var(--muted);padding:24px;text-align:center}
+  .note{color:var(--muted);font-size:12px;line-height:1.5}
+  .note b{color:var(--text)}
+  @media (max-width:640px){header h1{font-size:15px}}
+</style>
+</head>
+<body>
+<header>
+  <h1><span>MasRainMan AI</span> · Verification</h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="../">← Forecast maps</a>
+  <a class="btn" href="../../">Model maps</a>
+</header>
+
+<main>
+  <div class="bar">
+    <label>Region <select id="region"></select></label>
+    <label>Period <select id="period">
+      <option value="7">Past 7 days</option><option value="14">Past 14 days</option>
+      <option value="30" selected>Past 30 days</option><option value="90">Past 90 days</option>
+      <option value="9999">All days so far</option></select></label>
+    <label>Measure <select id="measure"></select></label>
+  </div>
+
+  <div class="card">
+    <p class="lead" id="headline">Loading…</p>
+    <p class="sub" id="basis"></p>
+  </div>
+
+  <div class="card">
+    <h3>Each model at each forecast day</h3>
+    <p class="sub" id="tabsub"></p>
+    <div class="wrap" id="table"></div>
+  </div>
+
+  <div class="card">
+    <h3>By forecast day</h3>
+    <p class="sub" id="chartsub"></p>
+    <div id="chart"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="card">
+    <h3>Daily check: observed against forecast</h3>
+    <p class="sub">Observed cells are the average of the gauges in each 0.25° cell; pale grey cells had gauges and under 1 mm.</p>
+    <div class="bar" style="margin:0">
+      <label>Rain-day <select id="day"></select></label>
+      <div class="seg" id="leads"></div>
+    </div>
+    <div class="viewer" id="viewer"></div>
+  </div>
+
+  <div class="card">
+    <h3>Airports: MSLP and wind</h3>
+    <p class="sub" id="airsub"></p>
+    <div class="wrap" id="air"></div>
+  </div>
+
+  <div class="card note">
+    <b>Rain.</b> Observed: 24-hour totals to 08:30 IST from the MasRainman rain-report gauges (TN-SMART,
+    Kerala, Andhra Pradesh, Telangana), averaged onto 0.25° cells. Karnataka is not included yet: its feed
+    has no archived daily totals. Forecast Day 1 of a 00 UTC run covers 05:30 to 05:30 IST, so 21 of the
+    24 hours overlap. Only cells with gauges are scored.<br>
+    <b>Skill</b> is the Equitable Threat Score, as used by IMD thresholds 2.5, 15.6 and 64.5 mm: 1 is
+    perfect, 0 no better than chance. <b>Near-miss skill</b> is the Fractions Skill Score, which gives credit
+    for rain placed close to where it fell. <b>Error</b> is RMSE, <b>bias</b> is forecast minus observed.<br>
+    <b>MSLP and wind.</b> Observed: airport reports (METAR) at 00, 06, 12 and 18 UTC, compared with the
+    forecast interpolated to the airport. METAR QNH matches MSLP near sea level, so airports above about
+    300 m (Bengaluru, Hyderabad, Coimbatore) are left out of the overall MSLP scores and marked ▲ in the
+    table. Airport winds are local, so a model's grid-cell wind is expected to differ somewhat.
+    <br>Scores from a few days swing a lot and mean little; read them with the day count shown.
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmtDay = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-IN", {timeZone: "UTC", day: "numeric", month: "short"});
+const COLORS = {masrainman: "#ffb02e", ifs: "#2fb5ff", aifs: "#c58bff"};
+const LEADS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+let D, day = null, lead = 1;
+
+const ets = t => s => {
+  const c = s.ct[t]; if (!c || c[0] + c[2] === 0) return null;
+  const [a, b, m, d] = c, n = a + b + m + d, r = (a + b) * (a + m) / n, den = a + b + m - r;
+  return den ? (a - r) / den : null;
+};
+const fss = (t, sc) => s => {
+  const f = s.fss[t] && s.fss[t][sc]; return f && f[1] ? 1 - f[0] / f[1] : null;
+};
+const MEASURES = {
+  ets15: {name: "Moderate rain skill (≥ 15.6 mm)", f: ets("15.6"), kind: "rain", dig: 2},
+  ets2: {name: "Rain or no rain skill (≥ 2.5 mm)", f: ets("2.5"), kind: "rain", dig: 2},
+  ets64: {name: "Heavy rain skill (≥ 64.5 mm)", f: ets("64.5"), kind: "rain", dig: 2},
+  fss15: {name: "Moderate rain, near-miss skill (75 km)", f: fss("15.6", "3"), kind: "rain", dig: 2},
+  fss2: {name: "Rain or no rain, near-miss skill (75 km)", f: fss("2.5", "3"), kind: "rain", dig: 2},
+  rmse: {name: "Rain error (RMSE, mm/day)", f: s => Math.sqrt(s.sse / s.n), kind: "rain", dig: 1, low: true},
+  bias: {name: "Rain bias (mm/day; closest to 0 best)", f: s => (s.sf - s.so) / s.n, kind: "rain", dig: 1, zero: true},
+  corr: {name: "Rain pattern correlation", kind: "rain", dig: 2, f: s => {
+    const den = Math.sqrt((s.n * s.sff - s.sf ** 2) * (s.n * s.soo - s.so ** 2));
+    return den ? (s.n * s.sfo - s.sf * s.so) / den : null; }},
+  prmse: {name: "MSLP error (RMSE, hPa)", kind: "air", field: "p", dig: 2, low: true, f: s => s.np_ ? Math.sqrt(s.ssp / s.np_) : null},
+  pbias: {name: "MSLP bias (hPa; closest to 0 best)", kind: "air", field: "p", dig: 2, zero: true, f: s => s.np_ ? s.sp / s.np_ : null},
+  wrmse: {name: "Wind speed error (RMSE, m/s)", kind: "air", field: "w", dig: 2, low: true, f: s => s.nw ? Math.sqrt(s.ssw / s.nw) : null},
+  wbias: {name: "Wind speed bias (m/s; closest to 0 best)", kind: "air", field: "w", dig: 2, zero: true, f: s => s.nw ? s.sw / s.nw : null},
+};
+
+function addSums(into, r) {
+  for (const k of ["n", "sf", "so", "sse", "sff", "soo", "sfo", "np_", "sp", "ssp", "nw", "sw", "ssw"])
+    if (r[k] !== undefined) into[k] = (into[k] || 0) + r[k];
+  if (r.ct) {
+    into.ct = into.ct || {};
+    for (const t in r.ct) into.ct[t] = (into.ct[t] || [0, 0, 0, 0]).map((v, i) => v + r.ct[t][i]);
+    into.fss = into.fss || {};
+    for (const t in r.fss) { into.fss[t] = into.fss[t] || {};
+      for (const c in r.fss[t]) into.fss[t][c] = (into.fss[t][c] || [0, 0]).map((v, i) => v + r.fss[t][c][i]); }
+  }
+  return into;
+}
+
+function latestDay(rows) { return rows.reduce((m, r) => r.day > m ? r.day : m, ""); }
+
+function inPeriod(rows) {
+  const last = latestDay(rows), n = +$("period").value;
+  if (!last) return [];
+  const from = new Date(Date.parse(last + "T00:00:00Z") - (n - 1) * 864e5).toISOString().slice(0, 10);
+  return rows.filter(r => r.day >= from);
+}
+
+function usable(r, m) { // QNH is not MSLP at high airports
+  return !(m.field === "p" && D.airports[r.icao] && D.airports[r.icao].elev > 300);
+}
+
+// { model: { lead: {value, days} } }
+function collect(key) {
+  const m = MEASURES[key];
+  const rows = inPeriod(m.kind === "rain" ? D.rain.filter(r => r.region === $("region").value)
+                                          : D.points.filter(r => usable(r, m)));
+  const out = {}, seen = {};
+  for (const r of rows) {
+    const k = r.model + "|" + r.lead;
+    out[k] = addSums(out[k] || {}, r);
+    (seen[k] = seen[k] || new Set()).add(r.day);
+  }
+  const res = {};
+  for (const k in out) {
+    const [model, l] = k.split("|");
+    (res[model] = res[model] || {})[l] = {value: m.f(out[k]), days: seen[k].size};
+  }
+  return res;
+}
+
+function bestOf(key, res, l) {
+  const m = MEASURES[key], vals = Object.keys(res).map(k => [k, res[k][l] && res[k][l].value]).filter(v => v[1] != null);
+  if (vals.length < 2) return null;
+  const rank = v => m.zero ? Math.abs(v) : m.low ? v : -v;
+  return vals.reduce((a, b) => rank(b[1]) < rank(a[1]) ? b : a)[0];
+}
+
+function render() {
+  const key = $("measure").value, m = MEASURES[key], res = collect(key);
+  const models = Object.keys(D.models).filter(k => res[k]);
+  $("region").disabled = m.kind !== "rain";
+  const place = m.kind === "rain" ? D.regions[$("region").value] : "South India airports";
+  const period = $("period").selectedOptions[0].textContent;
+  const lastLead = LEADS.filter(l => models.some(k => res[k][l]));
+  const days = Math.max(0, ...models.flatMap(k => Object.values(res[k]).map(v => v.days)));
+
+  const ours = models.length ? lastLead.filter(l => bestOf(key, res, l) === "masrainman") : [];
+  $("headline").textContent = !models.length ? "No scores for this choice yet."
+    : models.length === 1 ? `${period} in ${place}: ${m.name} of ${D.models[models[0]]}, ${lastLead.length} forecast days scored.`
+    : `${period} in ${place}: MasRainMan AI ${ours.length ? "was best on Day " + ours.join(", ") : "was not the best on any day"}`
+      + ` of ${lastLead.length} scored, for ${m.name.toLowerCase()}.`;
+  $("basis").textContent = days ? `Based on up to ${days} observed day${days > 1 ? "s" : ""}. Use with care until about 30 days have built up.` : "";
+  $("tabsub").textContent = `${m.name}, ${period.toLowerCase()}, ${place}. Green marks the best model on that day.`;
+  $("chartsub").textContent = m.name;
+
+  if (!models.length) {
+    $("table").innerHTML = '<div class="empty">No scores yet.</div>';
+    $("chart").innerHTML = ""; $("legend").innerHTML = "";
+  } else {
+    const head = lastLead.map(l => {
+      const d = Math.max(...models.map(k => res[k][l] ? res[k][l].days : 0));
+      return `<th>Day ${l}<small>${d} day${d > 1 ? "s" : ""}</small></th>`; }).join("");
+    const rows = models.map(k => {
+      const cells = lastLead.map(l => {
+        const v = res[k][l] && res[k][l].value;
+        return `<td class="${bestOf(key, res, l) === k ? "best" : ""}">${v == null ? "–" : v.toFixed(m.dig)}</td>`; }).join("");
+      return `<tr class="${k === "masrainman" ? "ours" : ""}"><td>${D.models[k]}</td>${cells}</tr>`; }).join("");
+    $("table").innerHTML = `<table><tr><th>Model</th>${head}</tr>${rows}</table>`;
+    chart(res, models, lastLead, m);
+  }
+  airports(key);
+}
+
+function chart(res, models, leads, m) {
+  const W = 760, H = 240, L = 44, R = 12, T = 10, B = 26;
+  const vals = models.flatMap(k => leads.map(l => res[k][l] && res[k][l].value)).filter(v => v != null);
+  if (!vals.length) { $("chart").innerHTML = ""; $("legend").innerHTML = ""; return; }
+  let lo = Math.min(...vals, m.low ? 0 : Infinity), hi = Math.max(...vals);
+  if (lo === hi) { lo -= 1; hi += 1; }
+  const pad = (hi - lo) * 0.08; lo -= m.low ? 0 : pad; hi += pad;
+  const x = l => leads.length > 1 ? L + (W - L - R) * leads.indexOf(l) / (leads.length - 1) : (L + W - R) / 2;
+  const y = v => T + (H - T - B) * (hi - v) / (hi - lo);
+  let s = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${m.name} by forecast day">`;
+  for (let i = 0; i <= 4; i++) {
+    const v = lo + (hi - lo) * i / 4;
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#26324d"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v.toFixed(m.dig)}</text>`;
+  }
+  for (const l of leads) s += `<text x="${x(l)}" y="${H - 8}" text-anchor="middle">Day ${l}</text>`;
+  for (const k of models) {
+    const pts = leads.filter(l => res[k][l] && res[k][l].value != null).map(l => [x(l), y(res[k][l].value)]);
+    s += `<polyline fill="none" stroke="${COLORS[k]}" stroke-width="${k === "masrainman" ? 3 : 2}" points="${pts.map(p => p.join(",")).join(" ")}"/>`;
+    s += pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${COLORS[k]}"/>`).join("");
+  }
+  $("chart").innerHTML = s + "</svg>";
+  $("legend").innerHTML = models.map(k => `<span><i style="background:${COLORS[k]}"></i>${D.models[k]}</span>`).join("");
+}
+
+function airports(key) {
+  const m = MEASURES[key].kind === "air" ? MEASURES[key] : MEASURES.wrmse;
+  const rows = inPeriod(D.points.filter(r => r.model === "masrainman"));
+  const show = [1, 2, 3, 5, 7, 10], sums = {};
+  for (const r of rows) {
+    const k = r.icao + "|" + r.lead;
+    sums[k] = addSums(sums[k] || {}, r);
+  }
+  $("airsub").textContent = `MasRainMan AI, ${m.name}. Pick an MSLP or wind measure above to change this table.`;
+  if (!rows.length) { $("air").innerHTML = '<div class="empty">No airport scores yet.</div>'; return; }
+  const body = Object.keys(D.airports).map(c => {
+    const a = D.airports[c];
+    const cells = show.map(l => { const s = sums[c + "|" + l], v = s ? m.f(s) : null;
+      return `<td>${v == null ? "–" : v.toFixed(m.dig)}</td>`; }).join("");
+    return `<tr><td>${a.name}${a.elev > 300 ? " ▲" : ""}</td>${cells}</tr>`; }).join("");
+  $("air").innerHTML = `<table><tr><th>Airport</th>${show.map(l => `<th>Day ${l}</th>`).join("")}</tr>${body}</table>`;
+}
+
+function showMap() {
+  const d = D.days.find(x => x.day === day);
+  if (!d) { $("viewer").innerHTML = '<div class="empty">No maps yet.</div>'; return; }
+  if (!d.maps.some(m => m.lead === lead)) lead = d.maps[0].lead;
+  $("leads").innerHTML = d.maps.map(m => `<button class="pill ${m.lead === lead ? "on" : ""}" data-l="${m.lead}">Day ${m.lead}</button>`).join("");
+  const m = d.maps.find(x => x.lead === lead);
+  $("viewer").innerHTML = `<img src="${m.file}?v=${encodeURIComponent(D.updated_utc)}" alt="Observed rain against the Day ${lead} forecasts, ${fmtDay(day)}">`;
+}
+
+fetch("scores.json", {cache: "no-store"})
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(doc => {
+    D = doc;
+    $("upd").textContent = `Updated ${doc.updated_utc.replace("T", " ")} UTC`;
+    $("region").innerHTML = Object.entries(D.regions).map(([k, v]) => `<option value="${k}">${v}</option>`).join("");
+    $("measure").innerHTML = Object.entries(MEASURES).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("");
+    ["region", "period", "measure"].forEach(id => $(id).onchange = render);
+    $("day").innerHTML = D.days.map(d => `<option value="${d.day}">${fmtDay(d.day)}</option>`).join("");
+    day = D.days.length ? D.days[0].day : null;
+    $("day").onchange = e => { day = e.target.value; showMap(); };
+    $("leads").onclick = e => { const b = e.target.closest(".pill"); if (b) { lead = +b.dataset.l; showMap(); } };
+    render(); showMap();
+  })
+  .catch(() => {
+    $("upd").textContent = "No scores yet";
+    $("headline").textContent = "The first verification has not been published here yet.";
+  });
+</script>
+</body>
+</html>

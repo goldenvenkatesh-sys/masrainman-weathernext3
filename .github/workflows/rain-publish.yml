@@ -100,14 +100,16 @@ jobs:
           fi
 
           # The model's own timer (daily_forecast.yml) gets skipped as well. If the newest ECMWF
-          # run should be out by now (00 UTC by ~9 UTC, 12 UTC by ~21 UTC) but the model has not
+          # run should be out by now (00 UTC by ~9, 06 by ~14, 12 by ~21, 18 by ~03 UTC) but the model has not
           # made it, start the model. Needs MASRAINMAN_MODEL_TOKEN to also have "Actions: Read and
           # write" on masrainman-model; without it this just prints a notice.
           want=$(python3 -c "
           from datetime import datetime, timedelta, timezone
           n = datetime.now(timezone.utc)
           if n.hour >= 21: c = n.replace(hour=12)
+          elif n.hour >= 14: c = n.replace(hour=6)
           elif n.hour >= 9: c = n.replace(hour=0)
+          elif n.hour >= 3: c = (n - timedelta(days=1)).replace(hour=18)
           else: c = (n - timedelta(days=1)).replace(hour=12)
           print(c.strftime('%Y%m%d%H'))")
           echo "MasRainMan AI: newest ECMWF run expected $want"

@@ -14,10 +14,11 @@ on:
     branches: [main]
     paths: ["web/ai.html", "web/ai_verify.html", ".github/workflows/masrainman-ai.yml"]
   schedule:                          # after each of the forecast's run times; quick no-op if nothing new
-    - cron: "25 9 * * *"             # 2:55 PM IST
+    - cron: "25 9 * * *"             # 2:55 PM IST  00 UTC run
     - cron: "5 11 * * *"             # 4:35 PM IST
-    - cron: "35 13 * * *"            # 7:05 PM IST
-    - cron: "55 21 * * *"            # 3:25 AM IST, after the 12 UTC run (the hourly rain job is the main backup)
+    - cron: "35 14 * * *"            # 8:05 PM IST  06 UTC run
+    - cron: "55 21 * * *"            # 3:25 AM IST  12 UTC run
+    - cron: "35 2 * * *"             # 8:05 AM IST  18 UTC run (the hourly rain job is the main backup)
   workflow_dispatch:
 
 permissions:

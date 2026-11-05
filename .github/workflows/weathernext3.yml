@@ -139,12 +139,12 @@ jobs:
             python render.py
           fi
 
-      # Ensemble landfall maps: ECMWF ENS tracks, plus GEFS and UKMET tracked from their fields.
+      # Ensemble landfall maps: ECMWF ENS and DeepMind FNV3 tracks, plus GEFS, GEPS, ICON-EPS and UKMET tracked from their fields.
       # Runs every time and only draws runs that are not on the site yet (a few minutes when it does).
       - name: Landfall maps
         id: landfall
         continue-on-error: true
-        timeout-minutes: 40
+        timeout-minutes: 90
         run: |
           pip install -q -r requirements.txt
           python landfall.py

@@ -60,12 +60,14 @@
     These maps are not official forecasts. Please follow IMD for official forecasts and warnings.</footer>
 </main>
 <script>
-// All six models get a button; the ones without data yet stay disabled.
+// All six models get a button; a model switches on as soon as its first run is on the site.
 const ALL = [["deepmind","DeepMind FNV3"],["ecmwf","ECMWF ENS"],["gfs","GFS (GEFS)"],
              ["icon","ICON-EPS"],["gem","GEM (GEPS)"],["ukmet","UKMET"]];
 let man = {models:{}}, model = null, run = null, sys = null;
 const $ = id => document.getElementById(id);
 const fmtRun = r => { const [d,h] = r.split("_"); return `${d.slice(6,8)}/${d.slice(4,6)} ${h}Z`; };
+// Older runs may still carry ECMWF genesis ids (70B, 71A …): show them as invests (90B, 91A …).
+const sid = s => /^7\d[AB]$/.test(s) ? "9" + s.slice(1) : s;
 const ll = (a,o) => `${Math.abs(a).toFixed(1)}°${a>=0?"N":"S"} ${Math.abs(o).toFixed(1)}°${o>=0?"E":"W"}`;
 
 function pills(el, items, cur, pick){
@@ -85,13 +87,13 @@ function draw(){
   const R = runs.find(r => r.run===run);
   const systems = R ? R.systems : [];
   if (!sys && systems.length) sys = [...systems].sort((a,b)=>b.landfalls-a.landfalls)[0].storm;
-  pills($("systems"), systems.map(s => [s.storm, s.members > 1 ? `${s.storm} · ${s.landfalls}/${s.members}` : s.storm]), sys, k => {sys=k; draw();});
+  pills($("systems"), systems.map(s => [s.storm, s.members > 1 ? `${sid(s.storm)} · ${s.landfalls}/${s.members}` : sid(s.storm)]), sys, k => {sys=k; draw();});
   const S = systems.find(s => s.storm===sys);
   if (!S){ $("out").innerHTML = `<div class="empty">${model ? "No North Indian Ocean system makes landfall in this run." : "No landfall maps yet."}</div>`; return; }
   const rows = S.areas.map((a,i) => `<tr><td><b>${i+1}</b></td><td>${ll(a.lat,a.lon)}</td><td>${a.n}</td><td>${a.pct.toFixed(0)}%</td></tr>`).join("");
   $("out").innerHTML = `<div class="stage">
-    <div class="viewer"><a href="${S.png}" target="_blank"><img src="${S.png}" alt="Landfall map ${S.storm}"></a></div>
-    <div class="side"><h3>${man.models[model].label} · ${S.storm}</h3>
+    <div class="viewer"><a href="${S.png}" target="_blank"><img src="${S.png}" alt="Landfall map ${sid(S.storm)}"></a></div>
+    <div class="side"><h3>${man.models[model].label} · ${sid(S.storm)}</h3>
       <div class="when">Init ${fmtRun(run)} · starts near ${ll(S.start.lat,S.start.lon)}${S.start.step?` (T+${S.start.step})`:""}</div>
       <div>${S.members > 1 ? `${S.landfalls} of ${S.members} members make landfall (${S.tracked} track it).` : (S.landfalls ? "The model track makes landfall." : "")}</div>
       ${man.models[model].note ? `<p class="when">${man.models[model].note}</p>` : ""}

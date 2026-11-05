@@ -6,8 +6,12 @@
 #   1. Gets the model's cyclone tracks
 #        ECMWF ENS : tropical-cyclone track BUFR (…-enfo-tf.bufr) from ECMWF open data,
 #                    which also tracks genesis systems (ids 70B, 71B …) before they are named
-#        GFS (GEFS), UKMET : tracked here from the gridded fields (gridtrack.py),
-#                    starting from ECMWF's position of each system
+#        GFS (GEFS), GEM (GEPS), ICON-EPS, UKMET : tracked here from the gridded fields
+#                    (gridtrack.py), starting from ECMWF's position of each system
+#        DeepMind FNV3 : ensemble tracks from Google DeepMind Weather Lab, each member matched
+#                    to the ECMWF system it starts on
+#      Genesis systems are named like JTWC invests (90B, 91A …): the JTWC id when JTWC has one,
+#      otherwise ECMWF's genesis id moved to the 90 series (70B -> 90B, 71B -> 91B)
 #   2. Keeps the North Indian Ocean systems (Bay of Bengal "B", Arabian Sea "A")
 #   3. Finds each member's first landfall (sea -> land on Natural Earth 10 m land)
 #      and its intensity there (TD / TS / Cat 1-5 from the member's 10-m wind)
@@ -78,9 +82,18 @@ ECMWF_URLS = [
 ]
 
 MODELS = {
+    "deepmind": {"label": "DeepMind FNV3 ensemble", "members": 50,
+                 "note": "Google DeepMind Weather Lab experimental cyclone ensemble (FNV3). Each member is "
+                         "matched to the ECMWF system it starts on."},
     "ecmwf": {"label": "ECMWF ENS", "members": 51},
     "gfs": {"label": "GFS ensemble (GEFS)", "members": 31,
             "note": "Tracks found by MasRainman in the GEFS 0.5° MSLP and 10-m wind (31 members), "
+                    "starting from ECMWF's position of each system."},
+    "icon": {"label": "DWD ICON-EPS", "members": 40,
+             "note": "Tracks found by MasRainman in the ICON-EPS MSLP and 10-m wind (40 members, "
+                     "to T+180 from 00Z/12Z, T+120 from 06Z/18Z), starting from ECMWF's position of each system."},
+    "gem": {"label": "CMC GEM ensemble (GEPS)", "members": 21,
+            "note": "Tracks found by MasRainman in the GEPS 0.5° MSLP and 10-m wind (control + 20 members), "
                     "starting from ECMWF's position of each system."},
     "ukmet": {"label": "UKMET global (deterministic)", "members": 1,
               "note": "One track found by MasRainman in the Met Office global 10 km MSLP and 10-m wind, "
@@ -441,16 +454,127 @@ def ecmwf_tracks(run, bufr=None):
             tracks = tracks.assign(storm=tracks.storm.replace(names))
     except Exception as e:
         print(f"  (JTWC names skipped: {e})")
+    rest = invest_ids(tracks.storm.unique())     # genesis ids JTWC has no invest for yet
+    if rest:
+        print("  invest ids: " + ", ".join(f"{k} -> {v}" for k, v in rest.items()))
+        tracks = tracks.assign(storm=tracks.storm.replace(rest))
     return tracks
 
 
+def invest_ids(storms, taken=()):
+    """ECMWF genesis ids (70B, 71A …) -> JTWC-style invest ids (90B, 91A …), never reusing an id in use."""
+    used = set(taken) | {s for s in storms if not str(s).startswith("7")}
+    out = {}
+    for s in sorted(storms):
+        s = str(s)
+        if not s.startswith("7") or len(s) != 3:
+            continue
+        cand = "9" + s[1:]
+        if cand in used:
+            cand = next((f"9{i}{s[-1]}" for i in range(10) if f"9{i}{s[-1]}" not in used), cand)
+        out[s] = cand
+        used.add(cand)
+    return out
+
+
+# ------------------------------------------------------------ DeepMind Weather Lab
+
+WEATHERLAB = ("https://deepmind.google.com/science/weatherlab/download/cyclones/"
+              "{m}/ensemble/paired/csv/{m}_{t}_paired.csv")
+WEATHERLAB_MODELS = ("FNV3P2", "OPER")       # current FNV3 ensemble first
+_DM = {}
+
+
+def deepmind_csv(run):
+    """Weather Lab ensemble track CSV for a run (bytes), or None if not online yet."""
+    if run in _DM:
+        return _DM[run]
+    t = datetime.strptime(run, "%Y%m%d_%H").strftime("%Y_%m_%dT%H_00")
+    _DM[run] = None
+    for m in WEATHERLAB_MODELS:
+        try:
+            r = requests.get(WEATHERLAB.format(m=m, t=t), timeout=120,
+                             headers={"User-Agent": "Mozilla/5.0 (MASRainman landfall maps)"})
+        except requests.RequestException as e:
+            print(f"  Weather Lab {m}: {e}")
+            continue
+        if r.status_code == 200 and r.content[:200].lower().find(b"track_id") >= 0:
+            _DM[run] = r.content
+            print(f"  Weather Lab: {m} ensemble for {run}")
+            break
+    return _DM[run]
+
+
+def read_weatherlab(content, run):
+    """Weather Lab CSV -> member tracks: track_id, member, step, lat, lon, mslp, wind (m/s)."""
+    import io
+    df = pd.read_csv(io.BytesIO(content))
+    df.columns = [c.strip().lower() for c in df.columns]
+    df = df[df["sample"].notna()].copy()          # 'paired' files can carry the observed track too
+    init = pd.Timestamp(datetime.strptime(run, "%Y%m%d_%H"))
+    if "lead_time_hours" in df:
+        step = pd.to_numeric(df["lead_time_hours"], errors="coerce")
+    elif "lead_time" in df:
+        step = pd.to_timedelta(df["lead_time"], errors="coerce").dt.total_seconds() / 3600
+    else:
+        step = (pd.to_datetime(df["valid_time"], utc=True).dt.tz_localize(None) - init).dt.total_seconds() / 3600
+    wind = df.get("maximum_sustained_wind_speed_knots", df.get("max_wind_knots"))
+    out = pd.DataFrame({
+        "track_id": df["track_id"].astype(str),
+        "member": pd.to_numeric(df["sample"], errors="coerce"),
+        "step": step,
+        "lat": pd.to_numeric(df["lat"], errors="coerce"),
+        "lon": pd.to_numeric(df["lon"], errors="coerce"),
+        "mslp": pd.to_numeric(df.get("minimum_slp_hpa", np.nan), errors="coerce"),
+        "wind": pd.to_numeric(wind, errors="coerce") / MS_TO_KT if wind is not None else np.nan,
+    }).dropna(subset=["member", "step", "lat", "lon"])
+    out["lon"] = np.where(out.lon > 180, out.lon - 360, out.lon)
+    out["member"] = out.member.astype(int)
+    out["step"] = out.step.round().astype(int)
+    return out[out.step >= 0].sort_values(["track_id", "member", "step"])
+
+
+def deepmind_tracks(run, ec, max_km=400, max_dh=12):
+    """DeepMind members that start on an ECMWF system, under that system's id."""
+    raw = deepmind_csv(run)
+    if raw is None:
+        return None
+    dm = read_weatherlab(raw, run)
+    ecm = ec.groupby(["storm", "step"])[["lat", "lon"]].median().reset_index()
+    rows, unmatched = [], 0
+    for (tid, m), t in dm.groupby(["track_id", "member"]):
+        f = t.iloc[0]
+        if not (-5 <= f.lat <= 32 and 40 <= f.lon <= 100):
+            continue                                   # not a North Indian Ocean system
+        c = ecm[(ecm.step - f.step).abs() <= max_dh]
+        if not len(c):
+            unmatched += 1
+            continue
+        d = haversine_km(f.lat, f.lon, c.lat.values, c.lon.values)
+        k = int(np.argmin(d))
+        if d[k] > max_km:
+            unmatched += 1
+            continue
+        rows.append(t.assign(storm=c.storm.values[k]))
+    if unmatched:
+        print(f"  DeepMind: {unmatched} North Indian Ocean member tracks match no ECMWF system, left out")
+    if not rows:
+        return pd.DataFrame(columns=["storm", "member", "step", "lat", "lon", "mslp", "wind"])
+    tr = pd.concat(rows)
+    # one track per member per system: the longest
+    keep = tr.groupby(["storm", "member", "track_id"]).size().reset_index(name="n") \
+             .sort_values("n").drop_duplicates(["storm", "member"], keep="last")
+    tr = tr.merge(keep[["storm", "member", "track_id"]])
+    return tr[["storm", "member", "step", "lat", "lon", "mslp", "wind"]].reset_index(drop=True)
+
+
 def candidate_runs(model, now=None):
-    """Recent runs, newest first: every 6 h (UKMET: 00Z and 12Z, the runs that reach T+168)."""
+    """Recent runs, newest first: every 6 h (UKMET and GEPS: 00Z and 12Z only)."""
     t = (now or datetime.now(timezone.utc)).replace(minute=0, second=0, microsecond=0)
     t -= timedelta(hours=t.hour % 6)
     out = []
     for _ in range(8):
-        if model != "ukmet" or t.hour in (0, 12):
+        if model not in ("ukmet", "gem") or t.hour in (0, 12):
             out.append(t.strftime("%Y%m%d_%H"))
         t -= timedelta(hours=6)
     return out
@@ -472,6 +596,11 @@ def do_model(model, run, bufr=None):
         return False
     if model == "ecmwf":
         tracks = ec
+    elif model == "deepmind":
+        tracks = deepmind_tracks(run, ec)
+        if tracks is None:
+            print(f"deepmind {run}: Weather Lab tracks not online")
+            return False
     else:
         seeds = seeds_from_ecmwf(ec)
         print(f"{model} {run}: tracking {', '.join(seeds) or 'nothing'} from ECMWF starting positions")
@@ -483,14 +612,16 @@ def do_model(model, run, bufr=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--models", default=",".join(MODELS), help="e.g. ecmwf,gfs,ukmet")
+    ap.add_argument("--models", default=",".join(MODELS), help="e.g. ecmwf,deepmind,gfs,gem,icon,ukmet")
     ap.add_argument("--run", help="YYYYMMDD_HH (default: newest complete run not on the site yet)")
     ap.add_argument("--bufr", help="use a local ECMWF track BUFR for --run instead of downloading")
     a = ap.parse_args()
 
     import gridtrack
     complete = {"ecmwf": lambda r: ecmwf_tf_path(r) is not None,
-                "gfs": gridtrack.gefs_complete, "ukmet": gridtrack.ukmo_complete}
+                "deepmind": lambda r: ecmwf_tf_path(r) is not None and deepmind_csv(r) is not None,
+                "gfs": gridtrack.gefs_complete, "gem": gridtrack.geps_complete,
+                "icon": gridtrack.icon_complete, "ukmet": gridtrack.ukmo_complete}
     changed = False
     for model in a.models.split(","):
         try:

@@ -402,7 +402,20 @@ def geps_complete(run):
     return h in ("00", "12") and _exists(GEPS.format(d=d, h=h, s=GEPS_LAST, v=GEPS_VARS["msl"]))
 
 
+_ICON_LOGGED = []
+
+
 def icon_complete(run):
     d, h = run.split("_")
-    s = icon_last(run)
-    return _exists(ICON_EPS.format(h=h, v="pmsl") + ICON_EPS_FILE.format(d=d, h=h, s=s, v="pmsl"))
+    url = ICON_EPS.format(h=h, v="pmsl") + ICON_EPS_FILE.format(d=d, h=h, s=icon_last(run), v="pmsl")
+    ok = _exists(url)
+    if not ok and len(_ICON_LOGGED) < 2:     # say why for the newest runs only
+        _ICON_LOGGED.append(run)
+        try:
+            r = _session.get(ICON_EPS.format(h=h, v="pmsl"), timeout=30)
+            names = [n for n in __import__("re").findall(r'href="([^"]+)"', r.text) if d + h in n][:3]
+            print(f"  ICON-EPS {run}: {url.rsplit('/', 1)[-1]} not found; folder HTTP {r.status_code}, "
+                  f"files for this run e.g. {names}")
+        except requests.RequestException as e:
+            print(f"  ICON-EPS {run}: {e}")
+    return ok

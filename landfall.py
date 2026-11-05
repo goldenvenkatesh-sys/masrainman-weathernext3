@@ -502,6 +502,8 @@ def deepmind_csv(run):
             _DM[run] = r.content
             print(f"  Weather Lab: {m} ensemble for {run}")
             break
+        if len(_DM) <= 2:      # say why for the newest runs only
+            print(f"  Weather Lab {m} {run}: HTTP {r.status_code} {r.content[:120]!r}")
     return _DM[run]
 
 

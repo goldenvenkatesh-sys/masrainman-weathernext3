@@ -498,11 +498,15 @@ def deepmind_csv(run):
         except requests.RequestException as e:
             print(f"  Weather Lab {m}: {e}")
             continue
-        if r.status_code == 200 and r.content[:200].lower().find(b"track_id") >= 0:
+        if r.status_code == 200 and b"track_id" in r.content[:20000].lower():
             _DM[run] = r.content
             print(f"  Weather Lab: {m} ensemble for {run}")
+            if not _DM.get("_terms_logged"):       # the file's terms-of-use header, once per job
+                _DM["_terms_logged"] = True
+                print("  Weather Lab file header:\n" + "\n".join(
+                    "    " + l for l in r.text.splitlines() if l.startswith("#")))
             break
-        if len(_DM) <= 2:      # say why for the newest runs only
+        if len([k for k in _DM if not k.startswith("_")]) <= 2:      # say why for the newest runs only
             print(f"  Weather Lab {m} {run}: HTTP {r.status_code} {r.content[:120]!r}")
     return _DM[run]
 
@@ -510,7 +514,7 @@ def deepmind_csv(run):
 def read_weatherlab(content, run):
     """Weather Lab CSV -> member tracks: track_id, member, step, lat, lon, mslp, wind (m/s)."""
     import io
-    df = pd.read_csv(io.BytesIO(content))
+    df = pd.read_csv(io.BytesIO(content), comment="#")
     df.columns = [c.strip().lower() for c in df.columns]
     df = df[df["sample"].notna()].copy()          # 'paired' files can carry the observed track too
     init = pd.Timestamp(datetime.strptime(run, "%Y%m%d_%H"))

@@ -412,10 +412,12 @@ def icon_complete(run):
     if not ok and len(_ICON_LOGGED) < 2:     # say why for the newest runs only
         _ICON_LOGGED.append(run)
         try:
-            r = _session.get(ICON_EPS.format(h=h, v="pmsl"), timeout=30)
-            names = [n for n in __import__("re").findall(r'href="([^"]+)"', r.text) if d + h in n][:3]
-            print(f"  ICON-EPS {run}: {url.rsplit('/', 1)[-1]} not found; folder HTTP {r.status_code}, "
-                  f"files for this run e.g. {names}")
+            base = ICON_EPS.split("{h}")[0]
+            r0 = _session.get(base, timeout=30)
+            r1 = _session.get(base + h + "/", timeout=30)
+            hrefs = lambda r: __import__("re").findall(r'href="([^"?]+)"', r.text)
+            print(f"  ICON-EPS {run}: {url.rsplit('/', 1)[-1]} not found. {base} HTTP {r0.status_code}: "
+                  f"{hrefs(r0)[:20]}; {h}/ HTTP {r1.status_code}: {hrefs(r1)[:80]}")
         except requests.RequestException as e:
             print(f"  ICON-EPS {run}: {e}")
     return ok

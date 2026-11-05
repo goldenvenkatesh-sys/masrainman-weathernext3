@@ -645,7 +645,9 @@ def main():
             if a.run:
                 run = a.run
             else:
-                run = next((r for r in candidate_runs(model) if complete[model](r)), None)
+                # tracked models start from ECMWF's systems, so the run must have ECMWF tracks too
+                run = next((r for r in candidate_runs(model)
+                            if complete[model](r) and (model == "ecmwf" or ecmwf_tf_path(r) is not None)), None)
                 if run is None or run in done_runs(model):
                     print(f"{model}: nothing new ({run or 'no complete run'})")
                     continue

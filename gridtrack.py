@@ -18,6 +18,7 @@ tracks(model, run, seeds) returns the same table as landfall.read_ecmwf_tf:
 storm, member, step, lat, lon, mslp (hPa), wind (m/s).
 """
 import io
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
@@ -50,12 +51,9 @@ GEPS_MEMBERS = list(range(0, 21))       # 0 = control
 GEPS_LAST = 384                         # 00Z and 12Z runs
 
 ICON_EPS = "https://opendata.dwd.de/weather/nwp/icon-eps/grib/{h}/{v}/"
-ICON_EPS_FILE = "icon-eps_global_icosahedral_single-level_{d}{h}_{s:03d}_{v}.grib2.bz2"
-ICON_EPS_COORDS = [  # cell-centre latitudes/longitudes of the ICON-EPS grid, first one online wins
-    ICON_EPS + "icon-eps_global_icosahedral_time-invariant_{d}{h}_{v}.grib2.bz2",
-    ICON_EPS + "icon-eps_global_icosahedral_time-invariant_{d}{h}_{V}.grib2.bz2",
-]
-ICON_GRID_FILES = [  # DWD's grid description files (radians), used when the time-invariant files are not there
+# ICON-EPS has no mean-sea-level pressure in open data: surface pressure (ps) is reduced to sea level
+# with the 2-m temperature and the model terrain height (hsurf). File names are read from DWD's folder listings.
+ICON_GRID_FILES = [  # DWD's grid description files (radians), used when the clat/clon files are not there
     "https://opendata.dwd.de/weather/lib/cdo/icon_grid_0024_R02B06_G.nc.bz2",
     "https://opendata.dwd.de/weather/lib/cdo/icon_grid_0036_R03B06_G.nc.bz2",
 ]
@@ -193,13 +191,15 @@ def _grib_members(data):
     return out
 
 
-def _all_members(msl, u, v, regrid=None):
+def _all_members(msl, u, v, regrid=None, adjust=None):
     """{member: (lats, lons, mslp hPa, wind m/s or None)} from three all-member GRIB blobs (u, v may be None)."""
     P = _grib_members(msl)
     U = {m: x for m, x, _, _ in _grib_members(u)} if u else {}
     V = {m: x for m, x, _, _ in _grib_members(v)} if v else {}
     out = {}
     for m, p, lats, lons in P:
+        if adjust:
+            p = adjust(m, p)
         w = np.hypot(U[m], V[m]) if m in U and m in V else None
         if regrid:
             lats, lons, p = regrid(p)
@@ -223,21 +223,45 @@ def geps_fields(run, step):
 _ICON_RG = {}
 
 
+_ICON_LIST = {}
+
+
+def _icon_files(run, var):
+    """({step: url}, [time-invariant urls]) for one ICON-EPS variable and run, from DWD's folder listing."""
+    d, h = run.split("_")
+    key = (run, var)
+    if key not in _ICON_LIST:
+        base = ICON_EPS.format(h=h, v=var)
+        steps, inv = {}, []
+        raw = _get(base, tries=3)
+        for name in set(re.findall(r'href="([^"?/]+\.grib2\.bz2)"', raw.decode(errors="ignore") if raw else "")):
+            if d + h not in name:
+                continue
+            m = re.search(d + h + r"_(\d{3})_", name)
+            if m:
+                steps[int(m.group(1))] = base + name
+            else:
+                inv.append(base + name)
+        _ICON_LIST[key] = (steps, inv)
+    return _ICON_LIST[key]
+
+
+def _icon_invariant(run, var):
+    """First message's values of a time-invariant ICON-EPS field (clat, clon, hsurf) or None."""
+    import bz2
+    for url in _icon_files(run, var)[1]:
+        raw = _get(url, tries=3)
+        if raw:
+            return _grib_members(bz2.decompress(raw))[0][1].ravel()
+    return None
+
+
 def _icon_coords(run, ncell):
     """(clat, clon) in degrees for the ICON-EPS cells, matching ncell values."""
     import bz2
-    d, h = run.split("_")
-    tries = [(d, h)] + ([(d, "00")] if h != "00" else [])
-    for dd, hh in tries:
-        for pat in ICON_EPS_COORDS:
-            got = []
-            for v in ("clat", "clon"):
-                raw = _get(pat.format(h=hh, d=dd, v=v, V=v.upper()), tries=2)
-                if not raw:
-                    break
-                got.append(_grib_members(bz2.decompress(raw))[0][1])
-            if len(got) == 2 and got[0].size == ncell:
-                return got[0], got[1]
+    clat, clon = _icon_invariant(run, "clat"), _icon_invariant(run, "clon")
+    if clat is not None and clon is not None and clat.size == ncell:
+        return clat, clon
     for url in ICON_GRID_FILES:
         raw = _get(url, tries=2)
         if not raw:
@@ -282,20 +306,30 @@ def icon_last(run):
 def icon_eps_fields(run, step):
     """{member: field} for one ICON-EPS step (all 40 members), or None if not online."""
     import bz2
-    d, h = run.split("_")
     if step > icon_last(run):
         return None
     blob = {}
-    for v in ("pmsl", "u_10m", "v_10m"):
-        raw = _get(ICON_EPS.format(h=h, v=v) + ICON_EPS_FILE.format(d=d, h=h, s=step, v=v))
+    for v in ("ps", "t_2m", "u_10m", "v_10m"):
+        url = _icon_files(run, v)[0].get(step)
+        raw = _get(url) if url else None
         blob[v] = bz2.decompress(raw) if raw else None
-    if not blob["pmsl"]:
+    if not blob["ps"] or not blob["t_2m"]:
         return None
-    first = _grib_members(blob["pmsl"])
+    first = _grib_members(blob["ps"])
     if not first:
         return None
-    rg = _icon_regridder(run, np.size(first[0][1]))
-    return _all_members(blob["pmsl"], blob["u_10m"], blob["v_10m"], regrid=rg)
+    ncell = np.size(first[0][1])
+    z = _icon_invariant(run, "hsurf")
+    if z is None or z.size != ncell:
+        z = np.zeros(ncell)          # sea points are what the tracker needs; terrain only matters over land
+    T = {m: x.ravel() for m, x, _, _ in _grib_members(blob["t_2m"])}
+
+    def to_msl(m, ps):               # hypsometric reduction with a standard lapse rate below the surface
+        t = T.get(m, np.full(ncell, 288.0))
+        return ps.ravel() * (1 + 0.0065 * z / t) ** 5.257
+
+    rg = _icon_regridder(run, ncell)
+    return _all_members(blob["ps"], blob["u_10m"], blob["v_10m"], regrid=rg, adjust=to_msl)
 
 
 # ------------------------------------------------------------ tracking
@@ -402,22 +436,9 @@ def geps_complete(run):
     return h in ("00", "12") and _exists(GEPS.format(d=d, h=h, s=GEPS_LAST, v=GEPS_VARS["msl"]))
 
 
-_ICON_LOGGED = []
-
-
 def icon_complete(run):
-    d, h = run.split("_")
-    url = ICON_EPS.format(h=h, v="pmsl") + ICON_EPS_FILE.format(d=d, h=h, s=icon_last(run), v="pmsl")
-    ok = _exists(url)
-    if not ok and len(_ICON_LOGGED) < 2:     # say why for the newest runs only
-        _ICON_LOGGED.append(run)
-        try:
-            base = ICON_EPS.split("{h}")[0]
-            r0 = _session.get(base, timeout=30)
-            r1 = _session.get(base + h + "/", timeout=30)
-            hrefs = lambda r: __import__("re").findall(r'href="([^"?]+)"', r.text)
-            print(f"  ICON-EPS {run}: {url.rsplit('/', 1)[-1]} not found. {base} HTTP {r0.status_code}: "
-                  f"{hrefs(r0)[:20]}; {h}/ HTTP {r1.status_code}: {hrefs(r1)[:80]}")
-        except requests.RequestException as e:
-            print(f"  ICON-EPS {run}: {e}")
+    steps = _icon_files(run, "ps")[0]
+    ok = icon_last(run) in steps and icon_last(run) in _icon_files(run, "t_2m")[0]
+    if not ok:
+        print(f"  ICON-EPS {run}: {len(steps)} surface-pressure steps online, last {max(steps, default=None)}")
     return ok

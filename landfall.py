@@ -83,8 +83,8 @@ ECMWF_URLS = [
 
 MODELS = {
     "deepmind": {"label": "DeepMind FNV3 ensemble", "members": 50,
-                 "note": "Google DeepMind Weather Lab experimental cyclone ensemble (FNV3). Each member is "
-                         "matched to the ECMWF system it starts on."},
+                 "note": "Google DeepMind Weather Lab experimental cyclone ensemble (FNV3), CC BY 4.0. Each member "
+                         "is matched to the ECMWF system it starts on."},
     "ecmwf": {"label": "ECMWF ENS", "members": 51},
     "gfs": {"label": "GFS ensemble (GEFS)", "members": 31,
             "note": "Tracks found by MasRainman in the GEFS 0.5° MSLP and 10-m wind (31 members), "
@@ -546,6 +546,11 @@ def deepmind_tracks(run, ec, max_km=400, max_dh=12):
     if raw is None:
         return None
     dm = read_weatherlab(raw, run)
+    f0 = dm.groupby(["track_id", "member"]).first()
+    nio = f0[(f0.lat.between(-5, 32)) & (f0.lon.between(40, 100))]
+    print(f"  DeepMind: {len(f0)} member tracks, {dm.track_id.nunique()} track ids "
+          f"(e.g. {list(dm.track_id.unique()[:6])}); {len(nio)} start in the North Indian Ocean "
+          f"(ids {sorted(nio.index.get_level_values(0).unique())[:8]}); ECMWF systems {sorted(ec.storm.unique())}")
     ecm = ec.groupby(["storm", "step"])[["lat", "lon"]].median().reset_index()
     rows, unmatched = [], 0
     for (tid, m), t in dm.groupby(["track_id", "member"]):
@@ -590,7 +595,13 @@ def done_runs(model):
     man = os.path.join(SITE_DIR, "data", "manifest_landfall.json")
     if not os.path.exists(man):
         return set()
-    return {r["run"] for r in json.load(open(man))["models"].get(model, {}).get("runs", [])}
+    done = {r["run"] for r in json.load(open(man))["models"].get(model, {}).get("runs", [])}
+    # LANDFALL_REDO="deepmind:20261105_00,icon" redraws those runs (or a model's newest run) once more
+    for item in filter(None, os.environ.get("LANDFALL_REDO", "").replace(" ", "").split(",")):
+        m, _, r = item.partition(":")
+        if m == model:
+            done = {d for d in done if r and d != r} if r else set()
+    return done
 
 
 def do_model(model, run, bufr=None):

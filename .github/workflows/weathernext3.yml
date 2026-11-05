@@ -22,6 +22,10 @@ on:
         description: "NEM outlook: redo one ECMWF run, e.g. 20261031_00 (empty = newest new run)"
         required: false
         default: ""
+      landfall_redo:
+        description: "Landfall: redraw runs already on the site, e.g. deepmind:20261105_00 or icon (empty = none)"
+        required: false
+        default: ""
       outlook_backfill:
         description: "NEM outlook: archive this many past days of ECMWF ENS tracks for verification (e.g. 30; empty = none)"
         required: false
@@ -145,6 +149,8 @@ jobs:
         id: landfall
         continue-on-error: true
         timeout-minutes: 90
+        env:
+          LANDFALL_REDO: ${{ github.event.inputs.landfall_redo }}
         run: |
           pip install -q -r requirements.txt
           python landfall.py

@@ -121,11 +121,11 @@
 (function(){
   const $ = id => document.getElementById(id);
   const BASE = 'rain/';
-  const REGION_ORDER = ['tn','kl','ka','ap','tg'];
+  const REGION_ORDER = ['tn','ktcc','kl','ka','ap','tg'];
   const KIND_ORDER = ['live','daily','live24','accum','month','sat24','gpm3d'];
   const KIND_SHORT = {live:'Rain so far', daily:'24-hour', live24:'Past 24 h, hour by hour', accum:'Multi-day', month:'Monthly', sat24:'Satellite 24 h', gpm3d:'Satellite 3D'};
   const LANG = {ta:'Tamil', en:'English', ml:'Malayalam'};
-  const STATE = {tn:{name:'Tamil Nadu', next:'10:45 am'}, kl:{name:'Kerala', next:'12:15 pm'},
+  const STATE = {tn:{name:'Tamil Nadu', next:'10:45 am'}, ktcc:{name:'KTCC', next:'10:15 am'}, kl:{name:'Kerala', next:'12:15 pm'},
                  ka:{name:'Karnataka', next:'10:45 am'}, ap:{name:'Andhra Pradesh', next:'10:45 am'},
                  tg:{name:'Telangana', next:'hour'}};
   const S = {all:[], region:null, kind:null, lang:null, cur:null};

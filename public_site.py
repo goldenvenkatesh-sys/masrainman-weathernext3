@@ -9,11 +9,12 @@
 Pages written (each one a folder with its own index.html):
   models/    WeatherNext 3 + ECMWF IFS + ECMWF AIFS maps: MSLP and MSLP + wind barbs only
   landfall/  ensemble landfall maps
-  cyclone/   cyclone outlook: genesis, cyclone tracks, consistency, PDI, environment, cyclone verification
+  cyclone/   NEM & cyclone outlook: genesis, cyclone tracks, 30-day NEM rain forecast, active/break, consistency, PDI,
+             environment, cyclone verification (the observed station-rainfall verification stays private)
   tracks/    multi-model LPA tracker + cyclone tracker
   weathernext3/  small redirect to models/ (the first public address)
 
-Nothing rain-related is ever published. Files are copied from allow-lists, the JSON files are rebuilt from
+Observed rain (rain reports, TN-SMART station rainfall) and model rain maps are never published. Files are copied from allow-lists, the JSON files are rebuilt from
 allow-lists of keys, the pages are cut down (rain layers, rain tabs, rain verification), and at the end the
 whole output is scanned: if a rain file or rain link is found, the pages are deleted and the script fails,
 so the previous public site stays as it was.
@@ -33,7 +34,7 @@ MODELS = ("wn3", "ifs", "aifs")
 # (key, label, link from a sub-page)
 PAGES = [("models", "🗺 Model maps", "../models/"),
          ("landfall", "🌀 Landfall maps", "../landfall/"),
-         ("cyclone", "📈 Cyclone outlook", "../cyclone/"),
+         ("cyclone", "📈 NEM &amp; cyclone outlook", "../cyclone/"),
          ("tracks", "🌐 LPA &amp; cyclone tracker", "../tracks/"),
          ("ai", "🤖 MasRainMan AI (10-day)", "../")]
 
@@ -177,47 +178,20 @@ OUTLOOK_VERIF_JS = r'''function verif(){
 
 
 def public_outlook_page(html):
-    html = sub1(r"<title>.*?</title>", "<title>Cyclone Outlook · MasRainman</title>", html, "title")
-    html = sub1(r"<h1><span>NEM &amp; Cyclone Outlook</span> · North Indian Ocean · 30 days</h1>",
-                "<h1><span>Cyclone Outlook</span> · North Indian Ocean · 15 days</h1>", html, "h1")
+    html = sub1(r"<title>.*?</title>", "<title>NEM &amp; Cyclone Outlook · MasRainman</title>", html, "title")
     html = sub1(r'<nav class="mr-nav">.*?</nav>', lambda _: nav_buttons("cyclone"), html, "nav", re.S)
-    # tabs without the rain ones
-    html = sub1(r'\["nem","C · 30-day NEM rain"\],\["ab","D · Active / break"\],', "", html, "rain tabs")
-    html = sub1(r'nem, ab: activeBreak, ', "", html, "render map")
-    # overview without the rain numbers and tiles
-    m = re.search(r"function overview\(\)\{.*?(?=\n// -{10,} A\. Genesis)", html, re.S)
-    if not m:
-        die("overview() not found in web/outlook.html")
-    ov = m.group(0)
-    ov = ov.replace(", nem = S.nem||{}, ab = S.active_break||{}, pdi", ", pdi")
-    ov = re.sub(r"\n  const w1 = .*", "", ov, count=1)
-    ov = re.sub(r"\n  const act = .*", "", ov, count=1)
-    ov = re.sub(r"\n    \$\{k\(\"TN week 1\".*", "", ov, count=1)
-    ov = re.sub(r"\n    \$\{k\(\"Active NEM days\".*", "", ov, count=1)
-    ov = re.sub(r"\n    <div>\$\{img\(w1 && w1\.png, \"Week 1 rain\"\)\}</div>\n    <div>\$\{img\(ab\.png, \"Active / break\"\)\}</div></div>`;",
-                "</div>`;", ov, count=1)
-    if re.search(r"w1|\bab\b|nem|NEM|rain", ov):
-        die("overview() still mentions rain after cutting")
-    html = html.replace(m.group(0), ov)
-    # drop the NEM and active/break tabs' code
-    html, n = re.subn(r"// -{10,} C\. 30-day NEM -{10,}\n.*?(?=// -{10,} E\. Consistency)", "", html, flags=re.S)
-    if n != 1:
-        die("NEM / active-break code not found in web/outlook.html")
-    # verification without the rain panels
+    # verification: cyclone tracks/detection only. The observed station rainfall (TN-SMART) and the
+    # active/break check against it stay private.
     html, n = re.subn(r"function verif\(\)\{.*?(?=\nfunction methods\(\))", lambda _: OUTLOOK_VERIF_JS.rstrip("\n"), html, flags=re.S)
     if n != 1:
         die("verif() not found in web/outlook.html")
     html = sub1(r"open data \(ECMWF ENS / IFS, NOAA CFSv2, NOAA CPC, IBTrACS, BoM RMM, TN-SMART\)",
-                "open data (ECMWF ENS / IFS, IBTrACS)", html, "footer sources")
-    html = sub1(r"\n  <li><b>30-day NEM outlook</b>.*?</li>", "", html, "NEM method line", re.S)
-    html = sub1(r"\n  <li><b>Active / break detector</b>.*?</li>", "", html, "active/break method line", re.S)
+                "open data (ECMWF ENS / IFS, NOAA CFSv2, NOAA CPC, IBTrACS, BoM RMM)", html, "footer sources")
     html = sub1(r"\n  <li><b>Verification</b>.*?</li>",
                 "\n  <li><b>Verification</b>: each run's ENS-mean and HRES tracks and predicted geneses are archived for 120 days and scored against IBTrACS / ECMWF analyses.</li>",
                 html, "verification method line", re.S)
     return html
 
-
-TAKEAWAY_DROP = re.compile(r"rain|\bnem\b|monsoon|\bmm\b|active|extended range|week \d|station", re.I)
 
 
 def build_outlook(site, out):
@@ -231,11 +205,11 @@ def build_outlook(site, out):
             s = json.load(f)
         ver = s.get("verification") or {}
         pub = {k: s[k] for k in ("run", "init", "generated", "demo", "genesis", "cyclones", "pdi", "consistency",
-                                 "environment", "names") if k in s}
-        pub["errors"] = {k: v for k, v in (s.get("errors") or {}).items() if k == "consistency"}
+                                 "environment", "nem", "active_break", "names") if k in s}
+        pub["errors"] = {k: v for k, v in (s.get("errors") or {}).items() if k != "verification"}
         if ver:
             pub["verification"] = {k: ver[k] for k in ("track", "detection", "runs_archived", "period") if k in ver}
-        pub["takeaways"] = [t for t in s.get("takeaways", []) if not TAKEAWAY_DROP.search(t)]
+        pub["takeaways"] = list(s.get("takeaways", []))
         # every picture the public summary points to, and nothing else
         found = set()
 
@@ -250,8 +224,8 @@ def build_outlook(site, out):
                 found.add(o)
         walk(pub)
         for p in sorted(found):
-            if re.search(r"nem_|active_break|verification", p):
-                die(f"unexpected rain picture in the public summary: {p}")
+            if re.search(r"verification", p):
+                die(f"the verification picture (station rainfall) must stay private: {p}")
             copy(site, p, dest)
             pngs += 1
         write_json(os.path.join(dest, r["summary"]), pub)
@@ -293,8 +267,8 @@ def build_tracks(site, out):
 
 
 # ---------------------------------------------------------------- final scan
-BAD_NAME = re.compile(r"rain|precip|nem_|active_break|verification\.png|tnsmart|tn-smart", re.I)
-BAD_TEXT = re.compile(r"rain\.html|TN-SMART|tnsmart|nem_w\d|active_break|Rain reports|data-layer=\"rain|rain24"
+BAD_NAME = re.compile(r"rain|precip|verification\.png|tnsmart|tn-smart", re.I)
+BAD_TEXT = re.compile(r"rain\.html|TN-SMART|tnsmart|Rain reports|data-layer=\"rain|rain24"
                       r"|\"rain\"\s*:\s*\[\s*\{|Rainfall Forecast|Station rainfall", re.I)
 
 

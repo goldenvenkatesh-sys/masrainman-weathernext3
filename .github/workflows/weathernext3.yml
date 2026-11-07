@@ -196,10 +196,10 @@ jobs:
           npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
           npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
 
-      # Public copy for the Blogger page (masrainman-ai, no login): AI forecast + verification + WeatherNext 3 maps.
+      # Public copy for the Blogger page (masrainman-ai, no login): AI forecast + verification + model maps, landfall, cyclone outlook and tracker (no rain).
       # No rain products. The AI workflow publishes the same set; each deploy replaces the whole project.
       - name: Publish the public pages (masrainman-ai, no login)
-        if: steps.render.outcome == 'success'
+        if: steps.render.outcome == 'success' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -5,14 +5,14 @@ name: MasRainMan AI forecast on the site
 # 14:00 IST with backups) and published on that repo's "live" branch; this workflow copies the
 # newest maps here, saves them in site-data like the other pages, and redeploys Cloudflare.
 # It also redeploys when new verification scores arrive (verif-site's stamp.txt), and publishes the
-# same two pages plus the WeatherNext 3 maps (no rain), without login, to the public Cloudflare project
+# same two pages plus the model maps, landfall, cyclone outlook and tracker pages (no rain), without login, to the public Cloudflare project
 # masrainman-ai (embedded on the MasRainman Blogger page). Nothing else of the site goes there.
 # Needs the secret MASRAINMAN_MODEL_TOKEN: a fine-grained GitHub token with read-only
 # "Contents" access to goldenvenkatesh-sys/masrainman-model.
 on:
   push:                              # once whenever this page or workflow changes
     branches: [main]
-    paths: ["web/ai.html", "web/ai_verify.html", "web/index.html", "build_public.sh", "public_wn3.py", ".github/workflows/masrainman-ai.yml"]
+    paths: ["web/ai.html", "web/ai_verify.html", "web/index.html", "web/landfall.html", "web/outlook.html", "multimodel/web/index.html", "build_public.sh", "public_site.py", ".github/workflows/masrainman-ai.yml"]
   schedule:                          # after each of the forecast's run times; quick no-op if nothing new
     - cron: "25 9 * * *"             # 2:55 PM IST  00 UTC run
     - cron: "5 11 * * *"             # 4:35 PM IST
@@ -116,9 +116,9 @@ jobs:
           npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
           npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
 
-      # Public copy for the Blogger page: the AI forecast, its verification and the WeatherNext 3 maps (MSLP + wind,
-      # no rain). Links back to the private dashboard are taken out; the blog link is added instead.
-      # build_public.sh builds all three pages (the model-maps workflow uses the same script).
+      # Public copy for the Blogger page: the AI forecast, its verification, model maps (WeatherNext 3, IFS, AIFS: MSLP + wind),
+      # landfall, cyclone outlook and LPA/cyclone tracker (no rain). Links back to the private dashboard are taken out; the blog link is added instead.
+      # build_public.sh builds all the pages (the model-maps workflow uses the same script).
       - name: Publish the public pages (masrainman-ai, no login)
         if: steps.get.outputs.new == 'true'
         continue-on-error: true

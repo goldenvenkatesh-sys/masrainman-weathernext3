@@ -2,7 +2,7 @@ name: Rain reports on the site
 
 # Republishes the Cloudflare site with the newest rainfall reports (Rain reports page),
 # keeping the model maps exactly as the last model run saved them (site-data branch).
-#  - instantly, when the rain-report repo sends "rain-reports" (needs its WN3_DISPATCH_TOKEN secret)
+#  - when the rain-report repo sends "rain-reports" (needs its WN3_DISPATCH_TOKEN secret)
 #  - otherwise every hour
 on:
   repository_dispatch:
@@ -37,10 +37,8 @@ jobs:
             git rev-parse FETCH_HEAD > "$RUNNER_TEMP/maps_sha"
           fi
 
-      # GitHub's own timer is often hours late or skips runs. This workflow is started about every
-      # hour, so it also starts (1) the model maps when a 3-hour slot has passed since their last run,
-      # and (2) the multi-model LPA / cyclone tracker when the newest 00/12 UTC cycle is not on
-      # the site yet. Uses this repository's own token: no extra secret needed.
+      # GitHub's own timer can start late or skip runs. This hourly workflow also starts
+      # the model maps and multi-model tracker when they are due.
       - name: Start model maps / cyclone tracker when due
         continue-on-error: true
         env:
@@ -70,14 +68,12 @@ jobs:
             echo "Multi-model run already going"
           else
             last=$(gh run list -R "$R" -w mme.yml -L 1 --json createdAt -q '.[0].createdAt')
-            # at most one try per 3 hours, so a failing model server can't eat all the minutes
             if [ -z "$last" ] || [ $(( $(date +%s) - $(date -d "$last" +%s) )) -gt 10800 ]; then
               gh workflow run mme.yml -R "$R" --ref main && echo "started multi-model cycle $cyc"
             fi
           fi
 
-      # The MasRainMan AI page: its own timer (masrainman-ai.yml) is often skipped too, so the
-      # site kept the morning forecast. Compare the model repo's newest forecast with the site's.
+      # Check whether a newer forecast is ready for the MasRainMan AI page.
       - name: Start MasRainMan AI page update when a new forecast is ready
         continue-on-error: true
         env:
@@ -98,10 +94,6 @@ jobs:
             gh workflow run masrainman-ai.yml -R "$R" --ref main && echo "started MasRainMan AI update $new"
           fi
 
-          # The model's own timer (daily_forecast.yml) gets skipped as well. If the newest ECMWF
-          # run should be out by now (00 UTC by ~9, 06 by ~14, 12 by ~21, 18 by ~03 UTC) but the model has not
-          # made it, start the model. Needs MASRAINMAN_MODEL_TOKEN to also have "Actions: Read and
-          # write" on masrainman-model; without it this just prints a notice.
           want=$(python3 -c "
           from datetime import datetime, timedelta, timezone
           n = datetime.now(timezone.utc)
@@ -119,9 +111,10 @@ jobs:
               echo "::warning::Model forecast $want is late, but MASRAINMAN_MODEL_TOKEN can't see the model's Actions. Give the token 'Actions: Read and write'."; exit 0; }
             last=$(echo "$runs" | python3 -c "import json,sys; r=json.load(sys.stdin)['workflow_runs']; print((r[0]['status']+' '+r[0]['created_at']) if r else '')")
             st=${last%% *}; at=${last#* }
-            # at most one start every 2 hours, and never while one is running
-            if [ "$st" != "completed" ] && [ -n "$last" ]; then echo "Model run already going"
-            elif [ -n "$at" ] && [ $(( $(date +%s) - $(date -d "$at" +%s) )) -lt 7200 ]; then echo "Model was started less than 2 h ago"
+            if [ "$st" != "completed" ] && [ -n "$last" ]; then
+              echo "Model run already going"
+            elif [ -n "$at" ] && [ $(( $(date +%s) - $(date -d "$at" +%s) )) -lt 7200 ]; then
+              echo "Model was started less than 2 h ago"
             else
               curl -fsS -X POST "${H[@]}" "$M/workflows/daily_forecast.yml/dispatches" -d '{"ref":"main"}' \
                 && echo "started model forecast for $want" \
@@ -143,10 +136,9 @@ jobs:
             cp web/index.html web/rain.html web/landfall.html web/outlook.html site/
           fi
 
-      - name: Publish to Cloudflare Pages (login-protected)
+      - name: Publish to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
-          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty](#)
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true

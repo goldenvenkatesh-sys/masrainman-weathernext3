@@ -5,11 +5,10 @@ name: Rain reports on the site
 #  - instantly, when the rain-report repo sends "rain-reports" (needs its WN3_DISPATCH_TOKEN secret)
 #  - otherwise every hour
 on:
-  # Manual only (automatic runs switched off on request). To turn them back on, add:
-  #   repository_dispatch:
-  #     types: [rain-reports]
-  #   schedule:
-  #     - cron: "20 * * * *"
+  repository_dispatch:
+    types: [rain-reports]
+  schedule:
+    - cron: "20 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -40,8 +39,8 @@ jobs:
 
       # GitHub's own timer is often hours late or skips runs. This workflow is started about every
       # hour, so it also starts (1) the model maps when a 3-hour slot has passed since their last run,
-      # and (2) the multi-model LPA / cyclone tracker when the newest 00/12 UTC cycle is not on the
-      # site yet. Uses this repository's own token: no extra secret needed.
+      # and (2) the multi-model LPA / cyclone tracker when the newest 00/12 UTC cycle is not on
+      # the site yet. Uses this repository's own token: no extra secret needed.
       - name: Start model maps / cyclone tracker when due
         continue-on-error: true
         env:
@@ -77,7 +76,7 @@ jobs:
             fi
           fi
 
-      # (3) The MasRainMan AI page: its own timer (masrainman-ai.yml) is often skipped too, so the
+      # The MasRainMan AI page: its own timer (masrainman-ai.yml) is often skipped too, so the
       # site kept the morning forecast. Compare the model repo's newest forecast with the site's.
       - name: Start MasRainMan AI page update when a new forecast is ready
         continue-on-error: true
@@ -117,7 +116,7 @@ jobs:
             M=https://api.github.com/repos/goldenvenkatesh-sys/masrainman-model/actions
             H=(-H "Authorization: Bearer $MODEL_TOKEN" -H "Accept: application/vnd.github+json")
             runs=$(curl -fsS "${H[@]}" "$M/workflows/daily_forecast.yml/runs?per_page=1") || {
-              echo "::warning::Model forecast $want is late, but MASRAINMAN_MODEL_TOKEN can't see the model's Actions. Give the token 'Actions: Read and write' on masrainman-model."; exit 0; }
+              echo "::warning::Model forecast $want is late, but MASRAINMAN_MODEL_TOKEN can't see the model's Actions. Give the token 'Actions: Read and write'."; exit 0; }
             last=$(echo "$runs" | python3 -c "import json,sys; r=json.load(sys.stdin)['workflow_runs']; print((r[0]['status']+' '+r[0]['created_at']) if r else '')")
             st=${last%% *}; at=${last#* }
             # at most one start every 2 hours, and never while one is running
@@ -126,7 +125,7 @@ jobs:
             else
               curl -fsS -X POST "${H[@]}" "$M/workflows/daily_forecast.yml/dispatches" -d '{"ref":"main"}' \
                 && echo "started model forecast for $want" \
-                || echo "::warning::Couldn't start the model. Give MASRAINMAN_MODEL_TOKEN 'Actions: Read and write' on masrainman-model."
+                || echo "::warning::Couldn't start the model. Give MASRAINMAN_MODEL_TOKEN 'Actions: Read and write'."
             fi
           fi
 
@@ -150,4 +149,4 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           npx --yes wrangler@3 pages project create "$CF_PROJECT" --production-branch=main 2>/dev/null || true
-          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
+          npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty](#)

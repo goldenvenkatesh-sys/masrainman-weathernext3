@@ -1,0 +1,674 @@
+{
+ "model": "aifs",
+ "model_label": "ECMWF AIFS",
+ "base": "ecmwf/aifs",
+ "run": "20261107_12",
+ "init": "2026-11-07T12:00Z",
+ "last_hour": 360,
+ "resol": "0p25",
+ "grid_deg": 0.25,
+ "persistent_tracks": 41,
+ "frames": [
+  {
+   "hour": 24,
+   "mslp": "mslp_T024.png",
+   "barbs": "barbs_T024.png",
+   "rain": "rain_T024.png",
+   "rain24": "rain24_T024.png",
+   "valid": "2026-11-08T12:00Z",
+   "systems": [
+    {
+     "id": "T01",
+     "lat": 24.8,
+     "lon": 92.8,
+     "mslp": 1012.6,
+     "dep": 1.72,
+     "wind": 3.9,
+     "circ": 0.691,
+     "score": 0.469
+    },
+    {
+     "id": "T06",
+     "lat": 13.5,
+     "lon": 74.8,
+     "mslp": 1010.1,
+     "dep": 1.28,
+     "wind": 6.6,
+     "circ": 0.627,
+     "score": 0.469
+    },
+    {
+     "id": "T09",
+     "lat": 23.8,
+     "lon": 91.0,
+     "mslp": 1012.8,
+     "dep": 1.2,
+     "wind": 3.0,
+     "circ": 0.73,
+     "score": 0.434
+    }
+   ]
+  },
+  {
+   "hour": 48,
+   "mslp": "mslp_T048.png",
+   "barbs": "barbs_T048.png",
+   "rain": "rain_T048.png",
+   "rain24": "rain24_T048.png",
+   "valid": "2026-11-09T12:00Z",
+   "systems": [
+    {
+     "id": "T11",
+     "lat": 24.8,
+     "lon": 92.2,
+     "mslp": 1012.5,
+     "dep": 2.84,
+     "wind": 3.8,
+     "circ": 0.73,
+     "score": 0.599
+    },
+    {
+     "id": "T12",
+     "lat": 25.0,
+     "lon": 88.0,
+     "mslp": 1013.0,
+     "dep": 1.08,
+     "wind": 3.2,
+     "circ": 0.713,
+     "score": 0.427
+    },
+    {
+     "id": "T14",
+     "lat": 10.8,
+     "lon": 76.0,
+     "mslp": 1009.4,
+     "dep": 0.86,
+     "wind": 6.8,
+     "circ": 0.602,
+     "score": 0.422
+    }
+   ]
+  },
+  {
+   "hour": 72,
+   "mslp": "mslp_T072.png",
+   "barbs": "barbs_T072.png",
+   "rain": "rain_T072.png",
+   "rain24": "rain24_T072.png",
+   "valid": "2026-11-10T12:00Z",
+   "systems": [
+    {
+     "id": "T14",
+     "lat": 10.8,
+     "lon": 76.0,
+     "mslp": 1008.7,
+     "dep": 1.08,
+     "wind": 6.6,
+     "circ": 0.608,
+     "score": 0.441
+    },
+    {
+     "id": "T15",
+     "lat": 22.5,
+     "lon": 58.0,
+     "mslp": 1013.0,
+     "dep": 1.0,
+     "wind": 8.7,
+     "circ": 0.608,
+     "score": 0.38
+    }
+   ]
+  },
+  {
+   "hour": 96,
+   "mslp": "mslp_T096.png",
+   "barbs": "barbs_T096.png",
+   "rain": "rain_T096.png",
+   "rain24": "rain24_T096.png",
+   "valid": "2026-11-11T12:00Z",
+   "systems": [
+    {
+     "id": "T15",
+     "lat": 24.0,
+     "lon": 57.5,
+     "mslp": 1011.5,
+     "dep": 1.24,
+     "wind": 9.5,
+     "circ": 0.781,
+     "score": 0.457
+    },
+    {
+     "id": "T17",
+     "lat": 10.8,
+     "lon": 76.0,
+     "mslp": 1007.7,
+     "dep": 1.12,
+     "wind": 6.9,
+     "circ": 0.578,
+     "score": 0.435
+    }
+   ]
+  },
+  {
+   "hour": 120,
+   "mslp": "mslp_T120.png",
+   "barbs": "barbs_T120.png",
+   "rain": "rain_T120.png",
+   "rain24": "rain24_T120.png",
+   "valid": "2026-11-12T12:00Z",
+   "systems": [
+    {
+     "id": "T21",
+     "lat": 24.8,
+     "lon": 92.8,
+     "mslp": 1012.8,
+     "dep": 2.44,
+     "wind": 2.6,
+     "circ": 0.685,
+     "score": 0.521
+    },
+    {
+     "id": "T22",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1008.9,
+     "dep": 1.08,
+     "wind": 7.4,
+     "circ": 0.56,
+     "score": 0.407
+    },
+    {
+     "id": "T20",
+     "lat": 25.8,
+     "lon": 58.5,
+     "mslp": 1012.6,
+     "dep": 1.12,
+     "wind": 13.7,
+     "circ": 0.618,
+     "score": 0.393
+    },
+    {
+     "id": "T23",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1015.2,
+     "dep": 0.84,
+     "wind": 3.0,
+     "circ": 0.609,
+     "score": 0.36
+    }
+   ]
+  },
+  {
+   "hour": 144,
+   "mslp": "mslp_T144.png",
+   "barbs": "barbs_T144.png",
+   "rain": "rain_T144.png",
+   "rain24": "rain24_T144.png",
+   "valid": "2026-11-13T12:00Z",
+   "systems": [
+    {
+     "id": "T28",
+     "lat": 24.8,
+     "lon": 92.8,
+     "mslp": 1012.6,
+     "dep": 1.8,
+     "wind": 2.9,
+     "circ": 0.764,
+     "score": 0.493
+    },
+    {
+     "id": "T27",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1009.0,
+     "dep": 1.28,
+     "wind": 8.0,
+     "circ": 0.663,
+     "score": 0.463
+    },
+    {
+     "id": "T30",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1014.0,
+     "dep": 1.32,
+     "wind": 3.3,
+     "circ": 0.678,
+     "score": 0.426
+    }
+   ]
+  },
+  {
+   "hour": 168,
+   "mslp": "mslp_T168.png",
+   "barbs": "barbs_T168.png",
+   "rain": "rain_T168.png",
+   "rain24": "rain24_T168.png",
+   "valid": "2026-11-14T12:00Z",
+   "systems": [
+    {
+     "id": "T34",
+     "lat": 25.8,
+     "lon": 59.2,
+     "mslp": 1012.7,
+     "dep": 1.52,
+     "wind": 12.2,
+     "circ": 0.77,
+     "score": 0.469
+    },
+    {
+     "id": "T35",
+     "lat": 25.5,
+     "lon": 63.2,
+     "mslp": 1011.9,
+     "dep": 1.24,
+     "wind": 12.1,
+     "circ": 0.596,
+     "score": 0.42
+    },
+    {
+     "id": "T38",
+     "lat": 24.8,
+     "lon": 92.8,
+     "mslp": 1012.0,
+     "dep": 0.94,
+     "wind": 2.8,
+     "circ": 0.758,
+     "score": 0.416
+    },
+    {
+     "id": "T30",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1012.2,
+     "dep": 1.48,
+     "wind": 2.3,
+     "circ": 0.615,
+     "score": 0.412
+    },
+    {
+     "id": "T37",
+     "lat": 25.5,
+     "lon": 69.2,
+     "mslp": 1011.1,
+     "dep": 1.0,
+     "wind": 7.9,
+     "circ": 0.792,
+     "score": 0.412
+    }
+   ]
+  },
+  {
+   "hour": 192,
+   "mslp": "mslp_T192.png",
+   "barbs": "barbs_T192.png",
+   "rain": "rain_T192.png",
+   "rain24": "rain24_T192.png",
+   "valid": "2026-11-15T12:00Z",
+   "systems": [
+    {
+     "id": "T42",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1008.9,
+     "dep": 1.08,
+     "wind": 7.2,
+     "circ": 0.717,
+     "score": 0.45
+    },
+    {
+     "id": "T49",
+     "lat": 6.2,
+     "lon": 81.5,
+     "mslp": 1008.7,
+     "dep": 0.92,
+     "wind": 15.2,
+     "circ": 0.671,
+     "score": 0.405
+    },
+    {
+     "id": "T43",
+     "lat": 4.2,
+     "lon": 95.5,
+     "mslp": 1009.6,
+     "dep": 0.92,
+     "wind": 12.7,
+     "circ": 0.633,
+     "score": 0.379
+    },
+    {
+     "id": "T34",
+     "lat": 25.8,
+     "lon": 58.5,
+     "mslp": 1012.1,
+     "dep": 0.92,
+     "wind": 8.1,
+     "circ": 0.73,
+     "score": 0.364
+    }
+   ]
+  },
+  {
+   "hour": 216,
+   "mslp": "mslp_T216.png",
+   "barbs": "barbs_T216.png",
+   "rain": "rain_T216.png",
+   "rain24": "rain24_T216.png",
+   "valid": "2026-11-16T12:00Z",
+   "systems": [
+    {
+     "id": "T49",
+     "lat": 10.8,
+     "lon": 82.0,
+     "mslp": 1006.8,
+     "dep": 1.48,
+     "wind": 15.3,
+     "circ": 1.0,
+     "score": 0.657
+    },
+    {
+     "id": "T42",
+     "lat": 14.2,
+     "lon": 74.2,
+     "mslp": 1008.1,
+     "dep": 1.28,
+     "wind": 8.4,
+     "circ": 0.687,
+     "score": 0.483
+    },
+    {
+     "id": "T53",
+     "lat": 6.5,
+     "lon": 81.8,
+     "mslp": 1007.6,
+     "dep": 1.16,
+     "wind": 16.5,
+     "circ": 0.652,
+     "score": 0.434
+    }
+   ]
+  },
+  {
+   "hour": 240,
+   "mslp": "mslp_T240.png",
+   "barbs": "barbs_T240.png",
+   "rain": "rain_T240.png",
+   "rain24": "rain24_T240.png",
+   "valid": "2026-11-17T12:00Z",
+   "systems": [
+    {
+     "id": "T49",
+     "lat": 12.2,
+     "lon": 82.2,
+     "mslp": 1006.4,
+     "dep": 1.96,
+     "wind": 17.3,
+     "circ": 1.0,
+     "score": 0.719
+    },
+    {
+     "id": "T42",
+     "lat": 14.2,
+     "lon": 74.2,
+     "mslp": 1007.7,
+     "dep": 1.22,
+     "wind": 8.4,
+     "circ": 0.62,
+     "score": 0.459
+    },
+    {
+     "id": "T60",
+     "lat": 17.0,
+     "lon": 97.8,
+     "mslp": 1010.0,
+     "dep": 1.26,
+     "wind": 5.0,
+     "circ": 0.724,
+     "score": 0.454
+    }
+   ]
+  },
+  {
+   "hour": 264,
+   "mslp": "mslp_T264.png",
+   "barbs": "barbs_T264.png",
+   "rain": "rain_T264.png",
+   "rain24": "rain24_T264.png",
+   "valid": "2026-11-18T12:00Z",
+   "systems": [
+    {
+     "id": "T49",
+     "lat": 13.0,
+     "lon": 82.5,
+     "mslp": 1006.7,
+     "dep": 2.72,
+     "wind": 19.1,
+     "circ": 1.0,
+     "score": 0.808
+    },
+    {
+     "id": "T72",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1015.1,
+     "dep": 1.56,
+     "wind": 5.0,
+     "circ": 0.592,
+     "score": 0.434
+    },
+    {
+     "id": "T66",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1008.1,
+     "dep": 1.24,
+     "wind": 6.8,
+     "circ": 0.578,
+     "score": 0.434
+    },
+    {
+     "id": "T67",
+     "lat": 17.0,
+     "lon": 97.8,
+     "mslp": 1011.8,
+     "dep": 1.42,
+     "wind": 5.4,
+     "circ": 0.598,
+     "score": 0.432
+    }
+   ]
+  },
+  {
+   "hour": 288,
+   "mslp": "mslp_T288.png",
+   "barbs": "barbs_T288.png",
+   "rain": "rain_T288.png",
+   "rain24": "rain24_T288.png",
+   "valid": "2026-11-19T12:00Z",
+   "systems": [
+    {
+     "id": "T49",
+     "lat": 14.0,
+     "lon": 81.5,
+     "mslp": 1006.9,
+     "dep": 4.12,
+     "wind": 23.9,
+     "circ": 1.0,
+     "score": 1.001
+    },
+    {
+     "id": "T74",
+     "lat": 24.8,
+     "lon": 92.8,
+     "mslp": 1014.9,
+     "dep": 1.28,
+     "wind": 3.6,
+     "circ": 0.826,
+     "score": 0.473
+    },
+    {
+     "id": "T76",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1008.8,
+     "dep": 1.44,
+     "wind": 8.1,
+     "circ": 0.614,
+     "score": 0.466
+    },
+    {
+     "id": "T72",
+     "lat": 22.5,
+     "lon": 95.8,
+     "mslp": 1015.3,
+     "dep": 1.74,
+     "wind": 3.0,
+     "circ": 0.631,
+     "score": 0.449
+    }
+   ]
+  },
+  {
+   "hour": 312,
+   "mslp": "mslp_T312.png",
+   "barbs": "barbs_T312.png",
+   "rain": "rain_T312.png",
+   "rain24": "rain24_T312.png",
+   "valid": "2026-11-20T12:00Z",
+   "systems": [
+    {
+     "id": "T49",
+     "lat": 14.5,
+     "lon": 80.2,
+     "mslp": 1007.8,
+     "dep": 3.04,
+     "wind": 20.0,
+     "circ": 0.976,
+     "score": 0.877
+    },
+    {
+     "id": "T82",
+     "lat": 13.2,
+     "lon": 74.5,
+     "mslp": 1007.8,
+     "dep": 1.64,
+     "wind": 9.1,
+     "circ": 0.645,
+     "score": 0.507
+    },
+    {
+     "id": "T83",
+     "lat": 19.0,
+     "lon": 93.8,
+     "mslp": 1012.7,
+     "dep": 0.99,
+     "wind": 11.7,
+     "circ": 0.557,
+     "score": 0.428
+    },
+    {
+     "id": "T76",
+     "lat": 11.2,
+     "lon": 77.5,
+     "mslp": 1008.1,
+     "dep": 0.9,
+     "wind": 5.4,
+     "circ": 0.614,
+     "score": 0.424
+    },
+    {
+     "id": "T72",
+     "lat": 22.5,
+     "lon": 95.5,
+     "mslp": 1013.7,
+     "dep": 1.56,
+     "wind": 2.1,
+     "circ": 0.58,
+     "score": 0.408
+    },
+    {
+     "id": "T81",
+     "lat": 25.0,
+     "lon": 90.5,
+     "mslp": 1013.8,
+     "dep": 0.94,
+     "wind": 3.9,
+     "circ": 0.612,
+     "score": 0.384
+    }
+   ]
+  },
+  {
+   "hour": 336,
+   "mslp": "mslp_T336.png",
+   "barbs": "barbs_T336.png",
+   "rain": "rain_T336.png",
+   "rain24": "rain24_T336.png",
+   "valid": "2026-11-21T12:00Z",
+   "systems": [
+    {
+     "id": "T86",
+     "lat": 14.5,
+     "lon": 78.5,
+     "mslp": 1010.0,
+     "dep": 0.92,
+     "wind": 8.0,
+     "circ": 0.753,
+     "score": 0.467
+    },
+    {
+     "id": "T88",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1013.2,
+     "dep": 1.48,
+     "wind": 2.0,
+     "circ": 0.615,
+     "score": 0.41
+    }
+   ]
+  },
+  {
+   "hour": 360,
+   "mslp": "mslp_T360.png",
+   "barbs": "barbs_T360.png",
+   "rain": "rain_T360.png",
+   "rain24": "rain24_T360.png",
+   "valid": "2026-11-22T12:00Z",
+   "systems": [
+    {
+     "id": "T91",
+     "lat": 15.5,
+     "lon": 77.0,
+     "mslp": 1011.2,
+     "dep": 1.64,
+     "wind": 5.7,
+     "circ": 0.616,
+     "score": 0.467
+    },
+    {
+     "id": "T92",
+     "lat": 17.0,
+     "lon": 97.8,
+     "mslp": 1012.1,
+     "dep": 1.2,
+     "wind": 5.6,
+     "circ": 0.713,
+     "score": 0.444
+    }
+   ]
+  }
+ ],
+ "gifs": {
+  "mslp": "ecmwf_aifs_20261107_12_mslp_loop.gif",
+  "barbs": "ecmwf_aifs_20261107_12_barbs_loop.gif",
+  "rain": "ecmwf_aifs_20261107_12_rain_loop.gif",
+  "rain24": "ecmwf_aifs_20261107_12_rain24_loop.gif"
+ },
+ "csv": {
+  "candidates": "ecmwf_aifs_20261107_12_V3_candidates.csv",
+  "tracks": "ecmwf_aifs_20261107_12_V3_persistent_tracks.csv"
+ },
+ "rendered": "2026-11-07T17:27Z"
+}

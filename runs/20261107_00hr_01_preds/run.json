@@ -1,0 +1,330 @@
+{
+ "model": "wn3",
+ "model_label": "WeatherNext 3",
+ "base": "runs",
+ "run": "20261107_00hr_01_preds",
+ "init": "2026-11-07T00:00Z",
+ "last_hour": 360,
+ "resol": null,
+ "grid_deg": 0.1,
+ "persistent_tracks": 59,
+ "frames": [
+  {
+   "hour": 24,
+   "mslp": "mslp_T024.png",
+   "barbs": "barbs_T024.png",
+   "rain": "rain_T024.png",
+   "rain24": "rain24_T024.png",
+   "valid": "2026-11-08T00:00Z",
+   "systems": [
+    {
+     "id": "T08",
+     "lat": 13.9,
+     "lon": 74.5,
+     "mslp": 1010.3,
+     "dep": 1.3,
+     "wind": 12.2,
+     "circ": 0.681,
+     "score": 0.521
+    },
+    {
+     "id": "T01",
+     "lat": 21.5,
+     "lon": 95.3,
+     "mslp": 1014.4,
+     "dep": 1.53,
+     "wind": 4.1,
+     "circ": 0.611,
+     "score": 0.445
+    }
+   ]
+  },
+  {
+   "hour": 48,
+   "mslp": "mslp_T048.png",
+   "barbs": "barbs_T048.png",
+   "rain": "rain_T048.png",
+   "rain24": "rain24_T048.png",
+   "valid": "2026-11-09T00:00Z",
+   "systems": []
+  },
+  {
+   "hour": 72,
+   "mslp": "mslp_T072.png",
+   "barbs": "barbs_T072.png",
+   "rain": "rain_T072.png",
+   "rain24": "rain24_T072.png",
+   "valid": "2026-11-10T00:00Z",
+   "systems": []
+  },
+  {
+   "hour": 96,
+   "mslp": "mslp_T096.png",
+   "barbs": "barbs_T096.png",
+   "rain": "rain_T096.png",
+   "rain24": "rain24_T096.png",
+   "valid": "2026-11-11T00:00Z",
+   "systems": [
+    {
+     "id": "T56",
+     "lat": 13.2,
+     "lon": 74.0,
+     "mslp": 1010.2,
+     "dep": 0.86,
+     "wind": 11.3,
+     "circ": 0.722,
+     "score": 0.484
+    }
+   ]
+  },
+  {
+   "hour": 120,
+   "mslp": "mslp_T120.png",
+   "barbs": "barbs_T120.png",
+   "rain": "rain_T120.png",
+   "rain24": "rain24_T120.png",
+   "valid": "2026-11-12T00:00Z",
+   "systems": [
+    {
+     "id": "T69",
+     "lat": 22.9,
+     "lon": 59.4,
+     "mslp": 1013.8,
+     "dep": 1.41,
+     "wind": 12.0,
+     "circ": 0.57,
+     "score": 0.392
+    }
+   ]
+  },
+  {
+   "hour": 144,
+   "mslp": "mslp_T144.png",
+   "barbs": "barbs_T144.png",
+   "rain": "rain_T144.png",
+   "rain24": "rain24_T144.png",
+   "valid": "2026-11-13T00:00Z",
+   "systems": [
+    {
+     "id": "T73",
+     "lat": 25.2,
+     "lon": 60.1,
+     "mslp": 1015.6,
+     "dep": 1.33,
+     "wind": 13.9,
+     "circ": 0.708,
+     "score": 0.45
+    },
+    {
+     "id": "T82",
+     "lat": 25.3,
+     "lon": 65.9,
+     "mslp": 1015.4,
+     "dep": 1.0,
+     "wind": 11.2,
+     "circ": 0.698,
+     "score": 0.393
+    }
+   ]
+  },
+  {
+   "hour": 168,
+   "mslp": "mslp_T168.png",
+   "barbs": "barbs_T168.png",
+   "rain": "rain_T168.png",
+   "rain24": "rain24_T168.png",
+   "valid": "2026-11-14T00:00Z",
+   "systems": [
+    {
+     "id": "T86",
+     "lat": 13.1,
+     "lon": 74.1,
+     "mslp": 1012.2,
+     "dep": 0.84,
+     "wind": 10.8,
+     "circ": 0.754,
+     "score": 0.483
+    },
+    {
+     "id": "T94",
+     "lat": 25.2,
+     "lon": 60.5,
+     "mslp": 1015.2,
+     "dep": 1.57,
+     "wind": 14.4,
+     "circ": 0.652,
+     "score": 0.456
+    },
+    {
+     "id": "T98",
+     "lat": 25.1,
+     "lon": 65.2,
+     "mslp": 1014.7,
+     "dep": 1.15,
+     "wind": 9.7,
+     "circ": 0.769,
+     "score": 0.425
+    }
+   ]
+  },
+  {
+   "hour": 192,
+   "mslp": "mslp_T192.png",
+   "barbs": "barbs_T192.png",
+   "rain": "rain_T192.png",
+   "rain24": "rain24_T192.png",
+   "valid": "2026-11-15T00:00Z",
+   "systems": [
+    {
+     "id": "T109",
+     "lat": 25.2,
+     "lon": 60.2,
+     "mslp": 1014.1,
+     "dep": 1.46,
+     "wind": 13.1,
+     "circ": 0.648,
+     "score": 0.438
+    }
+   ]
+  },
+  {
+   "hour": 216,
+   "mslp": "mslp_T216.png",
+   "barbs": "barbs_T216.png",
+   "rain": "rain_T216.png",
+   "rain24": "rain24_T216.png",
+   "valid": "2026-11-16T00:00Z",
+   "systems": [
+    {
+     "id": "T134",
+     "lat": 25.2,
+     "lon": 59.7,
+     "mslp": 1013.8,
+     "dep": 1.17,
+     "wind": 8.4,
+     "circ": 0.669,
+     "score": 0.385
+    }
+   ]
+  },
+  {
+   "hour": 240,
+   "mslp": "mslp_T240.png",
+   "barbs": "barbs_T240.png",
+   "rain": "rain_T240.png",
+   "rain24": "rain24_T240.png",
+   "valid": "2026-11-17T00:00Z",
+   "systems": [
+    {
+     "id": "T156",
+     "lat": 25.3,
+     "lon": 58.5,
+     "mslp": 1014.2,
+     "dep": 1.01,
+     "wind": 6.0,
+     "circ": 0.668,
+     "score": 0.354
+    }
+   ]
+  },
+  {
+   "hour": 264,
+   "mslp": "mslp_T264.png",
+   "barbs": "barbs_T264.png",
+   "rain": "rain_T264.png",
+   "rain24": "rain24_T264.png",
+   "valid": "2026-11-18T00:00Z",
+   "systems": [
+    {
+     "id": "T170",
+     "lat": 13.3,
+     "lon": 86.2,
+     "mslp": 1009.6,
+     "dep": 1.56,
+     "wind": 14.3,
+     "circ": 0.668,
+     "score": 0.562
+    }
+   ]
+  },
+  {
+   "hour": 288,
+   "mslp": "mslp_T288.png",
+   "barbs": "barbs_T288.png",
+   "rain": "rain_T288.png",
+   "rain24": "rain24_T288.png",
+   "valid": "2026-11-19T00:00Z",
+   "systems": [
+    {
+     "id": "T170",
+     "lat": 14.2,
+     "lon": 85.0,
+     "mslp": 1011.8,
+     "dep": 1.15,
+     "wind": 15.1,
+     "circ": 0.619,
+     "score": 0.515
+    }
+   ]
+  },
+  {
+   "hour": 312,
+   "mslp": "mslp_T312.png",
+   "barbs": "barbs_T312.png",
+   "rain": "rain_T312.png",
+   "rain24": "rain24_T312.png",
+   "valid": "2026-11-20T00:00Z",
+   "systems": [
+    {
+     "id": "T189",
+     "lat": 12.0,
+     "lon": 80.6,
+     "mslp": 1012.3,
+     "dep": 0.9,
+     "wind": 10.7,
+     "circ": 0.693,
+     "score": 0.502
+    },
+    {
+     "id": "T188",
+     "lat": 12.5,
+     "lon": 74.2,
+     "mslp": 1011.7,
+     "dep": 0.81,
+     "wind": 11.7,
+     "circ": 0.609,
+     "score": 0.44
+    }
+   ]
+  },
+  {
+   "hour": 336,
+   "mslp": "mslp_T336.png",
+   "barbs": "barbs_T336.png",
+   "rain": "rain_T336.png",
+   "rain24": "rain24_T336.png",
+   "valid": "2026-11-21T00:00Z",
+   "systems": []
+  },
+  {
+   "hour": 360,
+   "mslp": "mslp_T360.png",
+   "barbs": "barbs_T360.png",
+   "rain": "rain_T360.png",
+   "rain24": "rain24_T360.png",
+   "valid": "2026-11-22T00:00Z",
+   "systems": []
+  }
+ ],
+ "gifs": {
+  "mslp": "weathernext3_20261107_00hr_01_preds_mslp_loop.gif",
+  "barbs": "weathernext3_20261107_00hr_01_preds_barbs_loop.gif",
+  "rain": "weathernext3_20261107_00hr_01_preds_rain_loop.gif",
+  "rain24": "weathernext3_20261107_00hr_01_preds_rain24_loop.gif"
+ },
+ "csv": {
+  "candidates": "weathernext3_20261107_00hr_01_preds_V3_candidates.csv",
+  "tracks": "weathernext3_20261107_00hr_01_preds_V3_persistent_tracks.csv"
+ },
+ "rendered": "2026-11-07T11:24Z"
+}

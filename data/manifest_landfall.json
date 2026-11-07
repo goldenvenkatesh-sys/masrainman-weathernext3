@@ -1,0 +1,504 @@
+{
+ "models": {
+  "ecmwf": {
+   "runs": [
+    {
+     "run": "20261107_06",
+     "systems": [
+      {
+       "storm": "90B",
+       "png": "landfall/ecmwf/20261107_06/90B.png",
+       "csv": "landfall/ecmwf/20261107_06/90B.csv",
+       "start": {
+        "lat": 4.2,
+        "lon": 98.0,
+        "step": 0
+       },
+       "members": 51,
+       "tracked": 20,
+       "landfalls": 5,
+       "areas": [
+        {
+         "lat": 8.07,
+         "lon": 81.39,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 5.27,
+         "lon": 100.43,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 4.53,
+         "lon": 97.83,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 3.83,
+         "lon": 96.87,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "run": "20261107_00",
+     "systems": [
+      {
+       "storm": "90B",
+       "png": "landfall/ecmwf/20261107_00/90B.png",
+       "csv": "landfall/ecmwf/20261107_00/90B.csv",
+       "start": {
+        "lat": 8.0,
+        "lon": 87.6,
+        "step": 12
+       },
+       "members": 51,
+       "tracked": 31,
+       "landfalls": 16,
+       "areas": [
+        {
+         "lat": 6.81,
+         "lon": 81.79,
+         "n": 3,
+         "pct": 5.9
+        },
+        {
+         "lat": 8.12,
+         "lon": 81.27,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 9.28,
+         "lon": 80.58,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 12.68,
+         "lon": 80.2,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 14.91,
+         "lon": 80.12,
+         "n": 2,
+         "pct": 3.9
+        }
+       ]
+      },
+      {
+       "storm": "91B",
+       "png": "landfall/ecmwf/20261107_00/91B.png",
+       "csv": "landfall/ecmwf/20261107_00/91B.csv",
+       "start": {
+        "lat": 7.1,
+        "lon": 92.1,
+        "step": 42
+       },
+       "members": 51,
+       "tracked": 21,
+       "landfalls": 11,
+       "areas": [
+        {
+         "lat": 11.74,
+         "lon": 79.88,
+         "n": 3,
+         "pct": 5.9
+        },
+        {
+         "lat": 5.2,
+         "lon": 96.93,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 4.15,
+         "lon": 98.27,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 22.0,
+         "lon": 90.05,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 18.23,
+         "lon": 83.97,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      },
+      {
+       "storm": "92B",
+       "png": "landfall/ecmwf/20261107_00/92B.png",
+       "csv": "landfall/ecmwf/20261107_00/92B.csv",
+       "start": {
+        "lat": 4.2,
+        "lon": 82.0,
+        "step": 108
+       },
+       "members": 51,
+       "tracked": 12,
+       "landfalls": 6,
+       "areas": [
+        {
+         "lat": 10.02,
+         "lon": 79.84,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 5.13,
+         "lon": 97.27,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 6.0,
+         "lon": 80.48,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 8.35,
+         "lon": 100.25,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 11.85,
+         "lon": 99.75,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      },
+      {
+       "storm": "93B",
+       "png": "landfall/ecmwf/20261107_00/93B.png",
+       "csv": "landfall/ecmwf/20261107_00/93B.csv",
+       "start": {
+        "lat": 3.8,
+        "lon": 85.0,
+        "step": 144
+       },
+       "members": 51,
+       "tracked": 5,
+       "landfalls": 3,
+       "areas": [
+        {
+         "lat": 10.67,
+         "lon": 79.82,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 9.38,
+         "lon": 80.68,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "run": "20261106_18",
+     "systems": [
+      {
+       "storm": "90B",
+       "png": "landfall/ecmwf/20261106_18/90B.png",
+       "csv": "landfall/ecmwf/20261106_18/90B.csv",
+       "start": {
+        "lat": 5.6,
+        "lon": 99.2,
+        "step": 0
+       },
+       "members": 51,
+       "tracked": 12,
+       "landfalls": 3,
+       "areas": [
+        {
+         "lat": 5.25,
+         "lon": 95.87,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 5.03,
+         "lon": 97.68,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "run": "20261106_12",
+     "systems": [
+      {
+       "storm": "90A",
+       "png": "landfall/ecmwf/20261106_12/90A.png",
+       "csv": "landfall/ecmwf/20261106_12/90A.csv",
+       "start": {
+        "lat": 7.1,
+        "lon": 77.0,
+        "step": 0
+       },
+       "members": 51,
+       "tracked": 19,
+       "landfalls": 6,
+       "areas": [
+        {
+         "lat": 9.84,
+         "lon": 50.74,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 13.27,
+         "lon": 80.32,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 6.15,
+         "lon": 80.2,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 18.9,
+         "lon": 73.0,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 6.73,
+         "lon": 81.8,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      },
+      {
+       "storm": "90B",
+       "png": "landfall/ecmwf/20261106_12/90B.png",
+       "csv": "landfall/ecmwf/20261106_12/90B.csv",
+       "start": {
+        "lat": 5.5,
+        "lon": 81.2,
+        "step": 0
+       },
+       "members": 51,
+       "tracked": 25,
+       "landfalls": 15,
+       "areas": [
+        {
+         "lat": 9.23,
+         "lon": 80.64,
+         "n": 3,
+         "pct": 5.9
+        },
+        {
+         "lat": 21.32,
+         "lon": 92.18,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 6.17,
+         "lon": 80.13,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 10.88,
+         "lon": 99.4,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 15.92,
+         "lon": 81.03,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      },
+      {
+       "storm": "91B",
+       "png": "landfall/ecmwf/20261106_12/91B.png",
+       "csv": "landfall/ecmwf/20261106_12/91B.csv",
+       "start": {
+        "lat": 3.1,
+        "lon": 83.1,
+        "step": 0
+       },
+       "members": 51,
+       "tracked": 18,
+       "landfalls": 8,
+       "areas": [
+        {
+         "lat": 7.48,
+         "lon": 81.65,
+         "n": 2,
+         "pct": 3.9
+        },
+        {
+         "lat": 7.15,
+         "lon": 99.63,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 12.45,
+         "lon": 80.1,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 8.4,
+         "lon": 98.6,
+         "n": 1,
+         "pct": 2.0
+        },
+        {
+         "lat": 5.2,
+         "lon": 96.4,
+         "n": 1,
+         "pct": 2.0
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "label": "ECMWF ENS",
+   "note": ""
+  },
+  "gfs": {
+   "runs": [
+    {
+     "run": "20261107_06",
+     "systems": []
+    },
+    {
+     "run": "20261107_00",
+     "systems": []
+    },
+    {
+     "run": "20261106_18",
+     "systems": []
+    },
+    {
+     "run": "20261106_12",
+     "systems": []
+    }
+   ],
+   "label": "GFS ensemble (GEFS)",
+   "note": "Tracks found by MasRainman in the GEFS 0.5\u00b0 MSLP and 10-m wind (31 members), starting from ECMWF's position of each system."
+  },
+  "ukmet": {
+   "runs": [
+    {
+     "run": "20261107_00",
+     "systems": []
+    },
+    {
+     "run": "20261106_12",
+     "systems": []
+    },
+    {
+     "run": "20261106_00",
+     "systems": []
+    },
+    {
+     "run": "20261105_12",
+     "systems": []
+    }
+   ],
+   "label": "UKMET global (deterministic)",
+   "note": "One track found by MasRainman in the Met Office global 10 km MSLP and 10-m wind, starting from ECMWF's position. The MOGREPS-G ensemble is not openly published."
+  },
+  "gem": {
+   "runs": [
+    {
+     "run": "20261107_00",
+     "systems": []
+    },
+    {
+     "run": "20261106_12",
+     "systems": []
+    },
+    {
+     "run": "20261106_00",
+     "systems": []
+    },
+    {
+     "run": "20261105_12",
+     "systems": []
+    }
+   ],
+   "label": "CMC GEM ensemble (GEPS)",
+   "note": "Tracks found by MasRainman in the GEPS 0.5\u00b0 MSLP and 10-m wind (control + 20 members), starting from ECMWF's position of each system."
+  },
+  "deepmind": {
+   "runs": [
+    {
+     "run": "20261107_06",
+     "systems": []
+    },
+    {
+     "run": "20261107_00",
+     "systems": []
+    },
+    {
+     "run": "20261106_18",
+     "systems": []
+    },
+    {
+     "run": "20261106_12",
+     "systems": []
+    }
+   ],
+   "label": "DeepMind FNV3 ensemble",
+   "note": "Google DeepMind Weather Lab experimental cyclone ensemble (FNV3), CC BY 4.0. Each member is matched to the ECMWF system it starts on."
+  },
+  "icon": {
+   "runs": [
+    {
+     "run": "20261107_06",
+     "systems": []
+    },
+    {
+     "run": "20261107_00",
+     "systems": []
+    },
+    {
+     "run": "20261106_18",
+     "systems": []
+    },
+    {
+     "run": "20261106_12",
+     "systems": []
+    }
+   ],
+   "label": "DWD ICON-EPS",
+   "note": "Tracks found by MasRainman in the ICON-EPS MSLP and 10-m wind (40 members, to T+180 from 00Z/12Z, T+120 from 06Z/18Z), starting from ECMWF's position of each system."
+  }
+ },
+ "updated": "2026-11-07 14:18 UTC"
+}

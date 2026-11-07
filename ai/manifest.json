@@ -1,0 +1,117 @@
+{
+ "init": "2026-11-07T00",
+ "model": "MasRainMan AI",
+ "made_utc": "2026-11-07T07:49",
+ "maps": [
+  {
+   "lead": 24,
+   "valid": "2026-11-08T00",
+   "files": {
+    "rain": "fc_2026110700_rain_024h.png",
+    "mslp": "fc_2026110700_mslp_024h.png",
+    "t2m": "fc_2026110700_t2m_024h.png",
+    "wind": "fc_2026110700_wind_024h.png",
+    "tcwv": "fc_2026110700_tcwv_024h.png"
+   }
+  },
+  {
+   "lead": 48,
+   "valid": "2026-11-09T00",
+   "files": {
+    "rain": "fc_2026110700_rain_048h.png",
+    "mslp": "fc_2026110700_mslp_048h.png",
+    "t2m": "fc_2026110700_t2m_048h.png",
+    "wind": "fc_2026110700_wind_048h.png",
+    "tcwv": "fc_2026110700_tcwv_048h.png"
+   }
+  },
+  {
+   "lead": 72,
+   "valid": "2026-11-10T00",
+   "files": {
+    "rain": "fc_2026110700_rain_072h.png",
+    "mslp": "fc_2026110700_mslp_072h.png",
+    "t2m": "fc_2026110700_t2m_072h.png",
+    "wind": "fc_2026110700_wind_072h.png",
+    "tcwv": "fc_2026110700_tcwv_072h.png"
+   }
+  },
+  {
+   "lead": 96,
+   "valid": "2026-11-11T00",
+   "files": {
+    "rain": "fc_2026110700_rain_096h.png",
+    "mslp": "fc_2026110700_mslp_096h.png",
+    "t2m": "fc_2026110700_t2m_096h.png",
+    "wind": "fc_2026110700_wind_096h.png",
+    "tcwv": "fc_2026110700_tcwv_096h.png"
+   }
+  },
+  {
+   "lead": 120,
+   "valid": "2026-11-12T00",
+   "files": {
+    "rain": "fc_2026110700_rain_120h.png",
+    "mslp": "fc_2026110700_mslp_120h.png",
+    "t2m": "fc_2026110700_t2m_120h.png",
+    "wind": "fc_2026110700_wind_120h.png",
+    "tcwv": "fc_2026110700_tcwv_120h.png"
+   }
+  },
+  {
+   "lead": 144,
+   "valid": "2026-11-13T00",
+   "files": {
+    "rain": "fc_2026110700_rain_144h.png",
+    "mslp": "fc_2026110700_mslp_144h.png",
+    "t2m": "fc_2026110700_t2m_144h.png",
+    "wind": "fc_2026110700_wind_144h.png",
+    "tcwv": "fc_2026110700_tcwv_144h.png"
+   }
+  },
+  {
+   "lead": 168,
+   "valid": "2026-11-14T00",
+   "files": {
+    "rain": "fc_2026110700_rain_168h.png",
+    "mslp": "fc_2026110700_mslp_168h.png",
+    "t2m": "fc_2026110700_t2m_168h.png",
+    "wind": "fc_2026110700_wind_168h.png",
+    "tcwv": "fc_2026110700_tcwv_168h.png"
+   }
+  },
+  {
+   "lead": 192,
+   "valid": "2026-11-15T00",
+   "files": {
+    "rain": "fc_2026110700_rain_192h.png",
+    "mslp": "fc_2026110700_mslp_192h.png",
+    "t2m": "fc_2026110700_t2m_192h.png",
+    "wind": "fc_2026110700_wind_192h.png",
+    "tcwv": "fc_2026110700_tcwv_192h.png"
+   }
+  },
+  {
+   "lead": 216,
+   "valid": "2026-11-16T00",
+   "files": {
+    "rain": "fc_2026110700_rain_216h.png",
+    "mslp": "fc_2026110700_mslp_216h.png",
+    "t2m": "fc_2026110700_t2m_216h.png",
+    "wind": "fc_2026110700_wind_216h.png",
+    "tcwv": "fc_2026110700_tcwv_216h.png"
+   }
+  },
+  {
+   "lead": 240,
+   "valid": "2026-11-17T00",
+   "files": {
+    "rain": "fc_2026110700_rain_240h.png",
+    "mslp": "fc_2026110700_mslp_240h.png",
+    "t2m": "fc_2026110700_t2m_240h.png",
+    "wind": "fc_2026110700_wind_240h.png",
+    "tcwv": "fc_2026110700_tcwv_240h.png"
+   }
+  }
+ ]
+}

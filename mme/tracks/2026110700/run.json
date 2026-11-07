@@ -1,0 +1,282 @@
+{
+ "cycle": "2026-11-07T00:00Z",
+ "frames": [
+  {
+   "lead": 0,
+   "valid": "2026-11-07T00:00Z",
+   "sst": "lpa_sst_T000.png",
+   "nosst": "lpa_nosst_T000.png"
+  },
+  {
+   "lead": 12,
+   "valid": "2026-11-07T12:00Z",
+   "sst": "lpa_sst_T012.png",
+   "nosst": "lpa_nosst_T012.png"
+  },
+  {
+   "lead": 24,
+   "valid": "2026-11-08T00:00Z",
+   "sst": "lpa_sst_T024.png",
+   "nosst": "lpa_nosst_T024.png"
+  },
+  {
+   "lead": 36,
+   "valid": "2026-11-08T12:00Z",
+   "sst": "lpa_sst_T036.png",
+   "nosst": "lpa_nosst_T036.png"
+  },
+  {
+   "lead": 48,
+   "valid": "2026-11-09T00:00Z",
+   "sst": "lpa_sst_T048.png",
+   "nosst": "lpa_nosst_T048.png"
+  },
+  {
+   "lead": 60,
+   "valid": "2026-11-09T12:00Z",
+   "sst": "lpa_sst_T060.png",
+   "nosst": "lpa_nosst_T060.png"
+  },
+  {
+   "lead": 72,
+   "valid": "2026-11-10T00:00Z",
+   "sst": "lpa_sst_T072.png",
+   "nosst": "lpa_nosst_T072.png"
+  },
+  {
+   "lead": 84,
+   "valid": "2026-11-10T12:00Z",
+   "sst": "lpa_sst_T084.png",
+   "nosst": "lpa_nosst_T084.png"
+  },
+  {
+   "lead": 96,
+   "valid": "2026-11-11T00:00Z",
+   "sst": "lpa_sst_T096.png",
+   "nosst": "lpa_nosst_T096.png"
+  },
+  {
+   "lead": 108,
+   "valid": "2026-11-11T12:00Z",
+   "sst": "lpa_sst_T108.png",
+   "nosst": "lpa_nosst_T108.png"
+  },
+  {
+   "lead": 120,
+   "valid": "2026-11-12T00:00Z",
+   "sst": "lpa_sst_T120.png",
+   "nosst": "lpa_nosst_T120.png"
+  },
+  {
+   "lead": 132,
+   "valid": "2026-11-12T12:00Z",
+   "sst": "lpa_sst_T132.png",
+   "nosst": "lpa_nosst_T132.png"
+  },
+  {
+   "lead": 144,
+   "valid": "2026-11-13T00:00Z",
+   "sst": "lpa_sst_T144.png",
+   "nosst": "lpa_nosst_T144.png"
+  },
+  {
+   "lead": 156,
+   "valid": "2026-11-13T12:00Z",
+   "sst": "lpa_sst_T156.png",
+   "nosst": "lpa_nosst_T156.png"
+  },
+  {
+   "lead": 168,
+   "valid": "2026-11-14T00:00Z",
+   "sst": "lpa_sst_T168.png",
+   "nosst": "lpa_nosst_T168.png"
+  }
+ ],
+ "systems": [
+  {
+   "id": "L1",
+   "basin": "Arabian Sea",
+   "support": 0.85,
+   "models": [
+    "aifs_ens",
+    "ecmwf_ens",
+    "gefs",
+    "geps",
+    "wn3"
+   ],
+   "members": 58,
+   "track": [
+    {
+     "lead": 72,
+     "lat": 26.68,
+     "lon": 56.48,
+     "mslp": 1014.4,
+     "deficit": 1.86,
+     "wind_kt": 16.7,
+     "cat": "LPA",
+     "spread_km": 30,
+     "share": 0.77
+    },
+    {
+     "lead": 84,
+     "lat": 26.86,
+     "lon": 56.39,
+     "mslp": 1012.8,
+     "deficit": 1.92,
+     "wind_kt": 18.5,
+     "cat": "D",
+     "spread_km": 55,
+     "share": 0.78
+    },
+    {
+     "lead": 96,
+     "lat": 26.11,
+     "lon": 55.81,
+     "mslp": 1012.9,
+     "deficit": 2.38,
+     "wind_kt": 22.5,
+     "cat": "D",
+     "spread_km": 101,
+     "share": 0.94
+    },
+    {
+     "lead": 108,
+     "lat": 24.44,
+     "lon": 57.28,
+     "mslp": 1012.5,
+     "deficit": 1.29,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 145,
+     "share": 0.67
+    },
+    {
+     "lead": 120,
+     "lat": 26.24,
+     "lon": 56.86,
+     "mslp": 1013.6,
+     "deficit": 2.17,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 116,
+     "share": 0.65
+    },
+    {
+     "lead": 132,
+     "lat": 26.5,
+     "lon": 57.37,
+     "mslp": 1013.5,
+     "deficit": 2.16,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 193,
+     "share": 0.62
+    },
+    {
+     "lead": 144,
+     "lat": 25.49,
+     "lon": 59.52,
+     "mslp": 1015.3,
+     "deficit": 1.83,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 149,
+     "share": 0.56
+    },
+    {
+     "lead": 156,
+     "lat": 25.7,
+     "lon": 62.03,
+     "mslp": 1014.1,
+     "deficit": 1.62,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 130,
+     "share": 0.46
+    },
+    {
+     "lead": 168,
+     "lat": 25.1,
+     "lon": 60.64,
+     "mslp": 1015.2,
+     "deficit": 1.72,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 58,
+     "share": 0.42
+    }
+   ],
+   "det_track": [
+    {
+     "lead": 72,
+     "lat": 27.0,
+     "lon": 56.5,
+     "mslp": 1013.8,
+     "deficit": 2.09,
+     "wind_kt": 16.7,
+     "cat": "LPA",
+     "spread_km": 0,
+     "share": 1.0
+    },
+    {
+     "lead": 84,
+     "lat": 27.0,
+     "lon": 56.0,
+     "mslp": 1012.4,
+     "deficit": 2.26,
+     "wind_kt": 18.5,
+     "cat": "D",
+     "spread_km": 0,
+     "share": 1.0
+    },
+    {
+     "lead": 96,
+     "lat": 26.25,
+     "lon": 55.0,
+     "mslp": 1013.0,
+     "deficit": 2.43,
+     "wind_kt": 22.5,
+     "cat": "D",
+     "spread_km": 0,
+     "share": 1.0
+    }
+   ],
+   "min_mslp": 1012.5,
+   "peak_wind_kt": 22.5,
+   "peak_cat": "D",
+   "landfall": [
+    {
+     "where": "Other coast",
+     "prob": 0.412,
+     "lead": 108
+    },
+    {
+     "where": "Pakistan coast",
+     "prob": 0.294,
+     "lead": 156
+    },
+    {
+     "where": "No landfall by T+168 h",
+     "prob": 0.294,
+     "lead": null
+    }
+   ]
+  }
+ ],
+ "models": {
+  "ens": {
+   "ecmwf_ens": 20,
+   "wn3": 1,
+   "aifs_ens": 20,
+   "gefs": 20,
+   "geps": 21
+  },
+  "det": {
+   "ecmwf_hres": 1,
+   "aifs_single": 1,
+   "icon": 1,
+   "gfs": 1
+  }
+ },
+ "rendered": "2026-11-07T14:44Z"
+}

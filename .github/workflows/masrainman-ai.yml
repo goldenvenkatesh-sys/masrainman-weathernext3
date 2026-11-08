@@ -12,7 +12,7 @@ name: MasRainMan AI forecast on the site
 on:
   push:                              # once whenever this page or workflow changes
     branches: [main]
-    paths: ["web/ai.html", "web/ai_verify.html", "web/index.html", "web/landfall.html", "web/outlook.html", "multimodel/web/index.html", "build_public.sh", "public_site.py", ".github/workflows/masrainman-ai.yml"]
+    paths: ["web/ai.html", "web/ai_verify.html", "web/index.html", "web/landfall.html", "web/outlook.html", "web/raintotals.html", "multimodel/web/index.html", "build_public.sh", "public_site.py", ".github/workflows/masrainman-ai.yml"]
   schedule:                          # after each of the forecast's run times; quick no-op if nothing new
     - cron: "25 9 * * *"             # 2:55 PM IST  00 UTC run
     - cron: "5 11 * * *"             # 4:35 PM IST

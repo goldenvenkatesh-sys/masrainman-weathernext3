@@ -53,7 +53,13 @@ MODEL_NAMES = {
     "ecmwf_ens": "ECMWF ENS", "wn3": "WeatherNext 3", "aifs_ens": "ECMWF AIFS ENS",
     "gefs": "NCEP GEFS", "geps": "CMC GEPS", "ecmwf_hres": "ECMWF IFS HRES",
     "aifs_single": "ECMWF AIFS Single", "icon": "DWD ICON", "gfs": "NCEP GFS",
+    "aigfs": "NOAA AIGFS",
 }
+
+# Single-model rain totals from the start of the run (public "Rain totals" page on the blog)
+TOTAL_MODELS = ["wn3", "ecmwf_hres", "aifs_single", "gfs", "aigfs"]
+TOTAL_PERIODS = [("24h", 24, "24 hours"), ("7day", 168, "7 days"), ("15day", 360, "15 days")]
+TOTAL_REGIONS = ["south_india", "tamilnadu", "kerala"]
 
 # Members used from each ensemble (None = all). Fewer members = faster downloads.
 ENS_MEMBERS = {

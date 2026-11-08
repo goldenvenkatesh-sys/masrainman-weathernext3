@@ -26,7 +26,7 @@ import numpy as np
 
 from mme import config as C
 from mme.blend import load_group, blend, totals
-from mme.fetch import day_leads
+from mme.fetch import day_leads, FETCHERS, NotAvailable
 from mme.maps import rain_map
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -50,6 +50,8 @@ def main():
     ap.add_argument("--groups", default="ens,det")
     ap.add_argument("--regions", default=",".join(C.REGIONS))
     ap.add_argument("--days", type=int, default=C.N_DAYS, help="draw only the first N daily maps")
+    ap.add_argument("--totals", default=",".join(C.TOTAL_MODELS),
+                    help="models for the single-model rain totals (24 h, 7 days, 15 days); '' = none")
     args = ap.parse_args()
 
     init = (datetime.strptime(args.cycle, "%Y%m%d%H").replace(tzinfo=timezone.utc)
@@ -112,9 +114,65 @@ def main():
         info["groups"][group] = g_info
 
     os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "run.json"), "w") as f:   # the blends are safe even if the totals stall
+        json.dump(info, f, indent=1)
+
+    info["models"] = model_totals(init, out_dir, [m for m in args.totals.split(",") if m])
     with open(os.path.join(out_dir, "run.json"), "w") as f:
         json.dump(info, f, indent=1)
     LOG.info("Done: %s", out_dir)
+
+
+def model_totals(init, out_dir, models):
+    """Rain totals of single models from the start of their run: next 24 h, 7 days and 15 days.
+
+    These are the maps on the public "Rain totals" page. A model that is missing (or whose run
+    is shorter) is simply left out; the previous cycle (12 h older) is used if this one is not out."""
+    out = {}
+    for model in models:
+        acc, run = None, None
+        for back in (0, 12):
+            r = init - timedelta(hours=back)
+            leads = [0] + [h for _, h, _ in C.TOTAL_PERIODS]
+            try:
+                if model == "ecmwf_hres":   # T+360 if this run has it, else the usual T+240
+                    try:
+                        a = FETCHERS["ecmwf_hres_360"](r, leads)
+                    except NotAvailable:
+                        a = FETCHERS[model](r, leads)
+                else:
+                    a = FETCHERS[model](r, leads)
+            except NotAvailable as exc:
+                LOG.warning("totals: %s %s not available (%s)", model, r.strftime("%Y%m%d%HZ"), exc)
+                continue
+            except Exception as exc:  # one broken source must not stop the others
+                LOG.exception("totals: %s failed: %s", model, exc)
+                break
+            if 24 in a:
+                acc, run = a, r
+                break
+        if acc is None:
+            continue
+        name = C.MODEL_NAMES[model]
+        start = run.astimezone(IST)
+        m_info = {"name": name, "run": run.strftime("%Y-%m-%dT%H:%MZ"), "periods": [], "maps": {}}
+        for key, hours, label in C.TOTAL_PERIODS:
+            if hours not in acc:
+                continue
+            field = np.clip(acc[hours] - acc.get(0, 0), 0, None)
+            end = (run + timedelta(hours=hours)).astimezone(IST)
+            m_info["periods"].append({"key": key, "hours": hours, "label": label,
+                                      "end_ist": end.strftime("%Y-%m-%dT%H:%M+05:30")})
+            when = f"Rainfall total, next {label} · {start:%d %b %H:%M} IST → {end:%d %b %Y %H:%M} IST"
+            line = f"{name} | Run {run:%Y-%m-%d %H}Z"
+            for region in C.TOTAL_REGIONS:
+                png = os.path.join(out_dir, "models", model, f"{region}_{key}.png")
+                LOG.info("Drawing %s", png)
+                rain_map(field, region, key, png, f"{name} · Rainfall Total ({label})", when, line)
+                m_info["maps"].setdefault(region, []).append(key)
+        if m_info["periods"]:
+            out[model] = m_info
+    return out
 
 
 def _mk(d):

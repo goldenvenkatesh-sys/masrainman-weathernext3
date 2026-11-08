@@ -102,7 +102,9 @@ def _interp(leads, steps, acc_at):
 # ECMWF open data: IFS HRES, IFS ENS, AIFS Single, AIFS ENS
 # ------------------------------------------------------------
 
-def _ecmwf_steps(model, init):
+def _ecmwf_steps(model, init, last_override=None):
+    if last_override:   # e.g. IFS HRES 00/12 UTC now runs to T+360 in open data
+        return list(range(0, min(144, last_override) + 1, 3)) + list(range(150, last_override + 1, 6))
     if model in ("aifs_single", "aifs_ens"):
         return list(range(0, 361, 6))
     last = 360 if init.hour in (0, 12) else 144
@@ -131,8 +133,8 @@ def _ecmwf_retrieve(model, init, steps, kind, members=None):
     return path
 
 
-def fetch_ecmwf(model, init, leads):
-    steps = _ecmwf_steps(model, init)
+def fetch_ecmwf(model, init, leads, last=None):
+    steps = _ecmwf_steps(model, init, last)
 
     def acc_at(need):
         need = [s for s in need if s > 0]
@@ -189,6 +191,89 @@ def fetch_gfs(init, leads):
             raise NotAvailable("GFS: no rain fields in the downloaded files")
         out[0] = np.zeros_like(first)
         return out
+
+    return _interp(leads, steps, acc_at)
+
+
+AIGFS = "https://nomads.ncep.noaa.gov/pub/data/nccf/com/aigfs/prod/"
+
+
+def _download_range(url, path, start, end, timeout=120, tries=4):
+    """Download bytes start..end (inclusive; end None = to the end) of url into path."""
+    if os.path.exists(path) and os.path.getsize(path) > 0:
+        return path
+    rng = f"bytes={start}-" + ("" if end is None else str(end))
+    for attempt in range(tries):
+        try:
+            r = HTTP.get(url, headers={"Range": rng}, timeout=timeout)
+            if r.status_code == 404:
+                raise NotAvailable(url)
+            r.raise_for_status()
+            if not r.content.startswith(b"GRIB"):
+                raise RuntimeError(f"not a data file ({r.content[:80]!r})")
+            break
+        except NotAvailable:
+            raise
+        except Exception as exc:
+            if attempt == tries - 1:
+                raise
+            LOG.warning("retry %d for %s (%s)", attempt + 1, url.split("/")[-1], exc)
+            time.sleep(15 * (attempt + 1))
+    tmp = path + ".part"
+    with open(tmp, "wb") as f:
+        f.write(r.content)
+    os.replace(tmp, path)
+    return path
+
+
+def fetch_aigfs(init, leads):
+    """NOAA AIGFS (AI version of GFS, 0.25 deg, to 384 h every 6 h): rain from the sfc files.
+
+    Only the APCP message is downloaded (byte range from the .idx file). The 6-h buckets
+    (or running totals, whichever the file has) are turned into totals since the start."""
+    ymd, hh = init.strftime("%Y%m%d"), init.strftime("%H")
+    steps = list(range(0, 385, 6))
+
+    def apcp_file(s):
+        url = f"{AIGFS}aigfs.{ymd}/{hh}/model/atmos/grib2/aigfs.t{hh}z.sfc.f{s:03d}.grib2"
+        path = _cache(init, "aigfs", f"apcp_f{s:03d}.grib2")
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            return path
+        r = HTTP.get(url + ".idx", timeout=60)
+        if r.status_code == 404:
+            raise NotAvailable(url + ".idx")
+        r.raise_for_status()
+        lines = [l.split(":") for l in r.text.strip().splitlines()]
+        for k, l in enumerate(lines):
+            if len(l) > 3 and l[3] == "APCP":
+                end = int(lines[k + 1][1]) - 1 if k + 1 < len(lines) else None
+                return _download_range(url, path, int(l[1]), end)
+        raise NotAvailable(f"AIGFS: no APCP in {url.split('/')[-1]}")
+
+    def acc_at(need):
+        top = max(need)
+        total = None
+        out = {}
+        for s in range(6, top + 1, 6):
+            got = None
+            for m in messages(apcp_file(s)):
+                if m["shortName"] not in ("tp", "apcp"):
+                    continue
+                f = np.maximum(np.nan_to_num(regrid(m)), 0)
+                if m["start"] == 0:           # running total since the start
+                    got = f
+                else:                         # bucket since an earlier step
+                    base = out.get(m["start"], 0 if m["start"] == 0 else None)
+                    if base is None:
+                        raise NotAvailable(f"AIGFS: bucket {m['start']}-{m['end']} h without its start")
+                    got = base + f
+            if got is None:
+                raise NotAvailable(f"AIGFS: no rain field at +{s} h")
+            out[s] = total = got
+        if total is None:
+            raise NotAvailable("AIGFS: no rain")
+        out[0] = np.zeros_like(total)
+        return {s: out[s] for s in need if s in out}
 
     return _interp(leads, steps, acc_at)
 
@@ -319,7 +404,9 @@ FETCHERS = {
     "aifs_single": lambda i, l: fetch_ecmwf("aifs_single", i, l),
     "ecmwf_ens": lambda i, l: fetch_ecmwf("ecmwf_ens", i, l),
     "aifs_ens": lambda i, l: fetch_ecmwf("aifs_ens", i, l),
+    "ecmwf_hres_360": lambda i, l: fetch_ecmwf("ecmwf_hres", i, l, last=360),
     "gfs": fetch_gfs,
+    "aigfs": fetch_aigfs,
     "gefs": fetch_gefs,
     "geps": fetch_geps,
     "icon": fetch_icon,

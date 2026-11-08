@@ -13,6 +13,9 @@ Pages written (each one a folder with its own index.html):
              environment, cyclone verification (the observed station-rainfall verification stays private)
   tracks/    multi-model LPA tracker + cyclone tracker
   weathernext3/  small redirect to models/ (the first public address)
+  raintotals/  single-model rain totals (24 h, 7 days, 15 days: WeatherNext 3, ECMWF IFS, AIFS, GFS, AIGFS).
+             The owner chose to publish these totals (Nov 2026); they are the only rain maps here, copied
+             from an allow-list of file names (mme/rain/<cycle>/models/<model>/<region>_<period>.png).
 
 Observed rain (rain reports, TN-SMART station rainfall) and model rain maps are never published. Files are copied from allow-lists, the JSON files are rebuilt from
 allow-lists of keys, the pages are cut down (rain layers, rain tabs, rain verification), and at the end the
@@ -36,6 +39,7 @@ PAGES = [("models", "🗺 Model maps", "../models/"),
          ("landfall", "🌀 Landfall maps", "../landfall/"),
          ("cyclone", "📈 NEM &amp; cyclone outlook", "../cyclone/"),
          ("tracks", "🌐 LPA &amp; cyclone tracker", "../tracks/"),
+         ("raintotals", "🌧 Rain totals", "../raintotals/"),
          ("ai", "🤖 MasRainMan AI (10-day)", "../")]
 
 
@@ -266,6 +270,49 @@ def build_tracks(site, out):
     print(f"  tracks:   {len(tracks)} cycles, {n} files")
 
 
+# ---------------------------------------------------------------- rain totals
+TOTAL_FILE = re.compile(r"(south_india|tamilnadu|kerala)_(24h|7day|15day)\.png")
+
+
+def build_raintotals(site, out):
+    """Newest multi-model cycle that has single-model totals -> raintotals/ (page + manifest + PNGs)."""
+    dest = os.path.join(out, "raintotals")
+    root = os.path.join(site, "mme", "rain")
+    cycles = sorted((c for c in (os.listdir(root) if os.path.isdir(root) else []) if re.fullmatch(r"\d{10}", c)),
+                    reverse=True)
+    info, cyc = None, None
+    for c in cycles:
+        try:
+            with open(os.path.join(root, c, "run.json")) as f:
+                j = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if j.get("models"):
+            info, cyc = j, c
+            break
+    models, n = {}, 0
+    for mid, m in ((info or {}).get("models") or {}).items():
+        maps = {}
+        for region, keys in m.get("maps", {}).items():
+            for k in keys:
+                name = f"{region}_{k}.png"
+                if not TOTAL_FILE.fullmatch(name) or not os.path.isfile(os.path.join(root, cyc, "models", mid, name)):
+                    continue
+                copy(site, f"mme/rain/{cyc}/models/{mid}/{name}", dest, f"{cyc}/{mid}/{name}")
+                maps.setdefault(region, []).append(k)
+                n += 1
+        if maps:
+            models[mid] = {"name": m["name"], "run": m["run"], "maps": maps,
+                           "periods": [p for p in m.get("periods", []) if any(p["key"] in v for v in maps.values())]}
+    write_json(os.path.join(dest, "manifest.json"),
+               {"cycle": cyc, "base": cyc, "rendered": (info or {}).get("rendered", "").replace("Z", "+00:00"),
+                "models": models})
+    html = read("web", "raintotals.html")
+    html = sub1(r'<nav class="mr-nav">.*?</nav>', lambda _: nav_buttons("raintotals"), html, "nav", re.S)
+    write(os.path.join(dest, "index.html"), html)
+    print(f"  raintotals: {len(models)} models, {n} files (cycle {cyc})")
+
+
 # ---------------------------------------------------------------- final scan
 BAD_NAME = re.compile(r"rain|precip|verification\.png|tnsmart|tn-smart", re.I)
 BAD_TEXT = re.compile(r"rain\.html|TN-SMART|tnsmart|Rain reports|data-layer=\"rain|rain24"
@@ -291,7 +338,7 @@ def main():
     if len(sys.argv) != 3:
         die("usage: public_site.py <site_dir> <out_dir>")
     site, out = sys.argv[1], sys.argv[2]
-    for sub in ("models", "landfall", "cyclone", "tracks", "weathernext3"):
+    for sub in ("models", "landfall", "cyclone", "tracks", "weathernext3", "raintotals"):
         shutil.rmtree(os.path.join(out, sub), ignore_errors=True)
     print("public pages:")
     build_models(site, out)
@@ -302,6 +349,10 @@ def main():
           '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=../models/">'
           '<title>WeatherNext 3 · MasRainman</title><a href="../models/">Model maps</a>\n')
     bad = scan(out)
+    try:   # after the scan: these totals are the one allowed rain product; never stop the other pages
+        build_raintotals(site, out)
+    except Exception as exc:
+        print(f"public_site: rain totals skipped ({type(exc).__name__}: {exc})")
     if bad:
         for sub in ("models", "landfall", "cyclone", "tracks", "weathernext3"):
             shutil.rmtree(os.path.join(out, sub), ignore_errors=True)

@@ -476,6 +476,7 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import masrainman_logo  # noqa: F401  (MasRainman logo + name on every saved chart)
     from matplotlib.colors import BoundaryNorm, ListedColormap
 
     cols = columns()
@@ -602,7 +603,7 @@ def draw_chart(out_png, model, run_name, init, district, grid_pt, grid_deg, valu
     fig.text(0.955, 0.012, f"{cfg['credit']}  •  #MasRainman  •  Not an official forecast",
              fontsize=8, ha="right", color="#444")
 
-    fig.savefig(out_png, dpi=100)
+    fig.savefig(out_png, dpi=100, bbox_inches="tight", pad_inches=0.12)   # logo + name go in a strip above
     plt.close(fig)
     try:   # 256-colour PNG: about a third of the size, looks the same
         from PIL import Image

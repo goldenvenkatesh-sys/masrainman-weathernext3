@@ -743,21 +743,24 @@ def _download_noaa_step(http, url, out_path):
         parts.append(next((a for a in apcp if a[2].startswith("0-")), apcp[0]))
     if len([p for p in parts if p not in apcp]) < 3:
         raise RuntimeError(f"{url.split('/')[-1]}: MSLP / 10-m wind not in the index")
+    # ONE request for the span that holds all wanted messages (NOMADS limits requests per minute;
+    # the reader skips the other messages in the span)
+    lo = min(p[0] for p in parts)
+    hi = None if any(p[1] is None for p in parts) else max(p[1] for p in parts)
+    rng = f"bytes={lo}-" + ("" if hi is None else str(hi))
+    for attempt in range(6):
+        try:
+            rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
+            rr.raise_for_status()
+            if not rr.content.startswith(b"GRIB"):   # NOMADS answers "over rate limit" pages with 200
+                raise RuntimeError(f"not GRIB data ({rr.content[:60]!r})")
+            break
+        except Exception:
+            if attempt == 5:
+                raise
+            time.sleep(30 * (attempt + 1))
     with open(out_path, "wb") as f:
-        for start, end, _ in sorted(parts):
-            rng = f"bytes={start}-" + ("" if end is None else str(end))
-            for attempt in range(5):
-                try:
-                    rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
-                    rr.raise_for_status()
-                    if not rr.content.startswith(b"GRIB"):
-                        raise RuntimeError("not GRIB data")
-                    break
-                except Exception:
-                    if attempt == 4:
-                        raise
-                    time.sleep(10 * (attempt + 1))
-            f.write(rr.content)
+        f.write(rr.content)
     return out_path
 
 
@@ -828,7 +831,7 @@ def load_noaa_run(key, run_name):
             finally:
                 os.remove(p)
 
-        workers = 6 if cfg["noaa"] == "gfs" else 3     # NOMADS limits connections
+        workers = 6 if cfg["noaa"] == "gfs" else 2     # NOMADS limits connections and requests/minute
         with ThreadPoolExecutor(max_workers=workers) as pool:
             results = {st: r for st, r in pool.map(fetch_and_cut, steps) if r is not None}
         hours = sorted(results)

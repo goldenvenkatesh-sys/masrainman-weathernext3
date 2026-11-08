@@ -217,6 +217,7 @@ MODELS["gfs"] = {
     "manifest": "manifest_gfs.json",
     "pattern": ECMWF_RUN_PATTERN,
     "noaa": "gfs",
+    "keep": int(os.environ.get("NOAA_KEEP_RUNS", "2")),   # fewer runs kept: keeps the site-data push small
     "title": "NCEP GFS — MSLP with V3 Low Centres",
     "info_head": "NCEP GFS (operational deterministic, {grid})",
     "barbs_label": "10-m wind barbs: ON",
@@ -229,6 +230,7 @@ MODELS["aigfs"] = {
     "manifest": "manifest_aigfs.json",
     "pattern": ECMWF_RUN_PATTERN,
     "noaa": "aigfs",
+    "keep": int(os.environ.get("NOAA_KEEP_RUNS", "2")),
     "title": "NOAA AIGFS — MSLP with V3 Low Centres",
     "info_head": "NOAA AIGFS (AI version of GFS, {grid})",
     "barbs_label": "10-m wind barbs: ON",
@@ -707,7 +709,7 @@ def list_noaa_runs(key):
     for _ in range(16):
         if t.hour in NOAA_CYCLES and noaa_run_complete(key, t, http):
             found.append(t.strftime("%Y%m%d_%H"))
-            if len(found) == KEEP_RUNS:
+            if len(found) == MODELS[key].get("keep", KEEP_RUNS):
                 break
         t -= timedelta(hours=6)
     return found
@@ -814,7 +816,13 @@ def load_noaa_run(key, run_name):
         http = _http()
 
         def fetch_and_cut(st):
-            p = _download_noaa_step(http, noaa_file_url(key, run_time, st), os.path.join(tmp, f"s{st:03d}.grib2"))
+            try:
+                p = _download_noaa_step(http, noaa_file_url(key, run_time, st), os.path.join(tmp, f"s{st:03d}.grib2"))
+            except Exception as exc:
+                if st == 0:   # some AIGFS analysis files (f000) lack MSLP/wind: start from T+6 then
+                    print(f"  ({cfg['label']} T+0 skipped: {exc})")
+                    return st, None
+                raise
             try:
                 return st, _read_noaa_step(p)
             finally:
@@ -822,7 +830,7 @@ def load_noaa_run(key, run_name):
 
         workers = 6 if cfg["noaa"] == "gfs" else 3     # NOMADS limits connections
         with ThreadPoolExecutor(max_workers=workers) as pool:
-            results = dict(pool.map(fetch_and_cut, steps))
+            results = {st: r for st, r in pool.map(fetch_and_cut, steps) if r is not None}
         hours = sorted(results)
         first = results[hours[0]]
         mslp = np.stack([results[h]["msl"] for h in hours]) / 100.0     # Pa -> hPa
@@ -1465,11 +1473,12 @@ def write_manifest(model="wn3"):
     root = runs_root(model)
     runs = rendered_runs(model)
 
-    # Keep only the latest KEEP_RUNS
-    for old in runs[KEEP_RUNS:]:
+    # Keep only the latest KEEP_RUNS (per model, if the model says so)
+    keep = cfg.get("keep", KEEP_RUNS)
+    for old in runs[keep:]:
         print(f"[{cfg['label']}] Removing old run", old)
         shutil.rmtree(os.path.join(root, old), ignore_errors=True)
-    runs = runs[:KEEP_RUNS]
+    runs = runs[:keep]
 
     manifest = {
         "model": model,

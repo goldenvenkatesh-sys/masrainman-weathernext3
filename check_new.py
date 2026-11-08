@@ -177,7 +177,7 @@ def check_noaa(key):
                 r = requests.head(noaa_url(key, t, 360) + ".idx", timeout=TIMEOUT, allow_redirects=True)
                 if r.status_code == 200:
                     latest.append(t.strftime("%Y%m%d_%H"))
-                    if len(latest) == KEEP_RUNS:
+                    if len(latest) == int(os.environ.get("NOAA_KEEP_RUNS", "2")):
                         break
             except requests.RequestException as e:
                 print(f"[{key.upper()}] check failed: {type(e).__name__}")

@@ -107,6 +107,10 @@ jobs:
           cp web/index.html web/rain.html web/landfall.html web/outlook.html site/ 2>/dev/null || true
           bash get_rain_reports.sh site
 
+      - name: Add ensemble rain charts (ens-data branch)
+        if: steps.get.outputs.new == 'true'
+        run: bash get_ens.sh site
+
       - name: Publish to Cloudflare Pages (login-protected)
         if: steps.get.outputs.new == 'true'
         env:

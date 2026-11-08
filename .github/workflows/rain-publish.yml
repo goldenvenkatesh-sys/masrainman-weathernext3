@@ -136,6 +136,9 @@ jobs:
             cp web/index.html web/rain.html web/landfall.html web/outlook.html site/
           fi
 
+      - name: Add ensemble rain charts (ens-data branch)
+        run: bash get_ens.sh site
+
       - name: Publish to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

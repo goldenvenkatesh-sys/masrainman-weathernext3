@@ -153,3 +153,23 @@ and whenever that code changes. Same site-data branch and Cloudflare project as 
 - Weights are shared out over the models that reach each day. Members per ensemble: `env` in `mme.yml`.
 - Borders as per the Government of India (DataMeet, Survey of India based; downloaded on first run).
 
+
+## Ensemble rain by district (`ens.html`)
+
+WeatherBell-style **24-hour rain plume charts** for every district headquarters of
+Tamil Nadu, Kerala, Karnataka, Andhra Pradesh and Telangana (142 places, `ens/districts.csv`):
+
+| Model | Rows in the grid | Lower panel |
+|---|---|---|
+| ECMWF IFS ENS (open data, 0.25°, 00/12Z to T+360) | 51 members (c00 = control, 01–50) | control, mean, 25–75 % box, min–max whiskers |
+| WeatherNext 3 (statistics store, 0.1°) | p90, p75, median, p25, p10 + mean | mean, median, p25–p75 and p10–p90 bands |
+
+Each column is the rain in the 24 h ending at that time (every 6 h, UTC). WeatherNext 3's
+store has only the mean and percentiles of hourly rain (no members), so its percentile rows
+are sums of hourly percentiles: a guide, not exact 24-h percentiles. The mean row is exact.
+
+- `ens_meteogram.py` draws the charts (`--demo` for a test without downloads).
+- `.github/workflows/ens-rain.yml` runs every 3 h, draws only runs the site doesn't have,
+  keeps the latest 2 runs per model on the `ens-data` branch and publishes the site.
+- `get_ens.sh` adds the charts to the site in the other two publish workflows.
+- To add or fix a place, edit `ens/districts.csv` (state, district, HQ, lat, lon).

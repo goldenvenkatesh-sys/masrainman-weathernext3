@@ -323,6 +323,14 @@ fetch("scores.json", {cache: "no-store"})
     $("upd").textContent = "No scores yet";
     $("headline").textContent = "The first verification has not been published here yet.";
   });
+
+// Embedded on the blog: send the page height so the frame fits the page exactly
+if (window.parent !== window) {
+  const send = () => parent.postMessage({masrainmanHeight: document.documentElement.scrollHeight}, "*");
+  addEventListener("load", send); addEventListener("resize", send);
+  new ResizeObserver(send).observe(document.body);
+  document.addEventListener("load", send, true);
+}
 </script>
 </body>
 </html>

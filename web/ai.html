@@ -86,7 +86,7 @@
 
   <div class="card">
     <b>MasRainMan AI</b> is our own AI weather model for South India, made by MasRainman.
-    Pick a parameter above: <b>24-h rainfall</b> on the MasRainMan standard colour bar, mean sea level
+    Pick a parameter above: <b>24-h rainfall</b> on the MasRainMan standard colour bar, <b>rain totals</b> for 24 h, 3 days, 7 days and the full 10 days, mean sea level
     pressure, 2 m temperature, 10 m wind or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
     <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">→</span> to step through the days.
     <div style="margin-top:10px;color:var(--muted);font-size:11px">Input data © ECMWF, CC BY 4.0.</div>
@@ -98,26 +98,41 @@ const $ = id => document.getElementById(id);
 const IST = {timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "numeric", minute: "2-digit"};
 const utc = s => new Date(s.length === 13 ? s + ":00:00Z" : s + ":00Z");
 const ist = s => utc(s).toLocaleString("en-IN", IST) + " IST";
-const PARAMS = [["rain", "🌧 Rainfall (24 h)"], ["mslp", "MSLP"], ["t2m", "Temperature"],
+const PARAMS = [["rain", "🌧 Rainfall (24 h)"], ["total", "🌧 Rain total"], ["mslp", "MSLP"], ["t2m", "Temperature"],
                 ["wind", "Wind"], ["tcwv", "Water vapour"]];
-let maps = [], i = 0, timer = null;
+let daily = [], totals = [], maps = [], i = 0, timer = null;
 let param = PARAMS.some(p => p[0] === location.hash.slice(1)) ? location.hash.slice(1) : "rain";
 
 // older forecasts had one 4-panel image per day ("file"); newer ones one image per parameter
 const fileOf = m => m.files ? m.files[param] : m.file;
+// "total" shows the accumulated rain from the start of the run (24 h, 3 days, 7 days, 10 days)
+const dayOf = m => m.hours ? m.label : `Day ${m.lead / 24}`;
+const leadOf = m => m.hours || m.lead;
+
+function buildFrames() {
+  maps = param === "total" ? totals : daily;
+  $("frames").innerHTML = maps.map((m, j) =>
+    `<button class="fr" data-j="${j}"><b>${dayOf(m)}</b><small>${m.hours ? "to " : ""}${utc(m.valid).toLocaleDateString("en-IN", {timeZone: "Asia/Kolkata", day: "numeric", month: "short"})}</small></button>`
+  ).join("");
+  $("slider").max = Math.max(maps.length - 1, 0);
+  maps.forEach(m => { const im = new Image(); im.src = fileOf(m) + "?v=" + encodeURIComponent(m.valid); });
+}
 
 function setParam(p) {
+  const was = param;
   param = p;
   history.replaceState(null, "", "#" + p);
   [...$("params").children].forEach(b => b.classList.toggle("on", b.dataset.p === p));
+  if ((was === "total") !== (p === "total") || !maps.length) { buildFrames(); i = 0; }
   if (maps.length) show(i);
 }
 
 function show(k) {
   i = (k + maps.length) % maps.length;
   const m = maps[i], file = fileOf(m);
-  $("viewer").innerHTML = `<img src="${file}?v=${encodeURIComponent(m.valid)}" alt="MasRainMan AI ${param} +${m.lead} h">`;
-  $("now").innerHTML = `Day ${m.lead / 24} · +${m.lead} h<small>valid ${ist(m.valid)}</small>`;
+  $("viewer").innerHTML = `<img src="${file}?v=${encodeURIComponent(m.valid)}" alt="MasRainMan AI ${param} +${leadOf(m)} h">`;
+  $("now").innerHTML = m.hours ? `Rain total · ${m.label}<small>to ${ist(m.valid)}</small>`
+                               : `Day ${m.lead / 24} · +${m.lead} h<small>valid ${ist(m.valid)}</small>`;
   $("dl").href = file;
   $("slider").value = i;
   [...$("frames").children].forEach((b, j) => b.classList.toggle("on", j === i));
@@ -132,29 +147,33 @@ function play() {
 fetch("manifest.json", {cache: "no-store"})
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(doc => {
-    maps = doc.maps;
-    const have = maps[0].files ? PARAMS.filter(p => p[0] in maps[0].files) : [];
+    daily = doc.maps; totals = doc.totals || [];
+    const f0 = daily[0].files || {};
+    const have = daily[0].files ? PARAMS.filter(p => p[0] in f0 || (p[0] === "total" && totals.length)) : [];
     $("params").innerHTML = have.map(([p, label]) => `<button class="pill" data-p="${p}">${label}</button>`).join("");
     $("params").onclick = e => { const b = e.target.closest(".pill"); if (b) setParam(b.dataset.p); };
-    if (have.length && !have.some(p => p[0] === param)) param = have[0][0];
+    if (!have.some(p => p[0] === param)) param = have.length ? have[0][0] : "rain";
+    maps = [];
     setParam(param);
     $("upd").textContent = `Run ${doc.init.slice(0, 10)} ${doc.init.slice(11)} UTC · made ${ist(doc.made_utc)}`;
-    $("frames").innerHTML = maps.map((m, j) =>
-      `<button class="fr" data-j="${j}"><b>Day ${m.lead / 24}</b><small>${utc(m.valid).toLocaleDateString("en-IN", {timeZone: "Asia/Kolkata", day: "numeric", month: "short"})}</small></button>`
-    ).join("");
     $("frames").onclick = e => { const b = e.target.closest(".fr"); if (b) show(+b.dataset.j); };
-    $("slider").max = maps.length - 1;
     $("slider").oninput = e => show(+e.target.value);
     $("play").onclick = play;
     document.onkeydown = e => { if (e.key === "ArrowRight") show(i + 1); if (e.key === "ArrowLeft") show(i - 1); };
-    // preload the other days of the chosen parameter so stepping and Play are instant
-    maps.forEach(m => { const im = new Image(); im.src = fileOf(m) + "?v=" + encodeURIComponent(m.valid); });
     show(0);
   })
   .catch(() => {
     $("upd").textContent = "No forecast yet";
     $("viewer").innerHTML = '<div class="empty">The first MasRainMan AI forecast has not been published here yet.</div>';
   });
+
+// Embedded on the blog: send the page height so the frame fits the page exactly (no empty box, no inner scroll)
+if (window.parent !== window) {
+  const send = () => parent.postMessage({masrainmanHeight: document.documentElement.scrollHeight}, "*");
+  addEventListener("load", send); addEventListener("resize", send);
+  new ResizeObserver(send).observe(document.body);
+  document.addEventListener("load", send, true);   // each map image as it arrives
+}
 </script>
 </body>
 </html>

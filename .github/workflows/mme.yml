@@ -135,7 +135,25 @@ jobs:
         run: python mme_site.py
 
       - name: Save maps (site-data branch, private)
+        id: save
+        continue-on-error: true   # GitHub sometimes answers this big push with HTTP 500: retried below
         if: steps.page.outcome == 'success'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: site-data
+          force_orphan: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "MasRainman multi-model update"
+
+      - name: Wait before retrying the push
+        if: steps.save.outcome == 'failure'
+        run: sleep 60
+
+      - name: Save maps (retry after a failed push)
+        if: steps.save.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -172,7 +172,25 @@ jobs:
           python -u nem_outlook.py 2>&1 | tee site/outlook/state/last_log.txt
 
       - name: Save maps (site-data branch, private)
+        id: save
+        continue-on-error: true   # GitHub sometimes answers this big push with HTTP 500: retried below
         if: steps.render.outcome == 'success' || steps.rain24.outputs.new == 'true' || steps.landfall.outputs.new == 'true' || steps.outlook.outputs.new == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          publish_branch: site-data
+          force_orphan: true   # keeps repo small: no image history
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "MasRainman model maps update"
+
+      - name: Wait before retrying the push
+        if: steps.save.outcome == 'failure'
+        run: sleep 60
+
+      - name: Save maps (retry after a failed push)
+        if: steps.save.outcome == 'failure'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

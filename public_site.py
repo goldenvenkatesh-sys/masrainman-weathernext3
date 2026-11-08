@@ -7,7 +7,8 @@
 <out_dir>   the public folder, e.g. public/   (the AI forecast + verification pages are already in it)
 
 Pages written (each one a folder with its own index.html):
-  models/    WeatherNext 3 + ECMWF IFS + ECMWF AIFS maps: MSLP and MSLP + wind barbs only
+  models/    WeatherNext 3 + ECMWF IFS + ECMWF AIFS + NCEP GFS + NOAA AIGFS maps: MSLP, MSLP + wind barbs,
+             model rain total since the start of the run and 24-h model rain
   landfall/  ensemble landfall maps
   cyclone/   NEM & cyclone outlook: genesis, cyclone tracks, 30-day NEM rain forecast, active/break, consistency, PDI,
              environment, cyclone verification (the observed station-rainfall verification stays private)
@@ -31,8 +32,10 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 KEEP_RUNS = int(os.environ.get("PUBLIC_RUNS", "4"))        # model-map runs per model
 BLOG = "https://masrainman.blogspot.com/"
-LAYERS = ("mslp", "barbs")                                  # public model-map layers: no rain
-MODELS = ("wn3", "ifs", "aifs")
+# public model-map layers: the owner chose (Nov 2026) to show the model rain charts too
+# (Rain total since the start of the run, Rain 24 h). Observed rain stays private.
+LAYERS = ("mslp", "barbs", "rain", "rain24")
+MODELS = ("wn3", "ifs", "aifs", "gfs", "aigfs")
 
 # (key, label, link from a sub-page)
 PAGES = [("models", "🗺 Model maps", "../models/"),
@@ -92,7 +95,7 @@ def build_models(site, out):
     pub_models, copied, updated = [], 0, None
     for mid in MODELS:
         m = listed.get(mid)
-        if not m:
+        if not m or not os.path.isfile(os.path.join(site, m["manifest"])):
             print(f"public_site: model {mid} is not on the site yet, skipped")
             continue
         with open(os.path.join(site, m["manifest"])) as f:
@@ -126,9 +129,6 @@ def build_models(site, out):
 
     html = read("web", "index.html")
     html = sub1(r"<title>.*?</title>", "<title>Model maps · MasRainman</title>", html, "title")
-    html, n = re.subn(r'[ \t]*<button class="pill" data-layer="rain(?:24)?"[^\n]*</button>\n', "", html)
-    if n != 2:
-        die(f"expected 2 rain layer buttons in web/index.html, found {n}")
     html = sub1(r'<nav class="mr-nav">.*?</nav>', lambda _: nav_buttons("models"), html, "nav", re.S)
     fb = ",\n".join(f"    {{id:'{m['id']}', label:{json.dumps(m['label'])}, manifest:'{m['manifest']}', base:'{m['base']}'}}"
                     for m in pub_models)
@@ -321,7 +321,7 @@ BAD_TEXT = re.compile(r"rain\.html|TN-SMART|tnsmart|Rain reports|data-layer=\"ra
 
 def scan(out):
     bad = []
-    for sub in ("models", "landfall", "cyclone", "tracks", "weathernext3"):
+    for sub in ("landfall", "cyclone", "tracks", "weathernext3"):   # models/ now has model rain on purpose
         for root, _, files in os.walk(os.path.join(out, sub)):
             for fn in files:
                 p = os.path.join(root, fn)

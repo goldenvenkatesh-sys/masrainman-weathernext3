@@ -205,7 +205,41 @@ MODELS = {
         ],
     },
 }
-MODEL_ORDER = ["wn3", "ifs", "aifs"]
+NOAA_CREDITS = [
+    "Source: NOAA / NCEP open data (public domain) | NOMADS and NOAA Open Data on AWS",
+    "V3 analysis & visualisation: MasRainman",
+    "This is not an official forecast. Please follow IMD for official forecasts and warnings.",
+]
+MODELS["gfs"] = {
+    "label": "NCEP GFS",
+    "file_prefix": "noaa_gfs",
+    "runs_dir": os.path.join("noaa", "gfs"),
+    "manifest": "manifest_gfs.json",
+    "pattern": ECMWF_RUN_PATTERN,
+    "noaa": "gfs",
+    "title": "NCEP GFS — MSLP with V3 Low Centres",
+    "info_head": "NCEP GFS (operational deterministic, {grid})",
+    "barbs_label": "10-m wind barbs: ON",
+    "credits": NOAA_CREDITS,
+}
+MODELS["aigfs"] = {
+    "label": "NOAA AIGFS",
+    "file_prefix": "noaa_aigfs",
+    "runs_dir": os.path.join("noaa", "aigfs"),
+    "manifest": "manifest_aigfs.json",
+    "pattern": ECMWF_RUN_PATTERN,
+    "noaa": "aigfs",
+    "title": "NOAA AIGFS — MSLP with V3 Low Centres",
+    "info_head": "NOAA AIGFS (AI version of GFS, {grid})",
+    "barbs_label": "10-m wind barbs: ON",
+    "credits": NOAA_CREDITS,
+}
+MODEL_ORDER = ["wn3", "ifs", "aifs", "gfs", "aigfs"]
+
+# NOAA runs to draw: the 00/12 UTC runs only (each goes to T+384; maps to T+360) to save job time
+NOAA_CYCLES = [int(c) for c in os.environ.get("NOAA_CYCLES", "00,12").split(",") if c.strip()]
+NOAA_LAST_H = 360
+NOAA_STEP_H = 6
 
 
 # ============================================================
@@ -639,6 +673,208 @@ def load_ecmwf_run(key, run_name, source):
         return data
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+# ============================================================
+# DATA LOADING — NOAA GFS + AIGFS (MSLP, 10-m wind, rain)
+# ============================================================
+
+def noaa_file_url(key, run_time, step):
+    ymd, hh = run_time.strftime("%Y%m%d"), run_time.strftime("%H")
+    if MODELS[key]["noaa"] == "gfs":   # NOAA Open Data on AWS: no rate limit, same files as NOMADS
+        return (f"https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{ymd}/{hh}/atmos/"
+                f"gfs.t{hh}z.pgrb2.0p25.f{step:03d}")
+    return (f"https://nomads.ncep.noaa.gov/pub/data/nccf/com/aigfs/prod/aigfs.{ymd}/{hh}/model/atmos/grib2/"
+            f"aigfs.t{hh}z.sfc.f{step:03d}.grib2")
+
+
+def noaa_run_complete(key, run_time, http):
+    try:
+        r = http.head(noaa_file_url(key, run_time, NOAA_LAST_H) + ".idx", timeout=(5, 15), allow_redirects=True)
+        return r.status_code == 200
+    except Exception as exc:
+        print(f"  ({key} check failed: {type(exc).__name__})")
+        return False
+
+
+def list_noaa_runs(key):
+    """Newest complete 00/12 UTC runs first: [run_name, ...]."""
+    print(f"\nSearching {MODELS[key]['label']} runs...")
+    http = _http()
+    t = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    t -= timedelta(hours=t.hour % 6)
+    found = []
+    for _ in range(16):
+        if t.hour in NOAA_CYCLES and noaa_run_complete(key, t, http):
+            found.append(t.strftime("%Y%m%d_%H"))
+            if len(found) == KEEP_RUNS:
+                break
+        t -= timedelta(hours=6)
+    return found
+
+
+# idx lines: "12:3456789:d=2026110800:PRMSL:mean sea level:6 hour fcst:"
+NOAA_WANTED = {("PRMSL", "mean sea level"), ("UGRD", "10 m above ground"), ("VGRD", "10 m above ground"),
+               ("APCP", "surface")}
+
+
+def _download_noaa_step(http, url, out_path):
+    import time
+    for attempt in range(5):
+        try:
+            r = http.get(url + ".idx", timeout=HTTP_TIMEOUT)
+            r.raise_for_status()
+            break
+        except Exception:
+            if attempt == 4:
+                raise
+            time.sleep(10 * (attempt + 1))
+    lines = [l.split(":") for l in r.text.strip().splitlines()]
+    parts, apcp = [], []
+    for k, l in enumerate(lines):
+        if len(l) < 6 or (l[3], l[4]) not in NOAA_WANTED:
+            continue
+        start = int(l[1])
+        end = int(lines[k + 1][1]) - 1 if k + 1 < len(lines) else None
+        (apcp if l[3] == "APCP" else parts).append((start, end, l[5]))
+    if apcp:   # one rain message: the running total (0-N h) if the file has it, else its bucket
+        parts.append(next((a for a in apcp if a[2].startswith("0-")), apcp[0]))
+    if len([p for p in parts if p not in apcp]) < 3:
+        raise RuntimeError(f"{url.split('/')[-1]}: MSLP / 10-m wind not in the index")
+    with open(out_path, "wb") as f:
+        for start, end, _ in sorted(parts):
+            rng = f"bytes={start}-" + ("" if end is None else str(end))
+            for attempt in range(5):
+                try:
+                    rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
+                    rr.raise_for_status()
+                    if not rr.content.startswith(b"GRIB"):
+                        raise RuntimeError("not GRIB data")
+                    break
+                except Exception:
+                    if attempt == 4:
+                        raise
+                    time.sleep(10 * (attempt + 1))
+            f.write(rr.content)
+    return out_path
+
+
+def _read_noaa_step(path):
+    """msl/10u/10v (+tp with its start step) cut to the map domains, latitudes ascending."""
+    import eccodes
+    names = {"prmsl": "msl", "msl": "msl", "10u": "10u", "10v": "10v", "tp": "tp"}
+    out = {}
+    with open(path, "rb") as fh:
+        while True:
+            g = eccodes.codes_grib_new_from_file(fh)
+            if g is None:
+                break
+            try:
+                key = names.get(eccodes.codes_get(g, "shortName"))
+                if not key or key in out:
+                    continue
+                ni, nj = eccodes.codes_get(g, "Ni"), eccodes.codes_get(g, "Nj")
+                la0 = eccodes.codes_get(g, "latitudeOfFirstGridPointInDegrees")
+                la1 = eccodes.codes_get(g, "latitudeOfLastGridPointInDegrees")
+                lo0 = eccodes.codes_get(g, "longitudeOfFirstGridPointInDegrees")
+                lo1 = eccodes.codes_get(g, "longitudeOfLastGridPointInDegrees")
+                if lo1 < lo0:
+                    lo1 += 360.0
+                vals = eccodes.codes_get_double_array(g, "values").reshape(nj, ni)
+                lat, lon = np.linspace(la0, la1, nj), np.linspace(lo0, lo1, ni)
+                if lat[0] > lat[-1]:
+                    lat, vals = lat[::-1], vals[::-1]
+                box = (RAIN_LAT_MIN, RAIN_LAT_MAX, RAIN_LON_MIN, RAIN_LON_MAX) if key == "tp" else \
+                      (LAT_MIN, LAT_MAX, LON_MIN, LON_MAX)
+                j = (lat >= box[0] - 1e-6) & (lat <= box[1] + 1e-6)
+                i = (lon >= box[2] - 1e-6) & (lon <= box[3] + 1e-6)
+                cut = vals[np.ix_(j, i)].astype(np.float32)
+                if key == "tp":
+                    out["tp"] = np.maximum(cut, 0)          # kg m-2 = mm
+                    out["tp_start"] = int(eccodes.codes_get(g, "startStep"))
+                    out["rlat"], out["rlon"] = lat[j], lon[i]
+                else:
+                    out[key] = cut
+                    out["lat"], out["lon"] = lat[j], lon[i]
+            finally:
+                eccodes.codes_release(g)
+    for k in ("msl", "10u", "10v"):
+        if k not in out:
+            raise RuntimeError(f"{k} missing in {os.path.basename(path)}")
+    return out
+
+
+def load_noaa_run(key, run_name):
+    cfg = MODELS[key]
+    run_time = decode_init_time(run_name)
+    steps = list(range(0, NOAA_LAST_H + 1, NOAA_STEP_H))
+    print(f"\nDownloading {cfg['label']} {run_name}: {len(steps)} steps (T+0 … T+{NOAA_LAST_H}) ...")
+    tmp = tempfile.mkdtemp(prefix=f"{key}_{run_name}_")
+    try:
+        http = _http()
+
+        def fetch_and_cut(st):
+            p = _download_noaa_step(http, noaa_file_url(key, run_time, st), os.path.join(tmp, f"s{st:03d}.grib2"))
+            try:
+                return st, _read_noaa_step(p)
+            finally:
+                os.remove(p)
+
+        workers = 6 if cfg["noaa"] == "gfs" else 3     # NOMADS limits connections
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            results = dict(pool.map(fetch_and_cut, steps))
+        hours = sorted(results)
+        first = results[hours[0]]
+        mslp = np.stack([results[h]["msl"] for h in hours]) / 100.0     # Pa -> hPa
+        data = {"lat": first["lat"], "lon": first["lon"], "mslp": mslp.astype(np.float32),
+                "u10": np.stack([results[h]["10u"] for h in hours]),
+                "v10": np.stack([results[h]["10v"] for h in hours]),
+                "n_hours": int(hours[-1]), "hours": [int(h) for h in hours],
+                "grid_deg": 0.25, "resol": "0p25"}
+        rain_hours = [h for h in hours if h > 0]
+        if rain_hours and all("tp" in results[h] for h in rain_hours):
+            ref = results[rain_hours[0]]
+            totals = {0: np.zeros_like(ref["tp"])}
+            ok = True
+            for h in rain_hours:     # running total (start 0) or a bucket added to the total at its start
+                r_ = results[h]
+                base = 0 if r_["tp_start"] == 0 else totals.get(r_["tp_start"])
+                if base is None:
+                    ok = False
+                    break
+                totals[h] = base + r_["tp"]
+            if ok:
+                acc = np.stack([totals[h] if h in totals else totals[0] for h in hours])
+                data["rain"] = np.maximum.accumulate(acc, axis=0)
+                data["rlat"], data["rlon"] = ref["rlat"], ref["rlon"]
+                print(f"Rain grid {data['rain'].shape}, max total {np.nanmax(data['rain'][-1]):.0f} mm")
+        if "rain" not in data:
+            print("  (no rain in this run's files - rain charts skipped)")
+        print(f"Grid {mslp.shape}, MSLP {np.nanmin(mslp):.1f}–{np.nanmax(mslp):.1f} hPa")
+        return data
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def process_noaa(model, force_run=None):
+    label = MODELS[model]["label"]
+    if force_run:
+        targets = [force_run]
+    else:
+        available = list_noaa_runs(model)
+        print("Latest available:", ", ".join(available) or "(none)")
+        done = set(rendered_runs(model))
+        targets = [r for r in available if r not in done]
+    if not targets:
+        print(f"[{label}] Nothing new to render.")
+        return 0
+    rendered = 0
+    for run_name in targets:
+        if rendered >= MAX_NEW_RUNS_PER_JOB:
+            break
+        render_run(model, run_name, load_noaa_run(model, run_name))
+        rendered += 1
+    return rendered
 
 
 # ============================================================
@@ -1348,9 +1584,9 @@ def process_ecmwf(model, force_run=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--models", default="wn3,ifs,aifs",
-                    help="Comma list of models to process (wn3, ifs, aifs)")
-    ap.add_argument("--model", help="Model for --run (wn3, ifs or aifs)")
+    ap.add_argument("--models", default=",".join(MODEL_ORDER),
+                    help="Comma list of models to process (wn3, ifs, aifs, gfs, aigfs)")
+    ap.add_argument("--model", help="Model for --run (wn3, ifs, aifs, gfs or aigfs)")
     ap.add_argument("--run", help="Render this run name (forces re-render)")
     ap.add_argument("--demo", action="store_true", help="Synthetic data test, no downloads")
     args = ap.parse_args()
@@ -1384,6 +1620,8 @@ def main():
         try:
             if m == "wn3":
                 total += process_wn3(args.run)
+            elif MODELS[m].get("noaa"):
+                total += process_noaa(m, args.run)
             else:
                 total += process_ecmwf(m, args.run)
         except Exception as exc:

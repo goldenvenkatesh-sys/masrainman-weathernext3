@@ -154,11 +154,53 @@ def check_ecmwf(key):
     return missing
 
 
+# ------------------------------------------------------------------- NOAA GFS / AIGFS
+# 00/12 UTC runs only (must match render.py NOAA_CYCLES); complete when the T+360 .idx exists.
+NOAA_CYCLES = [int(c) for c in os.environ.get("NOAA_CYCLES", "00,12").split(",") if c.strip()]
+
+
+def noaa_url(key, t, step):
+    ymd, hh = t.strftime("%Y%m%d"), t.strftime("%H")
+    if key == "gfs":
+        return f"https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.{ymd}/{hh}/atmos/gfs.t{hh}z.pgrb2.0p25.f{step:03d}"
+    return (f"https://nomads.ncep.noaa.gov/pub/data/nccf/com/aigfs/prod/aigfs.{ymd}/{hh}/model/atmos/grib2/"
+            f"aigfs.t{hh}z.sfc.f{step:03d}.grib2")
+
+
+def check_noaa(key):
+    t = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
+    t -= timedelta(hours=t.hour % 6)
+    latest = []
+    for _ in range(16):
+        if t.hour in NOAA_CYCLES:
+            try:
+                r = requests.head(noaa_url(key, t, 360) + ".idx", timeout=TIMEOUT, allow_redirects=True)
+                if r.status_code == 200:
+                    latest.append(t.strftime("%Y%m%d_%H"))
+                    if len(latest) == KEEP_RUNS:
+                        break
+            except requests.RequestException as e:
+                print(f"[{key.upper()}] check failed: {type(e).__name__}")
+        t -= timedelta(hours=6)
+    have = site_has("noaa", key)
+    missing = [r for r in latest if not os.path.exists(os.path.join(SITE_DIR, "noaa", key, r, "run.json"))]
+    print(f"[{key.upper():5}] latest :", ", ".join(latest) or "(none found)")
+    print(f"[{key.upper():5}] to draw:", ", ".join(missing) or "(nothing new)")
+    return missing
+
+
 # ------------------------------------------------------------------------ main
 results = {}
 for key in ("ifs", "aifs"):
     print(f"--- ECMWF {key.upper()} ---", flush=True)
     results[key] = check_ecmwf(key)
+for key in ("gfs", "aigfs"):
+    print(f"--- NOAA {key.upper()} ---", flush=True)
+    try:
+        results[key] = check_noaa(key)
+    except Exception as e:  # never let one source block the others
+        print(f"[{key.upper()}] check failed:", e)
+        results[key] = []
 
 # WeatherNext 3 needs the Google login, which exists only on GitHub
 # (GOOGLE_APPLICATION_CREDENTIALS). Skip it on a PC without it, instead of

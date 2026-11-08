@@ -171,7 +171,9 @@
   const FALLBACK_MODELS = [
     {id:'wn3',  label:'WeatherNext 3', manifest:'data/manifest.json',      base:'runs'},
     {id:'ifs',  label:'ECMWF IFS',     manifest:'data/manifest_ifs.json',  base:'ecmwf/ifs'},
-    {id:'aifs', label:'ECMWF AIFS',    manifest:'data/manifest_aifs.json', base:'ecmwf/aifs'}
+    {id:'aifs', label:'ECMWF AIFS',    manifest:'data/manifest_aifs.json', base:'ecmwf/aifs'},
+    {id:'gfs',  label:'NCEP GFS',      manifest:'data/manifest_gfs.json',  base:'noaa/gfs'},
+    {id:'aigfs',label:'NOAA AIGFS',    manifest:'data/manifest_aigfs.json',base:'noaa/aigfs'}
   ];
 
   const fmtUTC = iso => {

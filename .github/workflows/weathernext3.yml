@@ -171,6 +171,12 @@ jobs:
           set -o pipefail
           python -u nem_outlook.py 2>&1 | tee site/outlook/state/last_log.txt
 
+      # GitHub refuses pushes over ~2 GB: keep the maps as 256-colour PNGs (same look, ~1/4 the size).
+      # Only files not yet converted are touched, so this is quick after the first time.
+      - name: Shrink map images
+        continue-on-error: true
+        run: python shrink_pngs.py site
+
       - name: Save maps (site-data branch, private)
         id: save
         continue-on-error: true   # GitHub sometimes answers this big push with HTTP 500: retried below

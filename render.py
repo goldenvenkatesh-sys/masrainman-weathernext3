@@ -743,24 +743,30 @@ def _download_noaa_step(http, url, out_path):
         parts.append(next((a for a in apcp if a[2].startswith("0-")), apcp[0]))
     if len([p for p in parts if p not in apcp]) < 3:
         raise RuntimeError(f"{url.split('/')[-1]}: MSLP / 10-m wind not in the index")
-    # ONE request for the span that holds all wanted messages (NOMADS limits requests per minute;
-    # the reader skips the other messages in the span)
-    lo = min(p[0] for p in parts)
-    hi = None if any(p[1] is None for p in parts) else max(p[1] for p in parts)
-    rng = f"bytes={lo}-" + ("" if hi is None else str(hi))
-    for attempt in range(6):
-        try:
-            rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
-            rr.raise_for_status()
-            if not rr.content.startswith(b"GRIB"):   # NOMADS answers "over rate limit" pages with 200
-                raise RuntimeError(f"not GRIB data ({rr.content[:60]!r})")
-            break
-        except Exception:
-            if attempt == 5:
-                raise
-            time.sleep(30 * (attempt + 1))
+    if "nomads" in url:
+        # AIGFS sfc files are small: ONE request for the span holding all wanted messages
+        # (NOMADS limits requests per minute; the reader skips the other messages in the span)
+        lo = min(p[0] for p in parts)
+        hi = None if any(p[1] is None for p in parts) else max(p[1] for p in parts)
+        spans = [(lo, hi)]
+    else:
+        # GFS pgrb2 files are ~500 MB: only the wanted messages (AWS has no rate limit)
+        spans = [(p[0], p[1]) for p in sorted(parts)]
     with open(out_path, "wb") as f:
-        f.write(rr.content)
+        for lo, hi in spans:
+            rng = f"bytes={lo}-" + ("" if hi is None else str(hi))
+            for attempt in range(6):
+                try:
+                    rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
+                    rr.raise_for_status()
+                    if not rr.content.startswith(b"GRIB"):   # NOMADS answers "over rate limit" pages with 200
+                        raise RuntimeError(f"not GRIB data ({rr.content[:60]!r})")
+                    break
+                except Exception:
+                    if attempt == 5:
+                        raise
+                    time.sleep(30 * (attempt + 1))
+            f.write(rr.content)
     return out_path
 
 

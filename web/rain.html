@@ -203,7 +203,9 @@
     $('title').innerHTML = nameFor(r) + tagFor(r);
     $('when').textContent = r.label + ' · made ' + fmtIST(r.made);
     const dl = $('dl'); dl.innerHTML = '';
-    [['mp4','⬇ MP4 video','primary'],['gif','⬇ GIF','gif'],['png','⬇ PNG picture',''],['list','⬇ Station list (PNG)','']].forEach(([e,t,c])=>{
+    const pages = [['list', f.list_pages ? '⬇ Station list p1 · Top 20' : '⬇ Station list (PNG)', '']];
+    for(let k = 2; k <= (f.list_pages || 1); k++) if(f['list_p' + k]) pages.push(['list_p' + k, '⬇ p' + k, '']);
+    [['mp4','⬇ MP4 video','primary'],['gif','⬇ GIF','gif'],['png','⬇ PNG picture',''],['list_pdf','⬇ Station list PDF (print)','gif']].concat(pages).forEach(([e,t,c])=>{
       if(!f[e]) return;
       const a = document.createElement('a');
       a.className = 'btn' + (c ? ' ' + c : '');

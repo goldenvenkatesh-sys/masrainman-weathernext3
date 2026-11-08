@@ -14,10 +14,41 @@ rm -rf public && cp -r "$site/ai" public
 # AI + verification pages: links back to the private dashboard are taken out, links to the public pages
 # and the blog are added instead.
 blog='<a class="btn" href="https://masrainman.blogspot.com/" target="_top">🏠 MasRainman blog</a>'
-links='<a class="btn" href="raintotals/">🌧 Rain totals</a>\n    <a class="btn" href="models/">🗺 Model maps</a>\n    <a class="btn" href="landfall/">🌀 Landfall maps</a>\n    <a class="btn" href="cyclone/">📈 Cyclone outlook</a>\n    <a class="btn" href="tracks/">🌐 LPA \&amp; cyclone tracker</a>'
+links='<a class="btn" href="raintotals/">🌧 Rain totals</a>\n    <a class="btn" href="ensrain/">📊 District rain (ensemble)</a>\n    <a class="btn" href="models/">🗺 Model maps</a>\n    <a class="btn" href="landfall/">🌀 Landfall maps</a>\n    <a class="btn" href="cyclone/">📈 Cyclone outlook</a>\n    <a class="btn" href="tracks/">🌐 LPA \&amp; cyclone tracker</a>'
 sed -i -e '\#href="\.\./mme/"#d' -e "s#<a class=\"btn\" href=\"\.\./\">[^<]*</a>#${links}\n    ${blog}#" public/index.html
 sed -i -e "s#<a class=\"btn\" href=\"\.\./\.\./\">[^<]*</a>#${blog}#" public/verify/index.html
 grep -c 'href="\.\./\.\./"\|href="\.\./mme/"' public/index.html public/verify/index.html || true
 
 # Model maps, landfall, cyclone outlook and tracker pages (no rain)
 python3 public_site.py "$site" public
+
+# Ensemble 24-h rain charts by district (ECMWF ENS + WeatherNext 3) from the ens-data branch.
+# The owner chose to show these on the blog (Nov 2026). Page at /ensrain/, charts at /ensrain/ens/.
+mkdir -p public/ensrain/ens
+if git fetch -q --depth 1 origin ens-data 2>/dev/null; then
+  git --work-tree=public/ensrain/ens checkout -q FETCH_HEAD -- . && git reset -q
+  echo "  ensrain: $(find public/ensrain/ens -name '*.png' | wc -l) charts"
+else
+  echo "  ensrain: no charts yet"
+fi
+python3 - <<'PY'
+import re
+html = open("web/ens.html", encoding="utf-8").read()
+nav = ('<a class="btn" href="../">🤖 MasRainMan AI</a>\n  <a class="btn" href="../raintotals/">🌧 Rain totals</a>\n'
+       '  <a class="btn" href="../models/">🗺 Model maps</a>\n'
+       '  <a class="btn" href="https://masrainman.blogspot.com/" target="_top">🏠 MasRainman blog</a>')
+html, n = re.subn(r'<a class="btn" href="index.html">[^<]*</a>\s*<a class="btn" href="rain.html">[^<]*</a>', nav, html)
+assert n == 1, "ens.html nav not found"
+fit = """<script>
+// Embedded on the blog: send the page height so the frame fits the page exactly
+if (window.parent !== window) {
+  const send = () => parent.postMessage({masrainmanHeight: document.documentElement.scrollHeight}, "*");
+  addEventListener("load", send); addEventListener("resize", send);
+  new ResizeObserver(send).observe(document.body);
+  document.addEventListener("load", send, true);
+}
+</script>
+</body>"""
+html = html.replace("</body>", fit, 1)
+open("public/ensrain/index.html", "w", encoding="utf-8").write(html)
+PY

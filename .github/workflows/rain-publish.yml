@@ -73,6 +73,27 @@ jobs:
             fi
           fi
 
+      # District ensemble rain charts: GitHub's 3-hourly timer often skips runs, so a new ECMWF ENS
+      # run (00Z out by ~09:30 UTC, 12Z by ~21:30 UTC) could wait 6 h or more. Start it once per new run.
+      - name: Start ensemble rain charts when a new ECMWF ENS run is out
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          R="$GITHUB_REPOSITORY"
+          ready=$(python3 -c "
+          from datetime import datetime, timedelta, timezone
+          now = datetime.now(timezone.utc)
+          t = [now.replace(hour=h, minute=40, second=0, microsecond=0) - timedelta(days=d)
+               for d in (0, 1) for h in (9, 21)]
+          print(max(x for x in t if x <= now).isoformat())")
+          last=$(gh run list -R "$R" -w ens-rain.yml -L 1 --json createdAt -q '.[0].createdAt')
+          busy=$(gh run list -R "$R" -w ens-rain.yml -L 5 --json status -q '[.[]|select(.status!="completed")]|length')
+          echo "Ensemble charts: newest ENS run out since $ready · last run ${last:-none} · running $busy"
+          if [ "$busy" = "0" ] && { [ -z "$last" ] || [ "$(date -d "$last" +%s)" -lt "$(date -d "$ready" +%s)" ]; }; then
+            gh workflow run ens-rain.yml -R "$R" --ref main && echo "started ensemble rain charts"
+          fi
+
       # Check whether a newer forecast is ready for the MasRainMan AI page.
       - name: Start MasRainMan AI page update when a new forecast is ready
         continue-on-error: true

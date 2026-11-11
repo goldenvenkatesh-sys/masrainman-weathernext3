@@ -87,7 +87,7 @@
   <div class="card">
     <b>MasRainMan AI</b> is our own AI weather model for South India, made by MasRainman.
     Pick a parameter above: <b>24-h rainfall</b> on the MasRainMan standard colour bar, <b>rain totals</b> for 24 h, 3 days, 7 days and the full 10 days, mean sea level
-    pressure, 2 m temperature, 10 m wind or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
+    pressure, 2 m temperature, 10 m wind, 850 hPa wind with streamlines or total column water vapour. Use <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">←</span>
     <span style="border:1px solid var(--line);border-radius:4px;padding:0 5px">→</span> to step through the days.
     <div style="margin-top:10px;color:var(--muted);font-size:11px">Input data © ECMWF, CC BY 4.0.</div>
   </div>
@@ -99,7 +99,7 @@ const IST = {timeZone: "Asia/Kolkata", day: "numeric", month: "short", hour: "nu
 const utc = s => new Date(s.length === 13 ? s + ":00:00Z" : s + ":00Z");
 const ist = s => utc(s).toLocaleString("en-IN", IST) + " IST";
 const PARAMS = [["rain", "🌧 Rainfall (24 h)"], ["total", "🌧 Rain total"], ["mslp", "MSLP"], ["t2m", "Temperature"],
-                ["wind", "Wind"], ["tcwv", "Water vapour"]];
+                ["wind", "10 m wind"], ["wind850", "850 hPa wind"], ["tcwv", "Water vapour"]];
 let daily = [], totals = [], maps = [], i = 0, timer = null;
 let param = PARAMS.some(p => p[0] === location.hash.slice(1)) ? location.hash.slice(1) : "rain";
 

@@ -189,7 +189,9 @@ def draw_ew_map(out_png, layer, model_label, credits, borders, init_time, start_
                     path_effects=halo, transform=ccrs.PlateCarree(), zorder=9)
 
     # Strongest signal in the region (index and the model's own 24-h rain there)
-    ok = np.isfinite(ew_r)
+    inside = ((lat_r[:, None] >= lat0) & (lat_r[:, None] <= lat1) &
+              (lon_r[None, :] >= lon0) & (lon_r[None, :] <= lon1))
+    ok = np.isfinite(ew_r) & inside
     peak = ""
     if ok.any():
         k = np.nanargmax(np.where(ok, ew_r, -9))

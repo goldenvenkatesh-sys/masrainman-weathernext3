@@ -705,12 +705,13 @@ def _read_uv_domain(path):
                 la1 = eccodes.codes_get(g, "latitudeOfLastGridPointInDegrees")
                 lo0 = eccodes.codes_get(g, "longitudeOfFirstGridPointInDegrees")
                 lo1 = eccodes.codes_get(g, "longitudeOfLastGridPointInDegrees")
-                if lo0 > 180 and lo1 < lo0:          # e.g. 180 … 179.75 written as 180 … 539.75
-                    lo0 -= 360.0
-                if lo1 < lo0:
+                if lo1 < lo0:                        # ECMWF: 180 … 179.75 (= -180 … 179.75)
                     lo1 += 360.0
                 vals = eccodes.codes_get_double_array(g, "values").reshape(nj, ni)
                 lat, lon = np.linspace(la0, la1, nj), np.linspace(lo0, lo1, ni)
+                lon = ((lon + 180.0) % 360.0) - 180.0         # any grid -> -180 … 180, then west to east
+                order = np.argsort(lon, kind="stable")
+                lon, vals = lon[order], vals[:, order]
                 if lat[0] > lat[-1]:
                     lat, vals = lat[::-1], vals[::-1]
                 j = (lat >= LAT_MIN - 1e-6) & (lat <= LAT_MAX + 1e-6)

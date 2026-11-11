@@ -54,6 +54,7 @@ import pandas as pd
 import matplotlib
 matplotlib.use("Agg")
 import masrainman_logo  # noqa: F401  (adds the MasRainman logo to every saved figure)
+import ew_index          # EW index (extreme 24-h rain) maps for South India and North India
 import matplotlib.pyplot as plt
 
 from scipy.ndimage import minimum_filter
@@ -1388,6 +1389,11 @@ def render_run(model, run_name, data):
     has_rain = "rain" in data
     if has_rain:
         pngs.update({"rain": [], "rain24": []})
+    has_ew = has_rain and ew_index.available()
+    if has_ew:
+        pngs.update({layer: [] for layer in ew_index.LAYERS})
+    elif has_rain:
+        print("  (EW index maps skipped: no rain climate in climate/ - see efi_climate.py)")
 
     for h in hours:
         print(f"[{cfg['label']}] Drawing T+{h:03d} ...")
@@ -1406,6 +1412,19 @@ def render_run(model, run_name, data):
                 fname = f"{layer}_T{h:03d}.png"
                 draw_rain_map(os.path.join(tmp_dir, fname), model, run_name, init_time, h,
                               data, period)
+                entry[layer] = fname
+                pngs[layer].append(os.path.join(tmp_dir, fname))
+
+        if has_ew:
+            try:
+                ew = ew_index.draw_ew_maps(tmp_dir, data, init_time, h,
+                                           f"{cfg.get('rain_label', cfg['label'])} "
+                                           f"{grid_label(data.get('grid_deg', 0.25)).split(' ')[0]}",
+                                           cfg["credits"], india_view_borders())
+            except Exception as exc:     # never lose the other maps because of the EW index
+                print(f"  (EW index T+{h} skipped: {type(exc).__name__}: {exc})")
+                ew = {}
+            for layer, fname in ew.items():
                 entry[layer] = fname
                 pngs[layer].append(os.path.join(tmp_dir, fname))
 

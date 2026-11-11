@@ -1,0 +1,40 @@
+name: EW index climate (one-time)
+
+# Builds the ERA5 1991-2020 daily 24-h rain percentile climate that the EW index maps
+# (ew_index.py: South India + North India) compare each forecast with, and stores it as
+# assets of the release "efi-climate" (about 100 MB, kept out of the git history).
+# Run once; run again only if efi_climate.py changes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      years:
+        description: "Climate years"
+        required: false
+        default: "1991-2020"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build climate (24-h rain)
+        run: |
+          pip install -q numpy numcodecs requests
+          python -u efi_climate.py --vars rain24 --years "${{ github.event.inputs.years || '1991-2020' }}"
+          ls -la climate | head; du -sh climate
+      - name: Upload to release efi-climate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view efi-climate >/dev/null 2>&1 || \
+            gh release create efi-climate --title "EW index climate (ERA5 ${{ github.event.inputs.years || '1991-2020' }})" \
+              --notes "Daily 24-h rain percentile climate for the EW index maps. Built by efi_climate.py."
+          gh release upload efi-climate climate/rain24_*.npz --clobber

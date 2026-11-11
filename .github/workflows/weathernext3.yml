@@ -133,6 +133,18 @@ jobs:
           path: ~/.local/share/cartopy
           key: cartopy-naturalearth-v1
 
+      # Rain climate for the EW index maps (South / North India), from the release "efi-climate"
+      # (built once by the "EW index climate (one-time)" workflow). Without it those maps are skipped.
+      - name: Get EW index climate
+        if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p climate
+          gh release download efi-climate -p 'rain24_*.npz' -D climate --skip-existing \
+            && echo "EW climate: $(ls climate | wc -l) files" || echo "(no EW climate yet - EW maps skipped)"
+
       - name: Render new runs
         id: render
         if: steps.check.outputs.new == 'true' || github.event.inputs.run != ''

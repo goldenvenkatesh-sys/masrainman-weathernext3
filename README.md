@@ -19,6 +19,15 @@ and persistent tracks, and publishes a viewer page with model and run selectors,
 frame buttons, slider, play/speed, and PNG / GIF / CSV downloads.
 The latest 4 runs of each model stay selectable. India's border is drawn as per the Government of India.
 
+**EW index (extreme 24-h rain) — South India and North India:** for every 24-h rain frame of every
+model, `ew_index.py` draws "Precipitation, 24h (EW index)" maps like the meteologix chart: how unusual the
+model's 24-h rain is for that place and time of year (0 = ordinary, 0.5 = clearly unusual, 0.8+ = extreme,
+1 = wetter than any day in 1991–2020). It is the ECMWF Extreme Forecast Index formula (`efi_core.py`) with the
+run as a single member, against an ERA5 1991–2020 daily climate (±15 days, 0.25°; the model rain is averaged to
+0.25° first). Not shown where the model gives under 1 mm. Layers `ew_south` / `ew_north` on the viewer page.
+The climate is built once by the workflow *EW index climate (one-time)* (`efi_climate.py`) and kept as
+assets of the release `efi-climate`; without it the EW maps are simply skipped.
+
 **Landfall maps:** `landfall.py` draws, for each Bay of Bengal / Arabian Sea system, every member's
 first landfall coloured by intensity (TD / TS / Cat 1–5), the numbered top-5 landfall areas with the
 share of members, and the ensemble mean track. They are on `landfall.html`.

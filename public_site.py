@@ -38,7 +38,7 @@ LAYERS = ("mslp", "barbs", "rain", "rain24")
 MODELS = ("wn3", "ifs", "aifs", "gfs", "aigfs")
 
 # (key, label, link from a sub-page)
-PAGES = [("models", "🗺 Model maps", "../models/"),
+PAGES = [("models", "🗺 Forecast models", "../models/"),
          ("landfall", "🌀 Landfall maps", "../landfall/"),
          ("cyclone", "📈 NEM &amp; cyclone outlook", "../cyclone/"),
          ("tracks", "🌐 LPA &amp; cyclone tracker", "../tracks/"),
@@ -129,7 +129,7 @@ def build_models(site, out):
     write_json(os.path.join(dest, "data", "models.json"), {"updated": updated, "models": pub_models})
 
     html = read("web", "index.html")
-    html = sub1(r"<title>.*?</title>", "<title>Model maps · MasRainman</title>", html, "title")
+    html = sub1(r"<title>.*?</title>", "<title>Forecast models · MasRainman</title>", html, "title")
     html = sub1(r'<nav class="mr-nav">.*?</nav>', lambda _: nav_buttons("models"), html, "nav", re.S)
     fb = ",\n".join(f"    {{id:'{m['id']}', label:{json.dumps(m['label'])}, manifest:'{m['manifest']}', base:'{m['base']}'}}"
                     for m in pub_models)
@@ -348,7 +348,7 @@ def main():
     build_tracks(site, out)
     write(os.path.join(out, "weathernext3", "index.html"),
           '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=../models/">'
-          '<title>WeatherNext 3 · MasRainman</title><a href="../models/">Model maps</a>\n')
+          '<title>WeatherNext 3 · MasRainman</title><a href="../models/">Forecast models</a>\n')
     bad = scan(out)
     try:   # after the scan: these totals are the one allowed rain product; never stop the other pages
         build_raintotals(site, out)

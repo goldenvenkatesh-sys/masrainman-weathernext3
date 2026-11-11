@@ -14,7 +14,7 @@ rm -rf public && cp -r "$site/ai" public
 # AI + verification pages: links back to the private dashboard are taken out, links to the public pages
 # and the blog are added instead.
 blog='<a class="btn" href="https://masrainman.blogspot.com/" target="_top">🏠 MasRainman blog</a>'
-links='<a class="btn" href="raintotals/">🌧 Rain totals</a>\n    <a class="btn" href="ensrain/">📊 District rain (ensemble)</a>\n    <a class="btn" href="models/">🗺 Model maps</a>\n    <a class="btn" href="landfall/">🌀 Landfall maps</a>\n    <a class="btn" href="cyclone/">📈 Cyclone outlook</a>\n    <a class="btn" href="tracks/">🌐 LPA \&amp; cyclone tracker</a>'
+links='<a class="btn" href="raintotals/">🌧 Rain totals</a>\n    <a class="btn" href="ensrain/">📊 District rain (ensemble)</a>\n    <a class="btn" href="models/">🗺 Forecast models</a>\n    <a class="btn" href="landfall/">🌀 Landfall maps</a>\n    <a class="btn" href="cyclone/">📈 Cyclone outlook</a>\n    <a class="btn" href="tracks/">🌐 LPA \&amp; cyclone tracker</a>'
 sed -i -e '\#href="\.\./mme/"#d' -e "s#<a class=\"btn\" href=\"\.\./\">[^<]*</a>#${links}\n    ${blog}#" public/index.html
 sed -i -e "s#<a class=\"btn\" href=\"\.\./\.\./\">[^<]*</a>#${blog}#" public/verify/index.html
 grep -c 'href="\.\./\.\./"\|href="\.\./mme/"' public/index.html public/verify/index.html || true
@@ -35,7 +35,7 @@ python3 - <<'PY'
 import re
 html = open("web/ens.html", encoding="utf-8").read()
 nav = ('<a class="btn" href="../">🤖 MasRainMan AI</a>\n  <a class="btn" href="../raintotals/">🌧 Rain totals</a>\n'
-       '  <a class="btn" href="../models/">🗺 Model maps</a>\n'
+       '  <a class="btn" href="../models/">🗺 Forecast models</a>\n'
        '  <a class="btn" href="https://masrainman.blogspot.com/" target="_top">🏠 MasRainman blog</a>')
 html, n = re.subn(r'<a class="btn" href="index.html">[^<]*</a>\s*<a class="btn" href="rain.html">[^<]*</a>', nav, html)
 assert n == 1, "ens.html nav not found"

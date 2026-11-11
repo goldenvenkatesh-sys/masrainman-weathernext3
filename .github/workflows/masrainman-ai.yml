@@ -104,7 +104,7 @@ jobs:
       - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
         if: steps.get.outputs.new == 'true'
         run: |
-          cp web/index.html web/rain.html web/landfall.html web/outlook.html site/ 2>/dev/null || true
+          cp web/index.html web/rain.html web/landfall.html web/outlook.html web/ew.html site/ 2>/dev/null || true
           bash get_rain_reports.sh site
 
       - name: Add ensemble rain charts (ens-data branch)

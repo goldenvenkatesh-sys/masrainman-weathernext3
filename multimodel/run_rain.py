@@ -28,6 +28,7 @@ from mme import config as C
 from mme.blend import load_group, blend, totals
 from mme.fetch import day_leads, FETCHERS, NotAvailable
 from mme.maps import rain_map
+from mme.ew import ew_maps
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 LOG = logging.getLogger("mme")
@@ -52,6 +53,7 @@ def main():
     ap.add_argument("--days", type=int, default=C.N_DAYS, help="draw only the first N daily maps")
     ap.add_argument("--totals", default=",".join(C.TOTAL_MODELS),
                     help="models for the single-model rain totals (24 h, 7 days, 15 days); '' = none")
+    ap.add_argument("--no-ew", action="store_true", help="skip the EW index maps")
     args = ap.parse_args()
 
     init = (datetime.strptime(args.cycle, "%Y%m%d%H").replace(tzinfo=timezone.utc)
@@ -65,8 +67,10 @@ def main():
     for k in range(C.N_DAYS):
         info["days"].append({"day": k + 1, "end_ist": day_label(init, k).strftime("%Y-%m-%dT%H:%M+05:30")})
 
+    fetched = {}                      # every model's daily rain, reused by the EW index maps
     for group in args.groups.split(","):
         members = load_group(group, init)
+        fetched.update(members)
         if len(members) < C.MIN_MODELS_PER_DAY:
             LOG.error("Group %s: only %d model(s) available, skipping", group, len(members))
             continue
@@ -120,6 +124,12 @@ def main():
     info["models"] = model_totals(init, out_dir, [m for m in args.totals.split(",") if m])
     with open(os.path.join(out_dir, "run.json"), "w") as f:
         json.dump(info, f, indent=1)
+
+    # EW index (extreme 24-h rain) for every model, South + North India, IMD days
+    if not args.no_ew:
+        info["ew"] = ew_maps(init, out_dir, fetched)
+        with open(os.path.join(out_dir, "run.json"), "w") as f:
+            json.dump(info, f, indent=1)
     LOG.info("Done: %s", out_dir)
 
 

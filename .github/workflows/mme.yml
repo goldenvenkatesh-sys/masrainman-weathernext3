@@ -44,7 +44,7 @@ env:
 jobs:
   mme:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
 
     steps:
       - name: Checkout code
@@ -107,11 +107,22 @@ jobs:
             multimodel/boundaries
           key: mme-boundaries-v1
 
+      # Rain climate for the EW index maps (release "efi-climate", built once by "EW index climate (one-time)")
+      - name: Get EW index climate
+        if: steps.due.outputs.run == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p climate
+          gh release download efi-climate -p 'rain24_*.npz' -D climate --skip-existing \
+            && echo "EW climate: $(ls climate | wc -l) files" || echo "(no EW climate yet - EW maps skipped)"
+
       - name: Rainfall (ensemble + deterministic blends)
         if: steps.due.outputs.run == 'true'
         id: rain
         continue-on-error: true
-        timeout-minutes: 70
+        timeout-minutes: 90
         working-directory: multimodel
         run: |
           mkdir -p "$SITE_DIR"
@@ -173,7 +184,7 @@ jobs:
       - name: Add rainfall reports (TN / Kerala / Karnataka / AP)
         if: steps.page.outcome == 'success'
         run: |
-          cp web/index.html web/rain.html web/landfall.html web/outlook.html site/ 2>/dev/null || true
+          cp web/index.html web/rain.html web/landfall.html web/outlook.html web/ew.html site/ 2>/dev/null || true
           bash get_rain_reports.sh site
 
       - name: Add ensemble rain charts (ens-data branch)

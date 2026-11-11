@@ -34,6 +34,7 @@ from matplotlib.colors import BoundaryNorm, ListedColormap
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 
+import masrainman_logo  # noqa: F401  (MasRainman logo on every chart, also from the multi-model job)
 import efi_core
 import efi_climate
 
@@ -121,13 +122,19 @@ def to_climate_grid(rain, rlat, rlon, clat, clon):
 
 
 def ew_field(rain24, rlat, rlon, valid_mid):
-    """EW index on the climate grid for one 24-h rain field. Returns (ew, rain_on_grid, lat, lon) or None."""
+    """EW index on the climate grid. rain24 is one 24-h rain field (ny, nx), or ensemble members
+    (N, ny, nx) for a true ensemble EFI. Returns (ew, rain_on_grid, lat, lon) or None;
+    rain_on_grid is the (ensemble-mean) rain, used for the 'shown where >= MIN_RAIN_MM' mask."""
     clim = climate_for(valid_mid)
     if clim is None:
         return None
     q, clat, clon = clim
-    r = to_climate_grid(rain24, rlat, rlon, clat, clon)
-    ew = efi_core.efi_from_members(q, np.nan_to_num(r)[None])
+    fields = np.asarray(rain24)
+    if fields.ndim == 2:
+        fields = fields[None]
+    members = np.stack([to_climate_grid(f, rlat, rlon, clat, clon) for f in fields])
+    r = members.mean(axis=0)
+    ew = efi_core.efi_from_members(q, np.nan_to_num(members))
     ew = np.where(np.isfinite(r) & (r >= MIN_RAIN_MM), ew, np.nan)
     return ew, r, clat, clon
 

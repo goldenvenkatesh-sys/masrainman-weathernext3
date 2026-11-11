@@ -154,7 +154,7 @@ jobs:
             mv site/rain "$RUNNER_TEMP/rain" && rm -rf site && mkdir site
             git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
             mv "$RUNNER_TEMP/rain" site/rain
-            cp web/index.html web/rain.html web/landfall.html web/outlook.html site/
+            cp web/index.html web/rain.html web/landfall.html web/outlook.html web/ew.html site/
           fi
 
       - name: Add ensemble rain charts (ens-data branch)

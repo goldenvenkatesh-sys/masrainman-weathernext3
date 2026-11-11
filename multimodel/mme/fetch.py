@@ -133,8 +133,32 @@ def _ecmwf_retrieve(model, init, steps, kind, members=None):
     return path
 
 
+# Member rain kept for the EW index (true ensemble EFI): {(model, init): {lead: (N, ny, nx)}}.
+# Filled by fetch_ecmwf (ECMWF ENS, AIFS ENS) and fetch_geps; off with MME_KEEP_MEMBERS=0.
+MEMBER_ACC = {}
+KEEP_MEMBERS = os.environ.get("MME_KEEP_MEMBERS", "1") != "0"
+
+
+def _keep_members(model, init, leads, steps, per_step):
+    """per_step {step: {number: field}} -> MEMBER_ACC[(model, init)] = {lead: (N, ny, nx)}."""
+    if not KEEP_MEMBERS or not per_step:
+        return
+    common = set.intersection(*(set(d) for s, d in per_step.items() if s > 0)) if \
+        any(s > 0 for s in per_step) else set()
+    if len(common) < 5:
+        return
+    nums = sorted(common)
+    stacked = {s: np.stack([d[n] for n in nums]).astype(np.float32) for s, d in per_step.items() if s > 0}
+    stacked[0] = np.zeros_like(next(iter(stacked.values())))
+    got = _interp(leads, steps, lambda need: stacked)
+    old = MEMBER_ACC.get((model, init), {})
+    old.update(got)
+    MEMBER_ACC[(model, init)] = old
+
+
 def fetch_ecmwf(model, init, leads, last=None):
     steps = _ecmwf_steps(model, init, last)
+    per_step = {}
 
     def acc_at(need):
         need = [s for s in need if s > 0]
@@ -155,11 +179,15 @@ def fetch_ecmwf(model, init, leads, last=None):
                     v = v * 1000.0  # IFS tp is in metres
                 sums[m["end"]] = sums.get(m["end"], 0) + v
                 counts[m["end"]] = counts.get(m["end"], 0) + 1
+                if model in ("ecmwf_ens", "aifs_ens") and KEEP_MEMBERS:
+                    per_step.setdefault(m["end"], {})[(kind, m["number"])] = v
         out = {s: sums[s] / counts[s] for s in sums}
         out[0] = np.zeros_like(next(iter(out.values())))
         return out
 
-    return _interp(leads, steps, acc_at)
+    res = _interp(leads, steps, acc_at)
+    _keep_members(model, init, leads, steps, per_step)
+    return res
 
 
 # ------------------------------------------------------------
@@ -309,6 +337,8 @@ def fetch_geps(init, leads):
     ymd, hh, ymdh = init.strftime("%Y%m%d"), init.strftime("%H"), init.strftime("%Y%m%d%H")
     steps = list(range(0, 193, 3)) + list(range(198, 385, 6))
 
+    per_step = {}
+
     def acc_at(need):
         out = {}
         for s in need:
@@ -317,12 +347,17 @@ def fetch_geps(init, leads):
             url = (f"https://dd.weather.gc.ca/{ymd}/WXO-DD/ensemble/geps/grib2/raw/{hh}/{s:03d}/"
                    f"CMC_geps-raw_APCP_SFC_0_latlon0p5x0p5_{ymdh}_P{s:03d}_allmbrs.grib2")
             path = _download(url, _cache(init, "geps", f"P{s:03d}.grib2"))
-            fields = [regrid(m) for m in messages(path)]
+            msgs = list(messages(path))
+            fields = [regrid(m) for m in msgs]
             out[s] = np.mean(fields, axis=0)
+            if KEEP_MEMBERS:
+                per_step[s] = {(m["dataType"], m["number"]): f for m, f in zip(msgs, fields)}
         out[0] = np.zeros_like(next(iter(out.values())))
         return out
 
-    return _interp(leads, steps, acc_at)
+    res = _interp(leads, steps, acc_at)
+    _keep_members("geps", init, leads, steps, per_step)
+    return res
 
 
 # ------------------------------------------------------------

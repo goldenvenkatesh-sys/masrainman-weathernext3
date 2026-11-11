@@ -98,7 +98,7 @@ jobs:
             git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
           fi
           bash get_rain_reports.sh site
-          cp web/index.html web/rain.html web/ens.html site/
+          cp web/index.html web/rain.html web/ens.html web/ew.html site/
           rm -rf site/ens && mv "$RUNNER_TEMP/ens" site/ens
 
       - name: Publish to Cloudflare Pages (login-protected)

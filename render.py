@@ -16,7 +16,8 @@
 #   5. Runs V3 surface-system detection + persistent tracking
 #      (same logic for all three models)
 #   6. Draws T+24, T+48 … maps, with and without 10-m wind barbs
-#      (same design as the Colab map)
+#      (same design as the Colab map), plus 850 hPa wind + streamline maps
+#      for ECMWF IFS / AIFS, GFS and AIGFS (WeatherNext 3 has no pressure levels)
 #   7. Builds an animated GIF for each layer
 #   8. Writes CSVs + systems JSON + a manifest per model
 #   9. Keeps only the latest KEEP_RUNS runs per model
@@ -679,6 +680,203 @@ def load_ecmwf_run(key, run_name, source):
 
 
 # ============================================================
+# 850 hPa WIND (ECMWF IFS / AIFS, GFS, AIGFS) — optional, never stops the other maps
+# ============================================================
+W850_LEVEL = 850
+MS_TO_KT = 1.943844
+
+
+def _read_uv_domain(path):
+    """u/v of one pressure level from a GRIB file (any centre), cut to the map domain,
+    latitudes ascending: {"u", "v", "lat", "lon"}."""
+    import eccodes
+    out = {}
+    with open(path, "rb") as fh:
+        while True:
+            g = eccodes.codes_grib_new_from_file(fh)
+            if g is None:
+                break
+            try:
+                key = eccodes.codes_get(g, "shortName")
+                if key not in ("u", "v") or key in out:
+                    continue
+                ni, nj = eccodes.codes_get(g, "Ni"), eccodes.codes_get(g, "Nj")
+                la0 = eccodes.codes_get(g, "latitudeOfFirstGridPointInDegrees")
+                la1 = eccodes.codes_get(g, "latitudeOfLastGridPointInDegrees")
+                lo0 = eccodes.codes_get(g, "longitudeOfFirstGridPointInDegrees")
+                lo1 = eccodes.codes_get(g, "longitudeOfLastGridPointInDegrees")
+                if lo0 > 180 and lo1 < lo0:          # e.g. 180 … 179.75 written as 180 … 539.75
+                    lo0 -= 360.0
+                if lo1 < lo0:
+                    lo1 += 360.0
+                vals = eccodes.codes_get_double_array(g, "values").reshape(nj, ni)
+                lat, lon = np.linspace(la0, la1, nj), np.linspace(lo0, lo1, ni)
+                if lat[0] > lat[-1]:
+                    lat, vals = lat[::-1], vals[::-1]
+                j = (lat >= LAT_MIN - 1e-6) & (lat <= LAT_MAX + 1e-6)
+                i = (lon >= LON_MIN - 1e-6) & (lon <= LON_MAX + 1e-6)
+                out[key] = vals[np.ix_(j, i)].astype(np.float32)
+                out["lat"], out["lon"] = lat[j], lon[i]
+            finally:
+                eccodes.codes_release(g)
+    if "u" not in out or "v" not in out:
+        raise RuntimeError(f"850 hPa u/v missing in {os.path.basename(path)}")
+    return out
+
+
+def _get_ranges(http, url, spans, out_path, tries=4, wait_s=10):
+    """Write the byte ranges [(lo, hi or None), ...] of url to out_path, with retries."""
+    import time
+    with open(out_path, "wb") as f:
+        for lo, hi in spans:
+            rng = f"bytes={lo}-" + ("" if hi is None else str(hi))
+            for attempt in range(tries):
+                try:
+                    rr = http.get(url, timeout=HTTP_TIMEOUT, headers={"Range": rng})
+                    rr.raise_for_status()
+                    if not rr.content.startswith(b"GRIB"):
+                        raise RuntimeError(f"not GRIB data ({rr.content[:60]!r})")
+                    break
+                except Exception:
+                    if attempt == tries - 1:
+                        raise
+                    time.sleep(wait_s * (attempt + 1))
+            f.write(rr.content)
+    return out_path
+
+
+def _ecmwf_850_parts(http, base, stamp, step, kind):
+    """Byte ranges of u/v at 850 hPa in one ECMWF step file, or None if the file lacks them."""
+    try:
+        r = http.get(f"{base}/{stamp}-{step}h-{kind}.index", timeout=HTTP_TIMEOUT)
+    except Exception:
+        return None
+    if r.status_code != 200:
+        return None
+    parts = []
+    for line in r.text.splitlines():
+        if not line.strip():
+            continue
+        rec = json.loads(line)
+        if (rec.get("levtype") == "pl" and str(rec.get("levelist")) == str(W850_LEVEL)
+                and rec.get("param") in ("u", "v")):
+            parts.append((int(rec["_offset"]), int(rec["_offset"]) + int(rec["_length"]) - 1))
+    return sorted(parts) if len(parts) == 2 else None
+
+
+def load_ecmwf_850(key, run_name, source, hours):
+    """850 hPa u/v at the given forecast hours: {"by_hour": {h: (u, v)}, "lat", "lon", "grid_deg"}.
+    Uses the run's own grid when its files have pressure levels, else the 0.25° files."""
+    run_time = decode_init_time(run_name)
+    http = _http()
+    tries = [(source["resol"], k) for k in ("oper-fc-pl", source["kind"], "oper-fc")] + [("0p25", "oper-fc")]
+    seen, pick = set(), None
+    for resol, kind in tries:
+        if (resol, kind) in seen:
+            continue
+        seen.add((resol, kind))
+        base, stamp = ecmwf_run_url(key, run_time, resol)
+        if _ecmwf_850_parts(http, base, stamp, hours[0], kind):
+            pick = (resol, kind, base, stamp)
+            break
+    if not pick:
+        print("  (no 850 hPa wind in this run's open-data files - 850 hPa maps skipped)")
+        return None
+    resol, kind, base, stamp = pick
+    print(f"  850 hPa wind from {resol}/{kind}: {len(hours)} steps")
+    tmp = tempfile.mkdtemp(prefix=f"{key}850_{run_name}_")
+    try:
+        def one(h):
+            parts = _ecmwf_850_parts(http, base, stamp, h, kind)
+            if not parts:
+                return h, None
+            p = _get_ranges(http, f"{base}/{stamp}-{h}h-{kind}.grib2", parts, os.path.join(tmp, f"w{h:03d}.grib2"))
+            try:
+                return h, _read_uv_domain(p)
+            finally:
+                os.remove(p)
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            got = {h: r for h, r in pool.map(one, hours) if r is not None}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    if not got:
+        return None
+    first = got[min(got)]
+    return {"by_hour": {h: (r["u"], r["v"]) for h, r in got.items()},
+            "lat": first["lat"], "lon": first["lon"], "grid_deg": ECMWF_RESOL_DEG.get(resol, 0.25)}
+
+
+def noaa_850_url(key, run_time, step):
+    """GFS keeps pressure levels in the same pgrb2 file; AIGFS has a separate 'pres' file."""
+    url = noaa_file_url(key, run_time, step)
+    return url.replace(".sfc.", ".pres.") if MODELS[key]["noaa"] == "aigfs" else url
+
+
+def load_noaa_850(key, run_name, hours):
+    run_time = decode_init_time(run_name)
+    http = _http()
+    tmp = tempfile.mkdtemp(prefix=f"{key}850_{run_name}_")
+    level = f"{W850_LEVEL} mb"
+    try:
+        def one(h):
+            import time
+            url = noaa_850_url(key, run_time, h)
+            for attempt in range(4):
+                try:
+                    r = http.get(url + ".idx", timeout=HTTP_TIMEOUT)
+                    r.raise_for_status()
+                    break
+                except Exception:
+                    if attempt == 3:
+                        return h, None
+                    time.sleep(10 * (attempt + 1))
+            lines = [l.split(":") for l in r.text.strip().splitlines()]
+            spans = []
+            for k, l in enumerate(lines):
+                if len(l) >= 5 and l[3] in ("UGRD", "VGRD") and l[4] == level:
+                    end = int(lines[k + 1][1]) - 1 if k + 1 < len(lines) else None
+                    spans.append((int(l[1]), end))
+            if len(spans) != 2:
+                return h, None
+            if "nomads" in url:   # one request for both messages (NOMADS limits requests per minute)
+                spans = [(min(a for a, _ in spans), None if any(b is None for _, b in spans) else max(b for _, b in spans))]
+            p = _get_ranges(http, url, spans, os.path.join(tmp, f"w{h:03d}.grib2"), tries=5, wait_s=30)
+            try:
+                return h, _read_uv_domain(p)
+            finally:
+                os.remove(p)
+        workers = 6 if MODELS[key]["noaa"] == "gfs" else 2
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            got = {h: r for h, r in pool.map(one, hours) if r is not None}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    if not got:
+        print("  (no 850 hPa wind found - 850 hPa maps skipped)")
+        return None
+    first = got[min(got)]
+    print(f"  850 hPa wind: {len(got)} of {len(hours)} steps")
+    return {"by_hour": {h: (r["u"], r["v"]) for h, r in got.items()},
+            "lat": first["lat"], "lon": first["lon"], "grid_deg": 0.25}
+
+
+def frame_hours(data):
+    available = set(data["hours"])
+    last_hour = min(FRAME_END_H, max(data["hours"]))
+    return [h for h in range(FRAME_STEP_H, last_hour + 1, FRAME_STEP_H) if h in available]
+
+
+def add_850(data, loader, *args):
+    """Attach 850 hPa wind to data; any failure only skips the 850 hPa maps."""
+    try:
+        w = loader(*args, frame_hours(data))
+        if w:
+            data["w850"] = w
+    except Exception as exc:
+        print(f"  (850 hPa wind skipped: {type(exc).__name__}: {exc})")
+    return data
+
+
+# ============================================================
 # DATA LOADING — NOAA GFS + AIGFS (MSLP, 10-m wind, rain)
 # ============================================================
 
@@ -890,7 +1088,8 @@ def process_noaa(model, force_run=None):
     for run_name in targets:
         if rendered >= MAX_NEW_RUNS_PER_JOB:
             break
-        render_run(model, run_name, load_noaa_run(model, run_name))
+        data = add_850(load_noaa_run(model, run_name), load_noaa_850, model, run_name)
+        render_run(model, run_name, data)
         rendered += 1
     return rendered
 
@@ -1347,6 +1546,75 @@ def draw_rain_map(out_png, model, run_name, init_time, plot_hour, data, period_h
     return valid_time
 
 
+# 850 hPa wind speed bands (kt) and colours: calm greys/blues -> greens -> yellow/orange -> red -> purple
+W850_LEVELS = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80]
+W850_COLOURS = ["#f4f6fa", "#d6e6f5", "#a9cdee", "#72b4e3", "#3f97cf", "#43b07a", "#8fcf4c",
+                "#e3e04b", "#f6b13b", "#ef7a2d", "#dd3c2a", "#b0195a", "#7a1f87"]
+
+
+def draw_w850_map(out_png, model, run_name, init_time, plot_hour, data):
+    """850 hPa wind speed (kt) shaded, with streamlines; same header style as the MSLP maps."""
+    from matplotlib.colors import BoundaryNorm, ListedColormap
+    cfg = MODELS[model]
+    w = data["w850"]
+    u, v = w["by_hour"][plot_hour]
+    lat, lon = np.asarray(w["lat"], float), np.asarray(w["lon"], float)
+    spd = np.hypot(u, v) * MS_TO_KT
+    valid_time = init_time + timedelta(hours=plot_hour)
+
+    cmap = ListedColormap(W850_COLOURS)
+    cmap.set_over("#4a0f5a")
+    norm = BoundaryNorm(W850_LEVELS, cmap.N)
+
+    fig = plt.figure(figsize=(16, 10.5), facecolor="white")
+    ax = fig.add_axes([0.045, 0.095, 0.845, 0.78], projection=ccrs.PlateCarree())
+    ax.set_extent([LON_MIN, LON_MAX, LAT_MIN, LAT_MAX], crs=ccrs.PlateCarree())
+    cf = ax.contourf(lon, lat, spd, levels=W850_LEVELS, cmap=cmap, norm=norm, extend="max",
+                     transform=ccrs.PlateCarree(), zorder=1)
+    # streamlines on a ~0.5° grid: smooth lines without the clutter of the full 0.1°/0.25° grid
+    k = max(1, int(round(0.5 / float(w.get("grid_deg") or 0.25))))
+    ax.streamplot(lon[::k], lat[::k], u[::k, ::k], v[::k, ::k], density=1.9, color="#1a1a1a",
+                  linewidth=0.7, arrowsize=0.9, arrowstyle="->", transform=ccrs.PlateCarree(), zorder=4)
+    ax.coastlines(resolution="50m", linewidth=0.8, color="black", zorder=5)
+    ax.add_feature(india_view_borders(), facecolor="none", edgecolor="black", linewidth=0.45, zorder=6)
+    gl = ax.gridlines(draw_labels=True, linewidth=0.35, color="gray", alpha=0.35, linestyle="--", zorder=7)
+    gl.top_labels = False
+    gl.right_labels = False
+    gl.xlabel_style = {"size": 9}
+    gl.ylabel_style = {"size": 9}
+
+    pos = ax.get_position()
+    map_mid = pos.x0 + pos.width / 2
+    header_y = 0.942
+    fig.text(map_mid, header_y + 0.016, f"{cfg['label']} — 850 hPa Wind & Streamlines",
+             ha="center", va="center", fontsize=19, fontweight="bold", color="#111111")
+    fig.text(map_mid, header_y - 0.022,
+             f"Valid: {valid_time.strftime('%a %d %b %Y, %H:%M UTC')}   |   T+{plot_hour} h   |   Run {run_name}",
+             ha="center", va="center", fontsize=12.5, color="#333333")
+    fig.add_artist(plt.Line2D([pos.x0, 0.985], [0.884, 0.884], transform=fig.transFigure,
+                              color="#1d63ba", linewidth=1.6))
+    fig.masrainman_header = (header_y, 0.985)
+
+    info = (f"{cfg['info_head'].format(grid=grid_label(w.get('grid_deg', 0.25)))}\n"
+            f"Run: {run_name}\n"
+            f"Initialisation: {init_time.strftime('%Y-%m-%d %H:%M UTC')}\n"
+            f"Forecast: +{plot_hour} h\n"
+            f"Strongest 850 hPa wind: {np.nanmax(spd):.0f} kt")
+    ax.text(0.012, 0.985, info, transform=ax.transAxes, va="top", ha="left", fontsize=9,
+            bbox=dict(boxstyle="round,pad=0.45", facecolor="white", edgecolor="gray", alpha=0.85), zorder=30)
+
+    cax = fig.add_axes([0.915, 0.18, 0.018, 0.58])
+    cbar = fig.colorbar(cf, cax=cax, orientation="vertical", ticks=W850_LEVELS)
+    cbar.set_label("850 hPa wind speed (knots)", fontsize=11)
+    cbar.ax.tick_params(labelsize=9)
+
+    for y, size, line in zip((0.045, 0.027, 0.010), (7.5, 7.0, 6.8), cfg["credits"]):
+        fig.text(0.5, y, line, ha="center", va="bottom", fontsize=size, color="dimgray")
+    plt.savefig(out_png, dpi=180, bbox_inches="tight", pad_inches=0.10, facecolor="white")
+    plt.close(fig)
+    return valid_time
+
+
 def make_gif(png_paths, out_gif):
     frames = []
     for p in png_paths:
@@ -1389,6 +1657,9 @@ def render_run(model, run_name, data):
     has_rain = "rain" in data
     if has_rain:
         pngs.update({"rain": [], "rain24": []})
+    has_850 = bool(data.get("w850"))
+    if has_850:
+        pngs["w850"] = []
     has_ew = has_rain and ew_index.available()
     if has_ew:
         pngs.update({layer: [] for layer in ew_index.LAYERS})
@@ -1414,6 +1685,15 @@ def render_run(model, run_name, data):
                               data, period)
                 entry[layer] = fname
                 pngs[layer].append(os.path.join(tmp_dir, fname))
+
+        if has_850 and h in data["w850"]["by_hour"]:
+            try:
+                fname = f"w850_T{h:03d}.png"
+                draw_w850_map(os.path.join(tmp_dir, fname), model, run_name, init_time, h, data)
+                entry["w850"] = fname
+                pngs["w850"].append(os.path.join(tmp_dir, fname))
+            except Exception as exc:     # never lose the other maps because of 850 hPa
+                print(f"  (850 hPa map T+{h} skipped: {type(exc).__name__}: {exc})")
 
         if has_ew:
             try:
@@ -1613,6 +1893,7 @@ def process_ecmwf(model, force_run=None):
         if rendered >= MAX_NEW_RUNS_PER_JOB:
             break
         data = load_ecmwf_run(model, run_name, src)
+        add_850(data, load_ecmwf_850, model, run_name, src)
         render_run(model, run_name, data)
         rendered += 1
         del data
@@ -1640,7 +1921,12 @@ def main():
             if m == "wn3":
                 render_run(m, today + "_00hr_01_preds", make_demo_data())
             else:
-                render_run(m, today + "_00", make_demo_data(360, ECMWF_STEP_H, 0.25))
+                d = make_demo_data(360, ECMWF_STEP_H, 0.25)
+                d["w850"] = {"by_hour": {h: (d["u10"][d["hours"].index(h)] * 1.8 - 6,
+                                             d["v10"][d["hours"].index(h)] * 1.8)
+                                         for h in frame_hours(d)},
+                             "lat": d["lat"], "lon": d["lon"], "grid_deg": 0.25}
+                render_run(m, today + "_00", d)
             write_manifest(m)
         write_models_index()
         return

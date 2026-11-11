@@ -187,6 +187,7 @@
         <span class="glabel">Pressure &amp; wind</span>
         <button class="chip on" data-layer="mslp">MSLP + low centres</button>
         <button class="chip" data-layer="barbs">MSLP + 10-m wind barbs</button>
+        <button class="chip" data-layer="w850" title="Wind speed at 850 hPa (about 1.5 km up) with streamlines">850 hPa wind</button>
       </div>
       <div class="cgroup">
         <span class="glabel">Rainfall</span>
@@ -320,6 +321,7 @@
   const LAYERS = {
     mslp:     {name:'MSLP + low centres', about:'Mean sea-level pressure (hPa) with the V3 low centres the tracker found. The red dot on a frame button means a persistent low is present at that hour; details are in the table below.'},
     barbs:    {name:'MSLP + 10-m wind barbs', about:'Mean sea-level pressure with 10-m wind barbs (knots) and the V3 low centres — shows where the flow converges around each low.'},
+    w850:     {name:'850 hPa wind', about:'Wind at 850 hPa (about 1.5 km above sea level) in knots, with streamlines showing the flow. Use it to follow the easterlies and westerlies, troughs and circulations that steer rain bands and lows. Not available for WeatherNext 3, whose open statistics have no pressure-level winds.'},
     rain24:   {name:'Rain (24 h)', about:'Rain in the 24 hours before the map time, MASRainman colour scale (mm).'},
     rain:     {name:'Rain (total)', about:'Total rain since the start of the run up to the map time (mm).'},
     ew_south: {name:'EW index · South India', about:'How extreme the model’s 24-h rain is for the place and season, against ERA5 1991–2020: 0 = ordinary, 0.5 = clearly unusual, 0.8+ = extreme, 1 = wetter than any day on record. Blank where the model gives under 1 mm.'},

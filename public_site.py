@@ -34,7 +34,7 @@ KEEP_RUNS = int(os.environ.get("PUBLIC_RUNS", "4"))        # model-map runs per 
 BLOG = "https://masrainman.blogspot.com/"
 # public model-map layers: the owner chose (Nov 2026) to show the model rain charts too
 # (Rain total since the start of the run, Rain 24 h). Observed rain stays private.
-LAYERS = ("mslp", "barbs", "rain", "rain24")
+LAYERS = ("mslp", "barbs", "w850", "rain", "rain24")
 MODELS = ("wn3", "ifs", "aifs", "gfs", "aigfs")
 
 # (key, label, link from a sub-page)

@@ -61,6 +61,16 @@ Every probability is a share of ensemble members. The history and verification a
 `site/outlook/state/` (kept on the `site-data` branch). To fill the verification archive straight away,
 run the workflow with *outlook_backfill* = 30. Test without downloads: `python nem_outlook.py --demo`.
 
+**Tropical tracker (interactive, every 2 hours):** `tracker/tropical_tracker.py` (from multitrack.py V86) shows
+ECMWF IFS HRES, AIFS Single and IFS ENS cyclone tracks (ECMWF track BUFR) and the NOAA AI-GFS MSLP low centre, coloured
+by IMD class, with the NOAA OISST sea-surface temperature as an optional layer. It keeps the newest 4 runs of each model.
+The workflow *Tropical tracker* runs every 2 hours (and the hourly rain-reports job starts it if GitHub skipped a slot);
+decoded tracks are cached on the `tracker-data` branch, so only new runs are downloaded. When something is new it
+publishes `/tropical/` on both the private site and the public blog pages. An open page checks every 5 minutes and
+redraws by itself when a new run arrives. On the PC: `python tracker/tropical_tracker.py --standalone --open`
+(one self-contained HTML; add `--every 2` to keep it checking every 2 hours; set `MASRAINMAN_ALL_INDIA` to use the
+Survey of India STATE_BOUNDARY.shp, otherwise the GoI-compliant DataMeet boundaries are downloaded once).
+
 ## Files
 
 | File | What it does |

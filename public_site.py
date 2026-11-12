@@ -13,6 +13,7 @@ Pages written (each one a folder with its own index.html):
   cyclone/   NEM & cyclone outlook: genesis, cyclone tracks, 30-day NEM rain forecast, active/break, consistency, PDI,
              environment, cyclone verification (the observed station-rainfall verification stays private)
   tracks/    multi-model LPA tracker + cyclone tracker
+  tropical/  interactive tropical tracker (copied by build_public.sh from site/tropical/, made by tracker/)
   weathernext3/  small redirect to models/ (the first public address)
   raintotals/  single-model rain totals (24 h, 7 days, 15 days: WeatherNext 3, ECMWF IFS, AIFS, GFS, AIGFS).
              The owner chose to publish these totals (Nov 2026); they are the only rain maps here, copied
@@ -42,6 +43,7 @@ PAGES = [("models", "🗺 Forecast models", "../models/"),
          ("landfall", "🌀 Landfall maps", "../landfall/"),
          ("cyclone", "📈 NEM &amp; cyclone outlook", "../cyclone/"),
          ("tracks", "🌐 LPA &amp; cyclone tracker", "../tracks/"),
+         ("tropical", "🌀 Tropical tracker", "../tropical/"),
          ("raintotals", "🌧 Rain totals", "../raintotals/"),
          ("ensrain", "📊 District rain", "../ensrain/"),
          ("ai", "🤖 MasRainMan AI (10-day)", "../")]

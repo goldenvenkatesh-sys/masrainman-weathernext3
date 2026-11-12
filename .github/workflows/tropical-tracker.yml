@@ -1,0 +1,111 @@
+name: Tropical tracker (IFS HRES + AIFS + IFS ENS + AI-GFS + SST)
+
+# The interactive India tropical tracker (tracker/tropical_tracker.py, from multitrack.py V86).
+# Every 2 hours it looks for the newest 4 runs of each model. Tracks already decoded are kept on the
+# tracker-data branch and reused, so a check with nothing new takes ~2 minutes and publishes nothing.
+# When something is new it publishes the private site (masrainman-wn3, /tropical/) and the public
+# blog pages (masrainman-ai, /tropical/). The open page checks every 5 minutes and redraws by itself.
+# GitHub's timer can start late or skip a slot: the hourly "Rain reports on the site" job starts this
+# one whenever it hasn't run for more than 2 hours, so nobody has to watch it.
+on:
+  schedule:
+    - cron: "13 */2 * * *"          # 05:43, 07:43, 09:43 ... IST (off the hour: GitHub skips :00 jobs)
+  push:
+    branches: [main]
+    paths: ["tracker/**", ".github/workflows/tropical-tracker.yml", "get_tracker.sh"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish even if no new run was found"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tropical-tracker
+  cancel-in-progress: false
+
+env:
+  CF_PROJECT: masrainman-wn3
+  TRACKER_KEEP_RUNS: "4"
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the last tracker (tracker-data branch)
+        run: |
+          mkdir -p site_tracker
+          if git fetch -q --depth 1 origin tracker-data 2>/dev/null; then
+            git --work-tree=site_tracker checkout -q FETCH_HEAD -- . && git reset -q
+            echo "cached runs: $(ls site_tracker/state 2>/dev/null | wc -l)"
+          else
+            echo "(first run: no tracker-data branch yet)"
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tracker/requirements.txt
+
+      - name: Install packages
+        run: pip install -q -r tracker/requirements.txt
+
+      - name: Cache India boundaries (DataMeet, GoI)
+        uses: actions/cache@v4
+        with:
+          path: tracker/boundaries
+          key: tracker-boundaries-v1
+
+      - name: Find the latest runs and build the tracker
+        id: run
+        run: |
+          python -u tracker/tropical_tracker.py --out site_tracker
+          changed=$(cat site_tracker/changed.txt)
+          if [ "${{ github.event_name }}" = "push" ] || [ "${{ github.event.inputs.publish }}" = "true" ]; then changed=true; fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "New runs / SST: $changed"
+
+      - name: Save the tracker (tracker-data branch)
+        if: steps.run.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site_tracker
+          publish_branch: tracker-data
+          force_orphan: true          # small branch, no history
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "Tropical tracker update"
+
+      - name: Build the whole site (maps + rain reports + charts + tracker)
+        if: steps.run.outputs.changed == 'true'
+        run: |
+          mkdir -p site
+          if git fetch -q --depth 1 origin site-data 2>/dev/null; then
+            git --work-tree=site checkout -q FETCH_HEAD -- . && git reset -q
+          fi
+          bash get_rain_reports.sh site
+          bash get_ens.sh site            # also puts the tracker into site/tropical/
+
+      - name: Publish to Cloudflare Pages (login-protected)
+        if: steps.run.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@3 pages deploy site --project-name="$CF_PROJECT" --branch=main --commit-dirty=true
+
+      - name: Publish the public pages (masrainman-ai, no login, on the blog)
+        if: steps.run.outputs.changed == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          bash build_public.sh site
+          npx --yes wrangler@3 pages deploy public --project-name=masrainman-ai --branch=main --commit-dirty=true

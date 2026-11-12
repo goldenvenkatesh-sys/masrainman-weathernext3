@@ -11,3 +11,6 @@ if git fetch -q --depth 1 origin ens-data 2>/dev/null; then
 else
   echo "No ensemble charts yet (no ens-data branch)."
 fi
+
+# Tropical tracker page (tracker-data branch)
+bash "$(dirname "$0")/get_tracker.sh" "$SITE" || true

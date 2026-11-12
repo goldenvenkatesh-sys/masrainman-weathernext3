@@ -1,0 +1,11 @@
+numpy
+pandas
+scipy
+xarray
+netCDF4
+shapely
+pyshp
+pillow
+requests
+eccodes>=2.39
+ecmwf-opendata

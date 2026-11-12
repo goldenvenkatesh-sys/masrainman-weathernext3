@@ -1,3 +1,5 @@
 __pycache__/
 site/
 climate/
+tracker/boundaries/
+tracker/__pycache__/

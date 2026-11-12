@@ -428,10 +428,16 @@ def aigfs_url_exists(url):
         return False
 
 
+def aigfs_run_complete(run_dt):
+    return aigfs_url_exists(aigfs_file_url(run_dt, AIGFS_MAX_HOURS) + ".idx")
+
+
 def find_latest_aigfs_runs(max_runs=KEEP_RUNS):
+    """Newest complete runs (all hours out to T+384 published)."""
     found = []
     for run_dt in cycle_candidates():
-        if cache_load("aigfs", run_key(run_dt)) is not None or aigfs_url_exists(aigfs_file_url(run_dt, 6)):
+        c = cache_load("aigfs", run_key(run_dt))
+        if (c is not None and c.get("v") == AIGFS_TRACKER_VERSION) or aigfs_run_complete(run_dt):
             found.append(run_dt)
             if len(found) >= max_runs:
                 break
@@ -502,117 +508,125 @@ def decode_aigfs_sfc_prmsl(path):
     return lats[:n], lons, prmsl[:n], (u10[:n] if u10 is not None else None), (v10[:n] if v10 is not None else None)
 
 
-def choose_aigfs_low_center(lats, lons, prmsl, u10, v10, prev=None):
-    from scipy.ndimage import minimum_filter, maximum_filter
-    lats, lons, p = np.asarray(lats).ravel(), np.asarray(lons).ravel(), np.asarray(prmsl).ravel()
-    n = min(lats.size, lons.size, p.size)
-    lats, lons, p = lats[:n], lons[:n], p[:n]
-    good = (np.isfinite(lats) & np.isfinite(lons) & np.isfinite(p) & (lons >= TRACK_WEST) & (lons <= TRACK_EAST)
-            & (lats >= TRACK_SOUTH) & (lats <= TRACK_NORTH))
-    if np.unique(lats[good]).size < 20:
+# AI-GFS publishes no cyclone tracks, so they are tracked here in its MSLP + 10-m wind, the same way the
+# repo's gridtrack.py tracks GEFS / UKMET: each system starts where ECMWF HRES (else AIFS) has it in the
+# same run, at the hour ECMWF first has it. Every 6 h the centre is the lowest MSLP within 2° (3° at the
+# start) of the expected position (last position + last 6-h motion), kept only if it is a closed low:
+# the mean MSLP on the 2.5-3.5° ring around it is at least 0.5 hPa higher. Two misses in a row end the
+# track. Wind = strongest 10-m wind within 2° of the centre (not the calm wind at the centre itself).
+AIGFS_TRACKER_VERSION = 2
+NIO = (0.0, 30.0, 45.0, 100.0)            # where a system must start to be tracked (North Indian Ocean)
+CUT = (-10.0, 40.0, 35.0, 120.0)          # area read from each global field
+
+
+def aigfs_field(run_dt, fhour):
+    """(lats, lons, mslp hPa, 10-m wind m/s) on the regular grid, cut to CUT, or None."""
+    path = download_aigfs_sfc(run_dt, fhour)
+    if path is None:
         return None
-    order = np.where(good)[0]
-    lat0, lon0, p0 = lats[order], lons[order], p[order]
-    sort_idx = np.lexsort((lon0, lat0))
-    lat_s, lon_s, p_s = lat0[sort_idx], lon0[sort_idx], p0[sort_idx]
     try:
-        p_grid = p_s.reshape(np.unique(lat0).size, np.unique(lon0).size)
-        local_min = minimum_filter(p_grid, size=11, mode="nearest")
-        broad_max = maximum_filter(p_grid, size=31, mode="nearest")
-    except Exception:
+        lats, lons, p, u, v = decode_aigfs_sfc_prmsl(path)
+    finally:
+        path.unlink(missing_ok=True)
+    ulat, ulon = np.unique(lats), np.unique(lons)
+    order = np.lexsort((lons, lats))                     # sort to lat rows, lon columns
+    shape = (ulat.size, ulon.size)
+    if ulat.size * ulon.size != lats.size:
+        raise RuntimeError("AI-GFS grid is not regular")
+    P = (p[order] / 100.0).reshape(shape)
+    W = (np.hypot(u[order], v[order]).reshape(shape) if u is not None and v is not None
+         else np.full(shape, np.nan))
+    iy = (ulat >= CUT[0]) & (ulat <= CUT[1])
+    ix = (ulon >= CUT[2]) & (ulon <= CUT[3])
+    return ulat[iy], ulon[ix], P[np.ix_(iy, ix)], W[np.ix_(iy, ix)]
+
+
+def find_centre(field, guess, radius, ring=(2.5, 3.5), min_depth=0.5, wind_radius=2.0):
+    lats, lons, p, w = field
+    LA, LO = np.meshgrid(lats, lons, indexing="ij")
+    d = np.hypot(LA - guess[0], (LO - guess[1]) * np.cos(np.radians(guess[0])))
+    inside = d <= radius
+    if not inside.any():
         return None
-    depth = broad_max - p_grid
-    lat_grid, lon_grid = lat_s.reshape(p_grid.shape), lon_s.reshape(p_grid.shape)
-    cand = (np.isfinite(p_grid) & (p_grid <= local_min + 1e-6) & (depth >= 200.0)
-            & (lat_grid >= TRACK_SOUTH) & (lat_grid <= TRACK_NORTH)
-            & (lon_grid >= TRACK_WEST) & (lon_grid <= TRACK_EAST))
-    cand_flat = np.where(cand.ravel())[0]
-    if not cand_flat.size:
+    k = np.nanargmin(np.where(inside, p, np.inf))
+    j, i = np.unravel_index(k, p.shape)
+    la, lo, pmin = lats[j], lons[i], p[j, i]
+    dc = np.hypot(LA - la, (LO - lo) * np.cos(np.radians(la)))
+    rg = (dc >= ring[0]) & (dc <= ring[1])
+    if not rg.any() or np.nanmean(p[rg]) - pmin < min_depth:
         return None
-    cand_lat, cand_lon, cand_p = lat_s[cand_flat], lon_s[cand_flat], p_s[cand_flat]
-    cand_depth = depth.ravel()[cand_flat]
-
-    if prev is None:
-        initial = ((cand_lat >= 5.0) & (cand_lat <= 25.0) & (cand_lon >= 45.0) & (cand_lon <= 100.0)
-                   & (cand_p <= 101000.0))
-        land = india_land_prepared()
-        if land is not None and np.any(initial):
-            idx = np.where(initial)[0]
-            keep = np.array([not land.covers(Point(float(cand_lon[i]), float(cand_lat[i]))) for i in idx], bool)
-            initial[:] = False
-            initial[idx[keep]] = True
-        if not np.any(initial):
-            return None
-        ii = np.where(initial)[0]
-        bob = ii[(cand_lat[ii] >= 8.0) & (cand_lat[ii] <= 18.0) & (cand_lon[ii] >= 88.0) & (cand_lon[ii] <= 100.0)]
-        j = bob[np.argmin(cand_p[bob])] if bob.size else ii[np.argmin(cand_p[ii])]
-    else:
-        plat, plon = prev
-        distance = np.sqrt((cand_lat - plat) ** 2 + ((cand_lon - plon) * np.cos(np.deg2rad(plat))) ** 2)
-        nearby = distance <= 4.0
-        if not np.any(nearby):
-            return None
-        ii = np.where(nearby)[0]
-        score = (distance[ii] / 4.0) - 0.15 * np.clip(cand_depth[ii] / 500.0, 0.0, 1.0)
-        j = ii[np.argmin(score)]
-
-    lat, lon, mslp = float(cand_lat[j]), float(cand_lon[j]), float(cand_p[j] / 100.0)
-    wind_kt = np.nan
-    if u10 is not None and v10 is not None:
-        k = int(cand_flat[j])
-        if k < sort_idx.size:
-            orig = int(order[sort_idx[k]])
-            uv = np.hypot(u10[orig], v10[orig])
-            if np.isfinite(uv):
-                wind_kt = float(uv * 1.94384449)
-    return lat, lon, mslp, wind_kt
+    near = w[dc <= wind_radius]
+    wind = np.nanmax(near) if np.isfinite(near).any() else 6.9 * np.sqrt(max(np.nanmean(p[rg]) - pmin, 0.0))
+    return float(la), float(lo), float(pmin), float(wind)
 
 
-def load_aigfs_track(run_dt):
-    """Resumes a run that was still coming in last time; a finished run comes straight from the cache."""
-    key = run_key(run_dt)
-    c = cache_load("aigfs", key) or {"complete": False, "next": 0, "rows": []}
-    rows = c["rows"]
-    if c["complete"]:
-        return rows_to_df(rows)
-    prev = (rows[-1]["lat"], rows[-1]["lon"]) if rows else None
-    fhour, complete = int(c.get("next") or 0), False
-    while fhour <= AIGFS_MAX_HOURS:
-        path = download_aigfs_sfc(run_dt, fhour)
-        if path is None:                      # not published yet: carry on from here next time
+def aigfs_seeds(key, ecmwf_sets):
+    """[(storm id, start hour, lat, lon)] from the first ECMWF product that has this run."""
+    for ds in ecmwf_sets:
+        df = ds.get(key)
+        if df is None or df.empty:
+            continue
+        seeds = []
+        for sid, g in df.groupby(df["storm_id"].astype(str), sort=False):
+            g = g.sort_values("tau")
+            r = g.iloc[0]
+            if NIO[0] <= r["lat"] <= NIO[1] and NIO[2] <= r["lon"] <= NIO[3]:
+                tau0 = int(round(float(r["tau"]) / AIGFS_STEP) * AIGFS_STEP)
+                seeds.append((sid, tau0, round(float(r["lat"]), 2), round(float(r["lon"]), 2)))
+        return seeds
+    return []
+
+
+def track_aigfs(run_dt, seeds):
+    state = {s[0]: {"tau0": s[1], "pos": (s[2], s[3]), "mot": (0.0, 0.0), "miss": 0, "done": False, "started": False}
+             for s in seeds}
+    rows = []
+    for fh in range(0, AIGFS_MAX_HOURS + 1, AIGFS_STEP):
+        live = [k for k, st in state.items() if not st["done"] and st["tau0"] <= fh]
+        if not live:
+            if all(st["done"] or st["tau0"] <= fh for st in state.values()):
+                break
+            continue                                     # nothing starts yet: no download
+        field = aigfs_field(run_dt, fh)
+        if field is None:
             break
-        try:
-            center = choose_aigfs_low_center(*decode_aigfs_sfc_prmsl(path), prev)
-        except Exception as exc:
-            print(f"  AI-GFS {run_label(run_dt)} f{fhour:03d}: {exc}")
-            center = None
-        finally:
-            path.unlink(missing_ok=True)
-        if center is None:                    # no low to follow any more: the track has ended
-            complete = True
-            break
-        lat, lon, mslp, wind_kt = center
-        rows.append({"storm_id": "AIGFS_LOW", "storm_name": "AI-GFS MSLP-DERIVED LOW", "member": "AI-GFS",
-                     "tau": fhour, "lat": lat, "lon": lon, "mslp": mslp,
-                     "wind_kt": None if not np.isfinite(wind_kt) else wind_kt})
-        prev = (lat, lon)
-        fhour += AIGFS_STEP
-    if fhour > AIGFS_MAX_HOURS or utc_now() - run_dt > timedelta(hours=18):
-        complete = True                       # end of the run, or NOMADS will not add more
-    cache_path("aigfs", key).write_text(json.dumps({"complete": complete, "next": fhour, "rows": rows},
-                                                   separators=(",", ":")))
-    print(f"  AI-GFS {run_label(run_dt)}: {len(rows)} points{'' if complete else ' (run still coming in)'}",
-          flush=True)
-    return rows_to_df(rows)
+        for k in live:
+            st = state[k]
+            first = not st["started"]
+            guess = (st["pos"][0] + st["mot"][0], st["pos"][1] + st["mot"][1])
+            c = find_centre(field, guess, 3.0 if first else 2.0)
+            if c is None:
+                st["miss"] += 1
+                st["pos"] = guess
+                st["done"] = first or st["miss"] >= 2
+                continue
+            la, lo, pm, wd = c
+            rows.append({"storm_id": k, "storm_name": f"seeded from ECMWF {k}", "member": "AI-GFS", "tau": fh, "lat": la, "lon": lo,
+                         "mslp": pm, "wind_kt": wd * 1.94384449})
+            st["mot"] = (la - st["pos"][0], lo - st["pos"][1]) if st["started"] else (0.0, 0.0)
+            st["pos"], st["miss"], st["started"] = (la, lo), 0, True
+            if not (CUT[0] + 3 <= la <= CUT[1] - 3 and CUT[2] + 3 <= lo <= CUT[3] - 3):
+                st["done"] = True                        # leaving the area read from the files
+    return pd.DataFrame(rows)
 
 
-def load_aigfs():
-    print_banner("NOAA AI-GFS LATEST RUNS")
+def load_aigfs(ecmwf_sets):
+    print_banner("NOAA AI-GFS LATEST RUNS (tracked from ECMWF's starting positions)")
     data, meta = {}, {}
     for run_dt in find_latest_aigfs_runs():
         key = run_key(run_dt)
-        df = load_aigfs_track(run_dt)
         meta[key] = {"date": run_dt.strftime("%Y-%m-%d"), "hour": run_dt.hour, "label": run_label(run_dt)}
+        seeds = aigfs_seeds(key, ecmwf_sets)
+        c = cache_load("aigfs", key)
+        if c is not None and c.get("v") == AIGFS_TRACKER_VERSION and c.get("seeds") == [list(s) for s in seeds]:
+            df = rows_to_df(c["rows"])
+        else:
+            df = track_aigfs(run_dt, seeds) if seeds else pd.DataFrame()
+            cache_path("aigfs", key).write_text(json.dumps(
+                {"v": AIGFS_TRACKER_VERSION, "seeds": [list(s) for s in seeds], "rows": df_to_rows(df)},
+                separators=(",", ":")))
+            print(f"  AI-GFS {run_label(run_dt)}: {len(seeds)} systems from ECMWF -> {len(df)} track points",
+                  flush=True)
         if not df.empty:
             data[key] = df
     return data, meta
@@ -1003,7 +1017,7 @@ def run_once(standalone=False, open_browser=False):
     except Exception:
         pass
     hres, aifs, ens, meta = load_ecmwf()
-    aigfs, aigfs_meta = load_aigfs()
+    aigfs, aigfs_meta = load_aigfs([hres, aifs])
     meta.update(aigfs_meta)
     prune_cache({"hres": set(hres), "aifs": set(hres), "ens": set(hres),
                  "aigfs": set(aigfs_meta)})

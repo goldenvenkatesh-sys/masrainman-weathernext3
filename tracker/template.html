@@ -621,7 +621,8 @@ boot();
 </script>
 <script>
 if (window.parent !== window) {
-  const send = () => parent.postMessage({masrainmanHeight: document.documentElement.scrollHeight}, "*");
+  // Phones: the page stacks map + controls, so tell the blog how tall it is. Wide screens fill the frame as it is.
+  const send = () => { if (innerWidth <= 820) parent.postMessage({masrainmanHeight: document.documentElement.scrollHeight}, "*"); };
   addEventListener("load", send); addEventListener("resize", send);
   new ResizeObserver(send).observe(document.body);
 }

@@ -100,7 +100,9 @@ const utc = s => new Date(s.length === 13 ? s + ":00:00Z" : s + ":00Z");
 const ist = s => utc(s).toLocaleString("en-IN", IST) + " IST";
 const PARAMS = [["rain", "🌧 Rainfall (24 h)"], ["total", "🌧 Rain total"], ["mslp", "MSLP"], ["t2m", "Temperature"],
                 ["wind", "10 m wind"], ["wind850", "850 hPa wind"], ["tcwv", "Water vapour"]];
-let daily = [], totals = [], maps = [], i = 0, timer = null;
+let daily = [], totals = [], maps = [], i = 0, timer = null, made = "";
+// the image address changes whenever the maps are redrawn, so browsers never keep showing old ones
+const ver = m => "?v=" + encodeURIComponent(m.valid + "_" + made);
 let param = PARAMS.some(p => p[0] === location.hash.slice(1)) ? location.hash.slice(1) : "rain";
 
 // older forecasts had one 4-panel image per day ("file"); newer ones one image per parameter
@@ -115,7 +117,7 @@ function buildFrames() {
     `<button class="fr" data-j="${j}"><b>${dayOf(m)}</b><small>${m.hours ? "to " : ""}${utc(m.valid).toLocaleDateString("en-IN", {timeZone: "Asia/Kolkata", day: "numeric", month: "short"})}</small></button>`
   ).join("");
   $("slider").max = Math.max(maps.length - 1, 0);
-  maps.forEach(m => { const im = new Image(); im.src = fileOf(m) + "?v=" + encodeURIComponent(m.valid); });
+  maps.forEach(m => { const im = new Image(); im.src = fileOf(m) + ver(m); });
 }
 
 function setParam(p) {
@@ -130,7 +132,7 @@ function setParam(p) {
 function show(k) {
   i = (k + maps.length) % maps.length;
   const m = maps[i], file = fileOf(m);
-  $("viewer").innerHTML = `<img src="${file}?v=${encodeURIComponent(m.valid)}" alt="MasRainMan AI ${param} +${leadOf(m)} h">`;
+  $("viewer").innerHTML = `<img src="${file}${ver(m)}" alt="MasRainMan AI ${param} +${leadOf(m)} h">`;
   $("now").innerHTML = m.hours ? `Rain total · ${m.label}<small>to ${ist(m.valid)}</small>`
                                : `Day ${m.lead / 24} · +${m.lead} h<small>valid ${ist(m.valid)}</small>`;
   $("dl").href = file;
@@ -147,7 +149,7 @@ function play() {
 fetch("manifest.json", {cache: "no-store"})
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(doc => {
-    daily = doc.maps; totals = doc.totals || [];
+    daily = doc.maps; totals = doc.totals || []; made = doc.made_utc || "";
     const f0 = daily[0].files || {};
     const have = daily[0].files ? PARAMS.filter(p => p[0] in f0 || (p[0] === "total" && totals.length)) : [];
     $("params").innerHTML = have.map(([p, label]) => `<button class="pill" data-p="${p}">${label}</button>`).join("");

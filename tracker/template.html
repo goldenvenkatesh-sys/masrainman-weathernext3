@@ -141,6 +141,7 @@ button:disabled { background:#191919; color:#555; cursor:not-allowed; }
     <div><b>Track points:</b> <span id="pointsStatus"></span></div>
     <div><b>Max available:</b> <span id="maxStatus"></span></div>
     <div><b>SST:</b> <span id="sstStatus">—</span></div>
+    <div><b>Active systems:</b> <span id="systemsStatus">—</span></div>
     <div><b>Updated:</b> <span id="updatedStatus">—</span></div>
     <div style="color:#8fd18f">Refreshes by itself when a new run is in</div>
   </div>
@@ -206,7 +207,7 @@ button:disabled { background:#191919; color:#555; cursor:not-allowed; }
 const BOOT = __BOOT__;
 let DATA={}, AIFS_DATA={}, ENS_DATA={}, AIGFS_DATA={}, STATE_BOUNDARY=[], SST_DATA={};
 let AVAIL={}, AIFS_AVAIL={}, ENS_AVAIL={}, AIGFS_AVAIL={}, RUNS={}, CYCLES=[];
-let STAMP=null, GENERATED=null;
+let STAMP=null, GENERATED=null, SYSTEMS=[];
 let showSST = false;
 let cycle = "";
 let hour = 0;
@@ -533,7 +534,7 @@ function updateMap() {
       document.getElementById('intensityStatus').textContent=current.length+' ensemble members'; document.getElementById('intensityStatus').style.color='#1683ff';
     }else{
       const selectedColors=current.map(x=>classifyWind(x.wind_kt).color), selectedNames=current.map(x=>classifyWind(x.wind_kt).name);
-      traces.push({ type:'scattergeo', lon:current.map(x=>x.lon),lat:current.map(x=>x.lat),mode:'markers+text', text:current.map(x=>'F'+String(x.tau).padStart(3,'0')), textposition:'top center',textfont:{size:11,color:'#111'}, marker:{size:16,symbol:'circle',color:selectedColors,line:{width:2,color:'#111'}}, showlegend:false, customdata:current.map((x,i)=>[x.tau,x.wind_kt,x.mslp,selectedNames[i]]), hovertemplate: '<b>Selected Position</b><br>Intensity: %{customdata[3]}<br>Wind: %{customdata[1]:.1f} kt<extra></extra>' });
+      traces.push({ type:'scattergeo', lon:current.map(x=>x.lon),lat:current.map(x=>x.lat),mode:'markers+text', text:current.map(x=>'F'+String(x.tau).padStart(3,'0')+(/^\d\d[AB]/.test(x.storm_name||'')?' · '+x.storm_name.slice(0,3):'')), textposition:'top center',textfont:{size:11,color:'#111'}, marker:{size:16,symbol:'circle',color:selectedColors,line:{width:2,color:'#111'}}, showlegend:false, customdata:current.map((x,i)=>[x.tau,x.wind_kt,x.mslp,selectedNames[i]]), hovertemplate: '<b>Selected Position</b><br>Intensity: %{customdata[3]}<br>Wind: %{customdata[1]:.1f} kt<extra></extra>' });
       document.getElementById('intensityStatus').textContent=classifyWind(current[0].wind_kt).name; document.getElementById('intensityStatus').style.color=(c=>c==='#111111'?'#cfcfcf':c)(classifyWind(current[0].wind_kt).color);
     }
   }
@@ -546,6 +547,13 @@ function updateMap() {
   const box=document.getElementById('map');
   VIEW=viewFor(box.clientWidth, box.clientHeight);
   traces.push(edgeLabels(VIEW));
+  if(SYSTEMS.length){   // where the system is now (US Navy / JTWC position)
+    traces.push({type:'scattergeo',lon:SYSTEMS.map(s=>s.lon),lat:SYSTEMS.map(s=>s.lat),mode:'markers+text',
+      text:SYSTEMS.map(s=>s.id),textposition:'bottom center',textfont:{size:11,color:'#0f1b2d',family:'Arial Black, Arial'},
+      marker:{symbol:'star',size:15,color:'#ffffff',line:{width:2,color:'#0f1b2d'}},showlegend:false,
+      customdata:SYSTEMS.map(s=>[s.id,s.name,new Date(s.time).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Kolkata'})+' IST',s.wind_kt??'—']),
+      hovertemplate:'<b>%{customdata[0]} %{customdata[1]}</b><br>Observed position %{customdata[2]}<br>Wind: %{customdata[3]} kt<br>Lat %{lat:.1f}° Lon %{lon:.1f}°<extra></extra>'});
+  }
   document.getElementById('hdrBadge').textContent = (ens?'IFS ENS':(aigfs?'AI-GFS':(aifs?'AIFS':'IFS HRES')))+' · F'+String(selectedTau).padStart(3,'0');
   Plotly.react('map', traces, {
     dragmode: false,
@@ -602,7 +610,9 @@ function applyData(d){
   [AIFS_DATA,AIFS_AVAIL]=expandProduct(d.products.aifs);
   [ENS_DATA,ENS_AVAIL]=expandProduct(d.products.ens);
   [AIGFS_DATA,AIGFS_AVAIL]=expandProduct(d.products.aigfs);
-  STATE_BOUNDARY=d.boundary||[]; RUNS=d.runs||{};
+  STATE_BOUNDARY=d.boundary||[]; RUNS=d.runs||{}; SYSTEMS=d.systems||[];
+  const se=document.getElementById('systemsStatus');
+  if(se) se.textContent=SYSTEMS.length?SYSTEMS.map(s=>s.id+(s.name&&s.name!=='INVEST'?' '+s.name:' invest')).join(', '):'none listed';
   CYCLES=Object.keys(RUNS).sort().reverse();
   STAMP=d.stamp; GENERATED=d.generated;
   const newest=CYCLES.filter(c=>AVAIL[c])[0] || CYCLES[0] || "";

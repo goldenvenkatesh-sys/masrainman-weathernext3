@@ -19,6 +19,7 @@ import base64
 import glob
 import io
 import json
+import re
 import os
 import shutil
 import tempfile
@@ -868,13 +869,114 @@ def compact(dataset):
     return out
 
 
-def build_payload(hres, aifs, ens, aigfs, meta):
+# =============================================================================
+# ACTIVE SYSTEM NAMES (JTWC invests / numbered storms, e.g. 92B)
+# ECMWF's track files give a system it found itself a temporary number of its own: 70B, 71B ... for the Bay,
+# 70A ... for the Arabian Sea, counted again in every run (and per ensemble member). Only storms with an
+# official number or name keep it (e.g. 04C PENA). So each ECMWF track (and the AI-GFS low) is matched by
+# position to the systems the US Navy's tropical cyclone sector file lists right now (invests 90-99 and
+# numbered storms), and is shown under that label, e.g. "92B INVEST (ECMWF 70B)".
+# =============================================================================
+
+SYSTEM_SOURCES = [
+    "https://www.nrlmry.navy.mil/tcdat/sectors/atcf_sector_file",
+    "https://science.nrlmry.navy.mil/geoips/tcdat/sectors/atcf_sector_file",
+]
+SECTOR_LINE = re.compile(r"^\s*(\d\d[A-Z])\s+(\S+)\s+(\d{6})\s+(\d{4})\s+([\d.]+)([NS])\s+([\d.]+)([EW])"
+                         r"(?:\s+(\S+))?(?:\s+(\d+))?(?:\s+(\d+))?")
+MATCH_KM = 550.0           # a track within this distance of the system at the same time is that system
+
+
+def load_active_systems():
+    """North Indian Ocean systems (A = Arabian Sea, B = Bay of Bengal) active now."""
+    for url in SYSTEM_SOURCES:
+        try:
+            r = requests.get(url, timeout=30, headers=UA)
+            if r.status_code != 200 or not r.text.strip():
+                continue
+        except Exception:
+            continue
+        out = []
+        for line in r.text.splitlines():
+            m = SECTOR_LINE.match(line)
+            if not m or m.group(1)[-1] not in "AB":
+                continue
+            sid, name, ymd, hm, la, ns, lo, ew = m.groups()[:8]
+            try:
+                when = datetime.strptime(ymd + hm, "%y%m%d%H%M").replace(tzinfo=timezone.utc)
+            except ValueError:
+                continue
+            if utc_now() - when > timedelta(days=2):
+                continue
+            out.append({"id": sid, "name": name.upper(), "time": when.isoformat(timespec="minutes"),
+                        "lat": float(la) * (1 if ns == "N" else -1), "lon": float(lo) * (1 if ew == "E" else -1),
+                        "wind_kt": int(m.group(10)) if m.group(10) else None})
+        print(f"  Active North Indian Ocean systems: {', '.join(s['id'] + ' ' + s['name'] for s in out) or 'none'}")
+        return out
+    print("  (active system list not reachable: ECMWF's own numbers are shown)")
+    return []
+
+
+def _km(lat1, lon1, lat2, lon2):
+    p1, p2 = np.deg2rad(lat1), np.deg2rad(lat2)
+    a = np.sin((p2 - p1) / 2) ** 2 + np.cos(p1) * np.cos(p2) * np.sin(np.deg2rad(lon2 - lon1) / 2) ** 2
+    return 6371.0 * 2 * np.arcsin(np.sqrt(a))
+
+
+def _label(system, own_id):
+    lab = f"{system['id']} {system['name']}" if system["name"] not in ("INVEST", system["id"]) else f"{system['id']} INVEST"
+    return f"{lab} (ECMWF {own_id})" if own_id and own_id != system["id"] else lab
+
+
+def name_tracks(dataset, systems, product):
+    """Give each track the official label of the system it is (by position at the system's time)."""
+    if not systems:
+        return dataset
+    out = {}
+    for key, df in dataset.items():
+        if df is None or df.empty:
+            out[key] = df
+            continue
+        df = df.copy()
+        df["storm_name"] = df["storm_name"].astype(str)
+        run = key_dt(key)
+        for (sid, mem), g in df.groupby([df["storm_id"].astype(str), df["member"].astype(str)], sort=False):
+            if not (product == "aigfs" or re.fullmatch(r"7\d[AB]", sid)):
+                continue                      # officially numbered/named storms keep their own label
+            g = g.sort_values("tau")
+            best = None
+            for s in systems:
+                if product != "aigfs" and s["id"][-1] != sid[-1]:
+                    continue
+                tau = (datetime.fromisoformat(s["time"]) - run).total_seconds() / 3600.0
+                taus = g["tau"].to_numpy(float)
+                if tau < taus[0]:
+                    if taus[0] - tau > 72:     # the track starts too long after the system was seen
+                        continue
+                    row = g.iloc[0]
+                elif tau > taus[-1] + 6:
+                    continue
+                else:
+                    row = g.iloc[int(np.argmin(np.abs(taus - tau)))]
+                d = _km(row["lat"], row["lon"], s["lat"], s["lon"])
+                if d <= MATCH_KM and (best is None or d < best[0]):
+                    best = (d, s)
+            if best:
+                df.loc[g.index, "storm_name"] = _label(best[1], sid if product != "aigfs" else "")
+        out[key] = df
+    return out
+
+
+def build_payload(hres, aifs, ens, aigfs, meta, systems=()):
+    hres, aifs, ens, aigfs = (name_tracks(hres, systems, "hres"), name_tracks(aifs, systems, "aifs"),
+                              name_tracks(ens, systems, "ens"), name_tracks(aigfs, systems, "aigfs"))
     products = {"hres": compact(hres), "aifs": compact(aifs), "ens": compact(ens), "aigfs": compact(aigfs)}
     stamp = "|".join(f"{p}:{','.join(sorted(k for k, v in d.items() if v))}:"
                      f"{sum(len(t['p']) for v in d.values() for t in v)}" for p, d in products.items())
+    stamp += "|sys:" + ",".join(sorted(f"{s['id']}{s['name']}" for s in systems))
     return {"generated": utc_now().isoformat(timespec="seconds"), "stamp": stamp,
             "runs": {k: meta[k] for k in sorted(meta)}, "products": products,
-            "boundary": load_boundary_segments()}
+            "boundary": load_boundary_segments(), "systems": list(systems)}
 
 
 def write_outputs(payload, sst, standalone):
@@ -914,7 +1016,9 @@ def run_once(standalone=False, open_browser=False):
         pass
     sst = load_latest_oisst_sst(previous_sst)
 
-    payload = build_payload(hres, aifs, ens, aigfs, meta)
+    print_banner("ACTIVE SYSTEMS")
+    systems = load_active_systems()
+    payload = build_payload(hres, aifs, ens, aigfs, meta, systems)
     page = write_outputs(payload, sst, standalone)
     changed = (old_stamp is None or old_stamp.get("stamp") != payload["stamp"]
                or old_stamp.get("sst_date") != sst.get("date"))

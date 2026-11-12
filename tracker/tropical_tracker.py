@@ -521,13 +521,21 @@ CUT = (-10.0, 40.0, 35.0, 120.0)          # area read from each global field
 
 def aigfs_field(run_dt, fhour):
     """(lats, lons, mslp hPa, 10-m wind m/s) on the regular grid, cut to CUT, or None."""
-    path = download_aigfs_sfc(run_dt, fhour)
-    if path is None:
+    for attempt in range(3):                             # NOMADS sometimes sends a cut-off or busy reply
+        path = download_aigfs_sfc(run_dt, fhour)
+        if path is None:
+            return None
+        try:
+            lats, lons, p, u, v = decode_aigfs_sfc_prmsl(path)
+            break
+        except Exception as exc:
+            print(f"  AI-GFS {run_label(run_dt)} f{fhour:03d}: {exc} (try {attempt + 1})")
+            time.sleep(10 * (attempt + 1))
+        finally:
+            path.unlink(missing_ok=True)
+    else:
         return None
-    try:
-        lats, lons, p, u, v = decode_aigfs_sfc_prmsl(path)
-    finally:
-        path.unlink(missing_ok=True)
+    time.sleep(0.4)                                      # be gentle: NOMADS limits requests per minute
     ulat, ulon = np.unique(lats), np.unique(lons)
     order = np.lexsort((lons, lats))                     # sort to lat rows, lon columns
     shape = (ulat.size, ulon.size)
@@ -589,7 +597,7 @@ def track_aigfs(run_dt, seeds):
             continue                                     # nothing starts yet: no download
         field = aigfs_field(run_dt, fh)
         if field is None:
-            break
+            return None                                  # a file could not be read: try the run next time
         for k in live:
             st = state[k]
             first = not st["started"]
@@ -622,6 +630,9 @@ def load_aigfs(ecmwf_sets):
             df = rows_to_df(c["rows"])
         else:
             df = track_aigfs(run_dt, seeds) if seeds else pd.DataFrame()
+            if df is None:
+                print(f"  AI-GFS {run_label(run_dt)}: some files could not be read, trying again next time")
+                continue
             cache_path("aigfs", key).write_text(json.dumps(
                 {"v": AIGFS_TRACKER_VERSION, "seeds": [list(s) for s in seeds], "rows": df_to_rows(df)},
                 separators=(",", ":")))

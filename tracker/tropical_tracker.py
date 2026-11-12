@@ -703,6 +703,9 @@ def load_boundary_segments():
 OISST_DAILY_BASE = "https://www.ncei.noaa.gov/data/sea-surface-temperature-optimum-interpolation/v2.1/access/avhrr"
 SST_DISPLAY_RES = 0.125
 SST_GAUSSIAN_SIGMA = 2.8
+# SST picture covers the whole area the page can show (the page widens the view to fill the frame)
+SST_W, SST_E, SST_S, SST_N = 35.0, 120.0, -10.0, 40.0
+SST_BOUNDS = {"w": SST_W, "e": SST_E, "s": SST_S, "n": SST_N}
 
 
 def _oisst_daily_urls(date_obj):
@@ -737,15 +740,15 @@ def _read_oisst_daily_netcdf(nc_path):
         lon_name = "lon" if "lon" in ds.coords else "longitude"
         da = ds["sst"].squeeze(drop=True).transpose(lat_name, lon_name)
         lat_values, lon_values = np.asarray(da[lat_name].values, float), np.asarray(da[lon_name].values, float)
-        da = da.isel({lat_name: np.where((lat_values >= MAP_SOUTH) & (lat_values <= MAP_NORTH))[0],
-                      lon_name: np.where((lon_values >= MAP_WEST) & (lon_values <= MAP_EAST))[0]})
+        da = da.isel({lat_name: np.where((lat_values >= SST_S) & (lat_values <= SST_N))[0],
+                      lon_name: np.where((lon_values >= SST_W) & (lon_values <= SST_E))[0]})
         da = da.sortby(lat_name).sortby(lon_name).astype("float32")
         da = da.where(np.isfinite(da)).where((da > -3.0) & (da < 45.0))
         lat_native, lon_native = np.asarray(da[lat_name].values, float), np.asarray(da[lon_name].values, float)
         native = np.asarray(da.values, dtype=np.float32)
 
-        fine_lat = np.arange(max(MAP_SOUTH, lat_native.min()), min(MAP_NORTH, lat_native.max()) + 1e-4, SST_DISPLAY_RES)
-        fine_lon = np.arange(max(MAP_WEST, lon_native.min()), min(MAP_EAST, lon_native.max()) + 1e-4, SST_DISPLAY_RES)
+        fine_lat = np.arange(max(SST_S, lat_native.min()), min(SST_N, lat_native.max()) + 1e-4, SST_DISPLAY_RES)
+        fine_lon = np.arange(max(SST_W, lon_native.min()), min(SST_E, lon_native.max()) + 1e-4, SST_DISPLAY_RES)
         coords = {lat_name: lat_native, lon_name: lon_native}
         grid = np.asarray(xr.DataArray(native, coords=coords, dims=(lat_name, lon_name))
                           .interp({lat_name: fine_lat, lon_name: fine_lon}, method="linear").values, np.float32)
@@ -767,10 +770,10 @@ def _read_oisst_daily_netcdf(nc_path):
                     hover_lon.append(round(float(fine_lon[j]), 3))
                     hover_sst.append(round(float(smooth[i, j]), 1))
 
-        y0, y1 = float(_mercator_y(MAP_SOUTH)), float(_mercator_y(MAP_NORTH))
+        y0, y1 = float(_mercator_y(SST_S)), float(_mercator_y(SST_N))
         W = 1400
-        H = int(W * ((y1 - y0) / np.deg2rad(MAP_EAST - MAP_WEST)))
-        x_lon = np.linspace(MAP_WEST, MAP_EAST, W)
+        H = int(W * ((y1 - y0) / np.deg2rad(SST_E - SST_W)))
+        x_lon = np.linspace(SST_W, SST_E, W)
         lat_rows = np.rad2deg(2.0 * np.arctan(np.exp(np.linspace(y1, y0, H))) - np.pi / 2.0)
         lon_stage = np.full((smooth.shape[0], W), np.nan, np.float32)
         mask_stage = np.zeros((smooth.shape[0], W), np.float32)
@@ -796,7 +799,7 @@ def _read_oisst_daily_netcdf(nc_path):
         return {"date": None, "source": None,
                 "image": "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii"),
                 "min": float(np.nanmin(raster[ok])), "max": float(np.nanmax(raster[ok])),
-                "hover_lat": hover_lat, "hover_lon": hover_lon, "hover_sst": hover_sst}
+                "bounds": SST_BOUNDS, "hover_lat": hover_lat, "hover_lon": hover_lon, "hover_sst": hover_sst}
     finally:
         ds.close()
 
@@ -814,7 +817,7 @@ def load_latest_oisst_sst(previous=None):
                 continue
             src = f"NOAA/NCEI OISST v2.1 {source_name}"
             if previous and previous.get("date") == d.isoformat() and previous.get("source") == src \
-                    and previous.get("image"):
+                    and previous.get("image") and previous.get("bounds") == SST_BOUNDS:
                 print(f"  SST: {d} unchanged")
                 return previous
             try:

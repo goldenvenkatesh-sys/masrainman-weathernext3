@@ -105,7 +105,12 @@ function draw(){
   if (!sys && systems.length) sys = [...systems].sort((a,b)=>b.landfalls-a.landfalls)[0].storm;
   pills($("systems"), systems.map(s => [s.storm, s.members > 1 ? `${sid(s.storm)} · ${s.landfalls}/${s.members}` : sid(s.storm)]), sys, k => {sys=k; draw();});
   const S = systems.find(s => s.storm===sys);
-  if (!S){ $("out").innerHTML = `<div class="empty">${model ? "No North Indian Ocean system makes landfall in this run." : "No landfall maps yet."}</div>`; return; }
+  if (!S){
+    const why = model === "deepmind"
+      ? "No DeepMind tracks for the North Indian Ocean in this run. Weather Lab's public download only carries systems JTWC is already tracking (numbered invests or storms); tracks for a low that forms later in the forecast appear here once JTWC numbers it."
+      : model === "ukmet" ? "UKMET (a single run, no ensemble) does not keep a trackable low to landfall in this run."
+      : "No North Indian Ocean system makes landfall in this run.";
+    $("out").innerHTML = `<div class="empty">${model ? why : "No landfall maps yet."}</div>`; return; }
   const rows = S.areas.map((a,i) => `<tr><td><b>${i+1}</b></td><td>${ll(a.lat,a.lon)}</td><td>${a.n}</td><td>${a.pct.toFixed(0)}%</td></tr>`).join("");
   $("out").innerHTML = `<div class="stage">
     <div class="viewer"><a href="${S.png}" target="_blank"><img src="${S.png}" alt="Landfall map ${sid(S.storm)}"></a></div>
@@ -119,7 +124,9 @@ function draw(){
 }
 fetch("data/manifest_landfall.json", {cache:"no-store"}).then(r => r.ok ? r.json() : {models:{}}).catch(() => ({models:{}}))
   .then(m => { man = m; $("upd").textContent = m.updated ? `Updated ${m.updated}` : "";
-    model = ALL.map(a=>a[0]).find(k => (m.models[k]||{runs:[]}).runs.length) || null; draw(); });
+    // Open on the model whose newest run has the most member landfalls (not an empty page).
+    const best = k => { const r = ((m.models[k]||{}).runs||[])[0]; return r ? Math.max(0, ...r.systems.map(s => s.landfalls / s.members)) : -1; };
+    model = ALL.map(a=>a[0]).filter(k => (m.models[k]||{runs:[]}).runs.length).sort((a,b) => best(b) - best(a))[0] || null; draw(); });
 </script>
 </body>
 </html>

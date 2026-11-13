@@ -375,7 +375,8 @@ def tracks(model, run, seeds, on_land, workers=24):
     }[model]
     # state per (storm, member): [pos, motion, misses, done]
     state = {(s, m): [seed, (0.0, 0.0), 0, False] for s, seed in seeds.items() for m in members}
-    rows = []
+    last_fix = {}            # (storm, member) -> step of the last centre found (motion is per STEP_H)
+    rows, gaps = [], 0
     with ThreadPoolExecutor(workers) as ex:
         for step in range(0, last + 1, STEP_H):
             need = sorted({m for (s, m), st in state.items() if not st[3]})
@@ -389,12 +390,18 @@ def tracks(model, run, seeds, on_land, workers=24):
             if all(f is None for f in fields.values()):
                 if step == 0:
                     return pd.DataFrame(columns=["storm", "member", "step", "lat", "lon", "mslp", "wind"])
-                break
+                # ICON-EPS is 12-hourly after T+120: skip a missing step, stop only after a long gap
+                gaps += 1
+                if gaps * STEP_H >= 24:
+                    break
+                continue
+            gaps = 0
             for (s, m), st in state.items():
                 if st[3] or fields.get(m) is None:
                     continue
                 pos, mot, misses, _ = st
-                guess = (pos[0] + mot[0], pos[1] + mot[1])
+                k = max(1, (step - last_fix.get((s, m), step - STEP_H)) // STEP_H)   # steps since last fix
+                guess = (pos[0] + k * mot[0], pos[1] + k * mot[1])
                 c = find_centre(fields[m], guess, SEED_SEARCH_DEG if step == 0 else SEARCH_DEG)
                 if c is None:
                     st[2] += 1
@@ -403,8 +410,9 @@ def tracks(model, run, seeds, on_land, workers=24):
                     continue
                 la, lo, pm, wd = c
                 rows.append((s, members.index(m), step, la, lo, pm, wd))
-                st[1] = (la - pos[0], lo - pos[1]) if step else (0.0, 0.0)
+                st[1] = ((la - pos[0]) / k, (lo - pos[1]) / k) if step else (0.0, 0.0)
                 st[0], st[2] = (la, lo), 0
+                last_fix[(s, m)] = step
                 st[3] = on_land(la, lo) and step > 0
             print(f"    {model} {run} T+{step}: {sum(not st[3] for st in state.values())} tracks running")
     return pd.DataFrame(rows, columns=["storm", "member", "step", "lat", "lon", "mslp", "wind"])

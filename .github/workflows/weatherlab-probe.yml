@@ -6,28 +6,22 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe 4
-        env:
-          GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
+      - name: Probe 5
         run: |
-          echo "$GCP_CREDS" > $RUNNER_TEMP/gcp.json
-          pip install -q google-auth requests
           python3 - <<'PY'
-          import google.auth, os, requests, json
-          from google.auth.transport.requests import AuthorizedSession
-          os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=os.environ["RUNNER_TEMP"]+"/gcp.json"
-          creds,proj=google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
-          s=AuthorizedSession(creds)
-          print("project", proj)
-          def ls(b,prefix="",n=60):
-              r=s.get(f"https://storage.googleapis.com/storage/v1/b/{b}/o",params={"prefix":prefix,"delimiter":"/","maxResults":n})
-              if r.status_code!=200: print(b,prefix,"->",r.status_code,r.text[:150]); return
-              d=r.json(); print(b,repr(prefix),"prefixes:",d.get("prefixes",[])[:n]); print("   items:",[i["name"] for i in d.get("items",[])][:30])
-          for b in ["weathernext-public","weathernext3_statistics_spatial","weathernext3","weathernext3_ensemble","weathernext3_members","weathernext3_cyclones","weathernext_cyclones","weathernext-cyclones","weathernext2","weathernext_2_0_0","weathernext3_spatial","weathernext3_tracks"]:
-              ls(b)
-          ls("weathernext3_statistics_spatial","weathernext_3_0_0_statistics/")
-          ls("weathernext-public","cyclones/")
-          r=s.get(f"https://cloudresourcemanager.googleapis.com/v1/projects"); print("projects",r.status_code,r.text[:300])
-          if proj:
-              r=s.get(f"https://storage.googleapis.com/storage/v1/b",params={"project":proj}); print("buckets",r.status_code,r.text[:600])
+          import requests
+          B="https://storage.googleapis.com/storage/v1/b/weathernext-public/o"
+          def ls(prefix,n=40):
+              d=requests.get(B,params={"prefix":prefix,"delimiter":"/","maxResults":1000}).json()
+              P=d.get("prefixes",[]); I=d.get("items",[])
+              print(repr(prefix),len(P),"prefixes:",P[:8],"...",P[-8:]); print("   items",len(I),[(i["name"],i["size"],i.get("updated","")[:16]) for i in I[-n:]])
+              return P,I
+          P,_=ls("cyclones/")
+          for p in P:
+              P2,_=ls(p)
+              for q in P2[-3:]:
+                  P3,_=ls(q,10)
+                  for r in P3[-2:]:
+                      P4,_=ls(r,10)
+                      for t in P4[-2:]: ls(t,10)
           PY

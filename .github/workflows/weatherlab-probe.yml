@@ -6,9 +6,30 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe 6
+      - name: Probe 7
+        env:
+          GCP_CREDS: ${{ secrets.GCP_SA_KEY }}
         run: |
-          pip install -q pypdf
-          curl -s -o r.pdf https://storage.googleapis.com/weathernext-public/cyclones/README.pdf
-          python3 -c "
-          import pypdf; r=pypdf.PdfReader('r.pdf'); print('\n'.join(p.extract_text() for p in r.pages))"
+          echo "$GCP_CREDS" > $RUNNER_TEMP/gcp.json
+          pip install -q google-auth requests
+          python3 - <<'PY'
+          import google.auth, os, requests
+          from google.auth.transport.requests import AuthorizedSession
+          os.environ["GOOGLE_APPLICATION_CREDENTIALS"]=os.environ["RUNNER_TEMP"]+"/gcp.json"
+          creds,_=google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
+          for name,s in (("anon",requests.Session()),("auth",AuthorizedSession(creds))):
+              def ls(prefix):
+                  r=s.get("https://storage.googleapis.com/storage/v1/b/weather-trusted-testers/o",params={"prefix":prefix,"delimiter":"/","maxResults":1000})
+                  if r.status_code!=200: print(name,prefix,r.status_code,r.text[:160]); return [],[]
+                  d=r.json(); P=d.get("prefixes",[]); I=d.get("items",[])
+                  print(name,repr(prefix),len(P),P[:10],P[-10:],"| items",[(i["name"],i["size"]) for i in I[-8:]]); return P,I
+              P,_=ls("")
+              for p in P:
+                  if "cyclone" in p.lower() or len(P)<6:
+                      P2,_=ls(p)
+                      for q in P2[-3:]:
+                          P3,_=ls(q)
+                          for r in P3[-2:]:
+                              P4,_=ls(r)
+                              for t in P4[-2:]: ls(t)
+          PY

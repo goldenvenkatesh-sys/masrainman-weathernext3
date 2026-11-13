@@ -1,0 +1,30 @@
+name: Weather Lab probe (temporary)
+on:
+  push:
+    branches: [claude/weatherlab-probe]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe download variants and page JS
+        run: |
+          UA="Mozilla/5.0"
+          T=2026_11_12T12_00
+          B=https://deepmind.google.com/science/weatherlab/download/cyclones
+          for M in FNV3P2 FNV3 OPER; do
+          for p in "ensemble/paired/csv/${M}_${T}_paired.csv" "ensemble/unpaired/csv/${M}_${T}_unpaired.csv" \
+                   "ensemble/all/csv/${M}_${T}_all.csv" "ensemble/csv/${M}_${T}.csv" "ensemble/genesis/csv/${M}_${T}_genesis.csv" \
+                   "ensemble/unpaired/atcf/${M}_${T}_unpaired.txt" "ensemble/paired/atcf/${M}_${T}_paired.txt" \
+                   "mean/paired/csv/${M}_${T}_paired.csv" "mean/unpaired/csv/${M}_${T}_unpaired.csv"; do
+            code=$(curl -s -o out.bin -w '%{http_code} %{size_download}' -A "$UA" "$B/$M/$p")
+            ids=$(grep -v '^#' out.bin 2>/dev/null | head -2000000 | awk -F, 'NR==1{for(i=1;i<=NF;i++) if(tolower($i)=="track_id") c=i} NR>1&&c{print $c}' | sort -u | tr '\n' ' ' | cut -c1-300)
+            echo "$M $p -> $code | ids: $ids"
+          done; done
+          echo "=== page scan ==="
+          curl -s -A "$UA" -L https://deepmind.google.com/science/weatherlab/ -o page.html; wc -c page.html
+          grep -oE 'download/cyclones[^"'"'"' ]{0,160}' page.html | sort -u | head -40
+          for js in $(grep -oE '(src|href)="[^"]+\.js[^"]*"' page.html | sed -E 's/^(src|href)="//; s/"$//' | sort -u | head -40); do
+            case "$js" in http*) u="$js";; /*) u="https://deepmind.google.com$js";; *) u="https://deepmind.google.com/science/weatherlab/$js";; esac
+            curl -s -A "$UA" "$u" -o b.js
+            grep -oE '.{0,120}(paired|unpaired|download/cyclones).{0,160}' b.js | head -15 | sed "s|^|[$js] |"
+          done

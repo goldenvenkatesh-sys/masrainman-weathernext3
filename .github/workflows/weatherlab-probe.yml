@@ -6,15 +6,11 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     steps:
-      - name: Probe 2
+      - name: Probe 3
         run: |
           UA="Mozilla/5.0"
-          B=https://deepmind.google.com/science/weatherlab/download/cyclones
-          for T in 2026_11_13T00_00 2026_11_12T18_00 2026_11_12T06_00 2026_11_11T12_00; do
-            curl -s -o o.csv -A "$UA" "$B/FNV3P2/ensemble/paired/csv/FNV3P2_${T}_paired.csv"
-            echo "$T: $(grep -v '^#' o.csv | awk -F, 'NR==1{for(i=1;i<=NF;i++) if(tolower($i)=="track_id") c=i} NR>1&&c{print $c}' | sort -u | tr '\n' ' ')"
-          done
-          head -c 3000 o.csv | grep '^#' | head -30
           curl -s -A "$UA" -L https://deepmind.google.com/science/weatherlab/ -o page.html
-          grep -oiE '.{0,100}(\.csv|atcf|unpaired|googleapis\.com|/api/|download).{0,140}' page.html | sort -u | head -60
-          grep -oE '"[^"]*\.js"' page.html | sort -u | head -30
+          grep -oE '.{0,160}(cyclones/|weathernext-public|ensemble/|paired|genesis|track_id|tcvitals).{0,200}' page.html | sort -u | head -50
+          echo ==== scripts
+          grep -oE '<script[^>]*src=[^>]*>' page.html | head
+          for u in $(grep -oE 'https://[^"'"'"' )]+' page.html | grep -iE 'weatherlab|weathernext|cyclone' | sort -u | head -40); do echo "URL $u"; done

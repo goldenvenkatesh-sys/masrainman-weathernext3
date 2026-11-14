@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MASRAINMAN · Cyclone Odds</title>
+<style>
+@font-face{font-family:"Bebas Neue";src:url(bebasneue.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:Outfit;src:url(outfit.woff2) format("woff2");font-weight:100 900;font-display:swap}
+:root{--bg:#12071f;--card:#1d0d33;--ink:#fff;--sub:#c7b6ee;--line:rgba(255,255,255,.12);--hot:#ff3d7f;--warm:#ff8a00;--sun:#ffd23f}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(1200px 700px at 20% -10%,#3a1263 0%,var(--bg) 55%) fixed;color:var(--ink);
+  font-family:Outfit,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--sun)}
+.top{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.top img{width:44px;height:44px}
+.top h1{font-family:"Bebas Neue",Impact,sans-serif;font-weight:400;letter-spacing:2px;font-size:30px;margin:0;line-height:1;
+  background:linear-gradient(90deg,var(--hot),var(--warm),var(--sun));-webkit-background-clip:text;background-clip:text;color:transparent}
+.top small{display:block;color:var(--sub);font-size:13px;margin-top:3px}
+.top .links{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.top .links a{font-size:13px;text-decoration:none;border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--ink)}
+.wrap{display:grid;grid-template-columns:330px 1fr;gap:18px;padding:18px;max-width:1500px;margin:0 auto}
+@media (max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}.stage{order:-1}.top{flex-wrap:wrap}.top .links{margin-left:0;width:100%}}
+.top .links a{white-space:nowrap}
+.panel{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:14px}
+.grp{margin-bottom:14px}
+.grp h3{margin:0 0 7px;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--sub);font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:7px 12px;
+  font:600 13px Outfit,system-ui,sans-serif;cursor:pointer}
+.runs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.runbtn{text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:14px;padding:8px 10px;cursor:pointer;font:600 14px Outfit,system-ui,sans-serif}
+.runbtn b{font-size:16px}.runbtn small{display:block;color:var(--sub);font-size:11px;font-weight:400;margin-top:2px}
+.runbtn .new{float:right;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 6px;border-radius:999px;background:var(--sun);color:#1a0a2a}
+.runbtn.on{background:linear-gradient(90deg,var(--hot),var(--warm));border-color:transparent}.runbtn.on small{color:#fff}
+.chip.on{background:linear-gradient(90deg,var(--hot),var(--warm));border-color:transparent;color:#fff}
+select{width:100%;background:#1b0c30;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 10px;font:600 14px Outfit,system-ui,sans-serif}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{border:0;border-radius:14px;padding:12px 10px;font:800 14px Outfit,system-ui,sans-serif;cursor:pointer;color:#1a0a2a;
+  background:linear-gradient(90deg,var(--sun),var(--warm))}
+.btn.alt{background:rgba(255,255,255,.08);color:var(--ink);border:1px solid var(--line)}
+.btn.rec{background:linear-gradient(90deg,var(--hot),#a21caf);color:#fff}
+.btn:disabled{opacity:.5;cursor:wait}
+.stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+#card{width:100%;height:auto;max-height:calc(100vh - 120px);object-fit:contain;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+@media (max-width:900px){#card{max-height:none}}
+.note{color:var(--sub);font-size:12.5px;line-height:1.5}
+.status{font-size:12.5px;color:var(--sub);min-height:18px;text-align:center}
+.cap{width:100%;min-height:120px;background:#1b0c30;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:13px/1.45 Outfit,system-ui,sans-serif}
+.legal{color:#ff8fa3;font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="top">
+  <img src="logo_dark.png" alt="MasRainman">
+  <div><h1>Cyclone Odds</h1><small>MasRainman · where, when and how strong — from every ensemble member</small></div>
+  <div class="links"><a href="../">🌀 Tropical tracker</a><a href="../../">← All MasRainman pages</a></div>
+</div>
+
+<div class="wrap">
+  <div class="panel" id="controls">
+    <div class="grp"><h3>Model run · newest first</h3><div class="runs" id="run"></div></div>
+    <div class="grp"><h3>System / sea</h3><div class="chips" id="area"></div></div>
+    <div class="grp"><h3>Look ahead</h3><div class="chips" id="win"></div></div>
+    <div class="grp"><h3>Count systems from</h3><div class="chips" id="thr"></div></div>
+    <div class="grp"><h3>Members</h3><div class="chips" id="set"></div></div>
+    <div class="grp"><h3>Map view</h3><div class="chips" id="view"></div></div>
+    <div class="grp"><h3>Look</h3><div class="chips" id="theme"></div></div>
+    <div class="grp"><h3>Size</h3><div class="chips" id="fmt"></div></div>
+    <div class="grp actions">
+      <button class="btn" id="png">⬇ Save picture</button>
+      <button class="btn alt" id="share">↗ Share</button>
+      <button class="btn alt" id="allruns" style="grid-column:span 2">⬇ Save this card for every run (compare)</button>
+      <button class="btn rec" id="reel" style="grid-column:span 2">● Make 12-second reel</button>
+    </div>
+    <div class="grp"><h3>Caption (tap to copy)</h3><textarea class="cap" id="caption" readonly></textarea></div>
+    <div class="note">
+      <b>How to read it.</b> Every honeycomb cell is the share of ensemble members whose storm centre passes within
+      120 km of it. Landfall odds count each member once, at its first crossing onto the mainland or Sri Lanka
+      (small islands are not counted). Strength steps use IMD classes on the member's peak 10-m wind.
+      Deterministic runs (IFS HRES, AIFS, AI-GFS) are drawn as lines.
+      <p class="legal">Not an official forecast or warning. For official information, follow IMD.</p>
+      Data: ECMWF ENS / IFS / AIFS tropical-cyclone tracks © ECMWF (CC BY 4.0), NOAA/NCEP AI-GFS. Coast: Natural Earth.
+      India's border as per the Government of India.
+    </div>
+  </div>
+  <div class="stage">
+    <canvas id="card" width="1080" height="1350"></canvas>
+    <div class="status" id="status">Loading the latest runs…</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+// =====================================================================================================
+// MASRAINMAN CYCLONE ODDS — reads ../data.json (written every 2 h by tracker/tropical_tracker.py)
+// and ./land.json (Natural Earth land outlines + 0.1° land mask). Everything is worked out in the page.
+// =====================================================================================================
+const IMD = [ // IMD classes on peak 10-m wind (kt)
+  {k:"D",   name:"Depression",          kt:17},
+  {k:"DD",  name:"Deep Depression",     kt:28},
+  {k:"CS",  name:"Cyclonic Storm",      kt:34},
+  {k:"SCS", name:"Severe CS",           kt:48},
+  {k:"VSCS",name:"Very Severe CS",      kt:64},
+  {k:"ESCS",name:"Extremely Severe CS", kt:90},
+  {k:"SuCS",name:"Super Cyclone",       kt:120}];
+const THEMES = {
+  sunset:{label:"Sunset", dark:true, bg:["#1a0830","#2b0d45","#12061f"], sea:["#170a32","#22104a"], land:"#2c2147", coast:"#9d8bd0",
+    border:"rgba(255,255,255,.38)", grid:"rgba(255,255,255,.07)", ink:"#ffffff", sub:"#cdbcf3", faint:"rgba(255,255,255,.55)",
+    panel:"rgba(255,255,255,.06)", accent:["#ff3d7f","#ff8a00","#ffd23f"], hres:"#ffffff", aifs:"#7cf7c8", aigfs:"#5cc8ff",
+    pal:[[0,"#3b1a78"],[.1,"#6d28d9"],[.2,"#a21caf"],[.33,"#db2777"],[.48,"#f43f5e"],[.62,"#fb6a1c"],[.78,"#fbbf24"],[1,"#fff7c2"]],
+    logo:"logo_dark.png", blend:"lighter"},
+  paper:{label:"Paper", dark:false, bg:["#fbf5ea","#f6ecdc","#fbf5ea"], sea:["#e9f0f2","#dfe9ee"], land:"#efe2c8", coast:"#9b8462",
+    border:"rgba(70,45,20,.55)", grid:"rgba(60,40,20,.08)", ink:"#1d1712", sub:"#6d5d49", faint:"rgba(40,30,20,.6)",
+    panel:"rgba(80,50,20,.05)", accent:["#e11d48","#f97316","#d97706"], hres:"#111111", aifs:"#0f766e", aigfs:"#2563eb",
+    pal:[[0,"#fde68a"],[.12,"#fcd34d"],[.25,"#fb923c"],[.4,"#f43f5e"],[.55,"#e11d48"],[.7,"#be185d"],[.85,"#86198f"],[1,"#3b0764"]],
+    logo:"logo.png", blend:"multiply"},
+  ember:{label:"Ember", dark:true, bg:["#170b07","#2a120a","#0e0705"], sea:["#140a08","#21100b"], land:"#2a1c17", coast:"#b48a74",
+    border:"rgba(255,236,220,.38)", grid:"rgba(255,255,255,.06)", ink:"#fff6ee", sub:"#f3c9a8", faint:"rgba(255,246,238,.55)",
+    panel:"rgba(255,255,255,.05)", accent:["#ff4d2e","#ffa31a","#ffe066"], hres:"#ffffff", aifs:"#b9a7ff", aigfs:"#ff7ab8",
+    pal:[[0,"#4a1408"],[.12,"#7c1d0b"],[.25,"#b91c1c"],[.4,"#ea580c"],[.55,"#f59e0b"],[.7,"#facc15"],[.85,"#fef08a"],[1,"#ffffff"]],
+    logo:"logo_dark.png", blend:"lighter"}};
+const FORMATS = {post:{label:"Post 4:5",w:1080,h:1350}, square:{label:"Square",w:1080,h:1080},
+                 story:{label:"Story / Reel 9:16",w:1080,h:1920}, wide:{label:"Wide 16:9",w:1920,h:1080}};
+const VIEWS = {auto:{label:"Auto"}, bay:{label:"Bay of Bengal",b:[76,96,4,24]}, arb:{label:"Arabian Sea",b:[54,78,5,26]},
+               nio:{label:"Whole NIO",b:[48,100,-2,28]}, tn:{label:"TN · AP coast",b:[76,88,6,18.5]}};
+const WINDOWS = [72,120,168,240,360];
+const THRS = [{label:"Any low",kt:0},{label:"Depression 17 kt+",kt:17},{label:"Cyclone 34 kt+",kt:34}];
+const STRIKE_KM = 120, GRID = 0.25;
+const S = {run:null, area:"nio", win:240, thr:17, set:"ens", view:"auto", theme:"sunset", fmt:"post"};
+let DATA = null, LAND = null, MASK = null, MODEL = null, LOGOS = {};
+const $ = id => document.getElementById(id);
+const canvas = $("card"), ctx = canvas.getContext("2d");
+
+// ---------- helpers ----------------------------------------------------------------------------------
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+function hex2rgb(h){ h=h.replace("#",""); return [0,2,4].map(i=>parseInt(h.substr(i,2),16)); }
+function palColor(pal, x, a=1){
+  x = clamp(x,0,1); let i=0; while(i<pal.length-2 && x>pal[i+1][0]) i++;
+  const [x0,c0]=pal[i], [x1,c1]=pal[i+1], f=(x-x0)/((x1-x0)||1), A=hex2rgb(c0), B=hex2rgb(c1);
+  const c=A.map((v,j)=>Math.round(v+(B[j]-v)*f)); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+function runDate(key){ return new Date(Date.UTC(+key.slice(0,4), +key.slice(4,6)-1, +key.slice(6,8), +key.slice(8,10))); }
+const IST_MS = 5.5*3600e3;
+function ist(d){ return new Date(d.getTime()+IST_MS); }  // read with getUTC*
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDay(d){ const x=ist(d); return `${DOW[x.getUTCDay()]} ${x.getUTCDate()} ${MON[x.getUTCMonth()]}`; }
+function fmtIST(d){ const x=ist(d); return `${fmtDay(d)}, ${String(x.getUTCHours()).padStart(2,"0")}:${String(x.getUTCMinutes()).padStart(2,"0")} IST`; }
+function classOf(kt){ let c=-1; IMD.forEach((m,i)=>{ if(kt>=m.kt) c=i; }); return c; }
+function kmDeg(lat){ return [STRIKE_KM/111.2, STRIKE_KM/(111.2*Math.max(.2,Math.cos(lat*Math.PI/180)))]; }
+
+// ---------- land mask + coast sectors ------------------------------------------------------------------
+function decodeMask(L){
+  const bin = atob(L.mask), bits = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bits[i]=bin.charCodeAt(i);
+  return (lat,lon)=>{
+    if(lon<L.w||lon>=L.e||lat<=L.s||lat>L.n) return false;
+    const ix=Math.floor((lon-L.w)/L.res), iy=Math.floor((L.n-lat)/L.res), k=iy*L.nx+ix;
+    return (bits[k>>3]>>(7-(k&7)))&1; };
+}
+// Coast sectors (where a member first crosses onto land). Bubble offsets point inland, so the sea stays clear.
+const SECTORS = {
+  "Sri Lanka":[1,.3], "South Tamil Nadu":[-1,.2], "Delta Tamil Nadu":[-1,0], "North Tamil Nadu & Puducherry":[-1,0],
+  "South Andhra Pradesh":[-1,0], "North Andhra Pradesh":[-1,-.2], "Odisha":[-1,-.4], "West Bengal":[-.3,-1], "Bangladesh":[.3,-1],
+  "Myanmar":[1,0], "Thailand & Malaysia":[1,0], "Kerala":[1,0], "Karnataka":[1,0], "Goa & Konkan":[1,0],
+  "Gujarat":[1,-.3], "Pakistan":[0,-1], "Oman & Yemen":[-1,-.4], "Somalia":[-1,0], "Elsewhere":[0,1]};
+function sectorOf(lat, lon){
+  if(lon>98.6) return "Thailand & Malaysia";
+  if(lon>=92.2 && lat<21.9) return "Myanmar";
+  if(lon>=88.95 && lat>=20.4) return "Bangladesh";
+  if(lon>=86.6 && lat>=21.3) return "West Bengal";
+  if(lon>=84.4 && lat>=19.05) return "Odisha";
+  if(lon>=77.5 && lat<19.2){
+    if(lat<9.95 && lon>79.6) return "Sri Lanka";
+    if(lat<10.0) return "South Tamil Nadu";
+    if(lat<11.55) return "Delta Tamil Nadu";
+    if(lat<13.6) return "North Tamil Nadu & Puducherry";
+    if(lat<15.8) return "South Andhra Pradesh";
+    return "North Andhra Pradesh"; }
+  if(lon<77.5 && lon>=68 && lat>=7.5){
+    if(lat<12.75) return "Kerala";
+    if(lat<14.95) return "Karnataka";
+    if(lat<20.2) return "Goa & Konkan";
+    if(lon>=68.3 || lat<23.55) return "Gujarat"; }
+  if(lon>=61.5 && lon<68.3 && lat>=23.3) return "Pakistan";
+  if(lon<61.5) return lat>11.8 ? "Oman & Yemen" : "Somalia";
+  return "Elsewhere";
+}
+const SHORT = {"North Tamil Nadu & Puducherry":"N. Tamil Nadu & Puducherry","South Andhra Pradesh":"S. Andhra Pradesh",
+  "North Andhra Pradesh":"N. Andhra Pradesh","South Tamil Nadu":"S. Tamil Nadu","Thailand & Malaysia":"Thailand/Malaysia"};
+
+// ---------- tracks ---------------------------------------------------------------------------------------
+function areaOK(t){
+  const b = t.id.slice(-1);
+  if(S.area==="nio") return b==="A"||b==="B";
+  if(S.area==="bay") return b==="B";
+  if(S.area==="arb") return b==="A";
+  return (t.n||"").startsWith(S.area+" ") || (t.n||"")===S.area;   // an official system, e.g. 92B
+}
+function interp(p, maxTau){   // [[tau,lat,lon,mslp,wind]] every 6 h -> hourly points
+  const pts = p.filter(r=>r[1]!=null && r[2]!=null).sort((a,b)=>a[0]-b[0]), out=[];
+  for(let i=0;i<pts.length;i++){
+    const a=pts[i]; if(a[0]>maxTau) break;
+    out.push({t:a[0], lat:a[1], lon:a[2], w:a[4]??0});
+    const b=pts[i+1]; if(!b || b[0]-a[0]>12) continue;
+    for(let h=a[0]+1; h<b[0] && h<=maxTau; h++){ const f=(h-a[0])/(b[0]-a[0]);
+      out.push({t:h, lat:a[1]+(b[1]-a[1])*f, lon:a[2]+(b[2]-a[2])*f, w:(a[4]??0)+((b[4]??0)-(a[4]??0))*f}); }
+  }
+  return out;
+}
+function nearestKey(prod, key){
+  const ks = Object.keys(DATA.products[prod]||{}).filter(k=>(DATA.products[prod][k]||[]).length).sort();
+  if(ks.includes(key)) return key;
+  const older = ks.filter(k=>k<=key); return older.length ? older[older.length-1] : null;
+}
+function runReach(key){ let m=0; (DATA.products.ens[key]||[]).forEach(t=>t.p.forEach(r=>{ if(r[0]>m) m=r[0]; })); return m; }
+
+// ---------- the numbers ------------------------------------------------------------------------------------
+const G = {w:38, e:118, s:-8, n:40}; G.nx=Math.round((G.e-G.w)/GRID); G.ny=Math.round((G.n-G.s)/GRID);
+function compute(key){
+  const reach = Math.max(6, Math.min(S.win, runReach(key) || S.win)), bins = Math.floor(reach/6)+1;
+  const voices = [];   // one entry per member (or deterministic model)
+  const byMem = {};
+  (DATA.products.ens[key]||[]).forEach(t=>{ (byMem[t.m] ||= []).push(t); });
+  const nEns = Math.max(51, Object.keys(byMem).length);
+  for(let i=0;i<nEns;i++){ const m=Object.keys(byMem)[i]; voices.push({kind:"ens", tracks:(m!=null?byMem[m]:[])}); }
+  const dets = {};
+  for(const prod of ["hres","aifs","aigfs"]){
+    const k = nearestKey(prod, key); dets[prod] = {key:k, tracks: k ? DATA.products[prod][k].filter(areaOK) : []};
+    if(S.set==="all") voices.push({kind:prod, tracks: k ? DATA.products[prod][k] : [], shift: k ? (runDate(key)-runDate(k))/3600e3 : 0});
+  }
+  const N = voices.length, nCells = G.nx*G.ny;
+  const binCount = Array.from({length:bins}, ()=>new Uint16Array(nCells));
+  const landfalls = [], peak = [], series = [];
+  const first = new Int16Array(nCells);
+  voices.forEach((v, vi)=>{
+    first.fill(32767); let lf=null, pk=0; const pos=[];
+    const shift = v.shift||0;     // a deterministic run older than the ENS run: line its hours up with the ENS run
+    v.tracks.filter(areaOK).forEach(t=>{
+      const seg=[]; pos.push(seg);
+      const pts = interp(t.p.map(r=>[r[0]-shift, r[1], r[2], r[3], r[4]]).filter(r=>r[0]>=0), reach);
+      let wasSea=false, recent=[];
+      pts.forEach((q, qi)=>{
+        recent.push(q.w); if(recent.length>13) recent.shift();
+        const land = MASK(q.lat, q.lon);
+        if(q.w>=S.thr || S.thr===0){
+          if(q.w>pk) pk=q.w;
+          if(q.t%3===0) seg.push(q);
+          const [dy,dx] = kmDeg(q.lat), i0=Math.floor((q.lon-dx-G.w)/GRID), i1=Math.floor((q.lon+dx-G.w)/GRID),
+                j0=Math.floor((G.n-q.lat-dy)/GRID), j1=Math.floor((G.n-q.lat+dy)/GRID);
+          for(let j=Math.max(0,j0); j<=Math.min(G.ny-1,j1); j++){
+            const clat=G.n-(j+.5)*GRID, ddy=(clat-q.lat)/dy;
+            for(let i=Math.max(0,i0); i<=Math.min(G.nx-1,i1); i++){
+              const clon=G.w+(i+.5)*GRID, ddx=(clon-q.lon)/dx;
+              if(ddx*ddx+ddy*ddy<=1){ const c=j*G.nx+i; if(q.t<first[c]) first[c]=q.t; } } }
+        }
+        if(land && wasSea){
+          const wmax = Math.max(...recent);
+          if((wmax>=S.thr || S.thr===0) && (!lf || q.t<lf.t))
+            lf = {t:q.t, lat:q.lat, lon:q.lon, w:wmax, sector:sectorOf(q.lat,q.lon), kind:v.kind};
+        }
+        if(!land) wasSea=true;
+      });
+    });
+    for(let c=0;c<nCells;c++) if(first[c]<32767) binCount[Math.min(bins-1, Math.ceil(first[c]/6))][c]++;
+    if(lf) landfalls.push(lf);
+    peak.push(pk); series.push(pos);
+  });
+  for(let b=1;b<bins;b++){ const A=binCount[b-1], B=binCount[b]; for(let c=0;c<nCells;c++) B[c]+=A[c]; }
+  const sys = (DATA.systems||[]).filter(s=> S.area==="nio" ? /[AB]$/.test(s.id) : S.area==="bay" ? /B$/.test(s.id)
+                                         : S.area==="arb" ? /A$/.test(s.id) : s.id===S.area);
+  return {key, reach, bins, N, nEns, binCount, landfalls, peak, series, dets, sys, run:runDate(key)};
+}
+function stats(M, tLim){
+  tLim = tLim==null ? M.reach : tLim;
+  const lf = M.landfalls.filter(l=>l.t<=tLim), by={};
+  lf.forEach(l=>{ (by[l.sector] ||= {n:0, lat:0, lon:0, t:[]}); const s=by[l.sector]; s.n++; s.lat+=l.lat; s.lon+=l.lon; s.t.push(l.t); });
+  const sectors = Object.entries(by).map(([k,s])=>({name:k, n:s.n, p:s.n/M.N, lat:s.lat/s.n, lon:s.lon/s.n, t:s.t.sort((a,b)=>a-b)}))
+                        .sort((a,b)=>b.n-a.n);
+  const peakAt = tLim>=M.reach ? M.peak : M.series.map(segs=>segs.flat().filter(q=>q.t<=tLim).reduce((m,q)=>Math.max(m,q.w),0));
+  const ladder = IMD.map(c=>peakAt.filter(w=>w>=c.kt).length/M.N);
+  const days = Math.ceil((M.reach+ (ist(M.run).getUTCHours()))/24)+0;
+  const d0 = Date.UTC(ist(M.run).getUTCFullYear(), ist(M.run).getUTCMonth(), ist(M.run).getUTCDate());
+  const perDay = [];
+  for(let d=0; d<Math.min(days,15); d++) perDay.push({date:new Date(d0+d*864e5-IST_MS), n:0});
+  lf.forEach(l=>{ const x=ist(new Date(M.run.getTime()+l.t*3600e3)); const d=Math.floor((Date.UTC(x.getUTCFullYear(),x.getUTCMonth(),x.getUTCDate())-d0)/864e5);
+                  if(perDay[d]) perDay[d].n++; });
+  const any = peakAt.filter(w=>w>0).length/M.N;
+  const ts = lf.map(l=>l.t).sort((a,b)=>a-b), med = ts.length ? ts[Math.floor(ts.length/2)] : null;
+  return {sectors, ladder, perDay, nLand:lf.length, any, medianT:med};
+}
+function probAt(M, tLim){ const b = Math.min(M.bins-1, Math.floor((tLim==null?M.reach:tLim)/6)); return M.binCount[b]; }
+
+// ---------- drawing ------------------------------------------------------------------------------------------
+let TH = THEMES.sunset;
+function font(w, px, fam){ return `${w} ${px}px ${fam==="d" ? '"Bebas Neue", Impact, sans-serif' : 'Outfit, system-ui, sans-serif'}`; }
+function rrect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function grad(x0,x1,cols){ const g=ctx.createLinearGradient(x0,0,x1,0); cols.forEach((c,i)=>g.addColorStop(i/(cols.length-1),c)); return g; }
+function text(s,x,y,f,col,al="left",bl="alphabetic"){ ctx.font=f; ctx.fillStyle=col; ctx.textAlign=al; ctx.textBaseline=bl; ctx.fillText(s,x,y); }
+function fitText(s, maxW, w, px, fam){ let p=px; ctx.font=font(w,p,fam); while(ctx.measureText(s).width>maxW && p>10){ p-=1; ctx.font=font(w,p,fam); } return p; }
+
+function layout(fmt, W, H){
+  const m = 40;
+  if(fmt==="post")   return {head:[0,0,W,190], map:[m,200,W-2*m,626], line:[m,840,W-2*m,64], land:[m,918,W*0.5-m-10,350], ladder:[W*0.5+10,918,W*0.5-m-10,200], days:[W*0.5+10,1130,W*0.5-m-10,138], foot:[0,H-66,W,66]};
+  if(fmt==="square") return {head:[0,0,W,160], map:[m,170,W-2*m,506], line:[m,686,W-2*m,58], land:[m,756,W*0.5-m-10,262], ladder:[W*0.5+10,756,W*0.5-m-10,262], days:null, foot:[0,H-58,W,58]};
+  if(fmt==="story")  return {head:[0,0,W,290], map:[m,302,W-2*m,830], line:[m,1150,W-2*m,110], land:[m,1276,W-2*m,296], ladder:[m,1588,W*0.56-m,232], days:[W*0.56+12,1588,W*0.44-m-12,232], foot:[0,H-84,W,84]};
+  return {head:[0,0,W,150], map:[m,160,1150,850], line:[1230,160,W-1230-m,96], land:[1230,272,W-1230-m,330], ladder:[1230,618,(W-1230-m)*0.55,392], days:[1230+(W-1230-m)*0.55+16,618,(W-1230-m)*0.45-16,392], foot:[0,H-62,W,62]};
+}
+function viewBox(M, st, rect){
+  let b;
+  if(S.view!=="auto") b = VIEWS[S.view].b.slice();
+  else {
+    const P = probAt(M), pts=[];
+    for(let c=0;c<P.length;c++) if(P[c]/M.N>=0.1){ const j=Math.floor(c/G.nx), i=c%G.nx; pts.push([G.w+(i+.5)*GRID, G.n-(j+.5)*GRID]); }
+    stats(M).sectors.filter(s=>s.p>=0.04).forEach(s=>{ for(let k=0;k<20;k++) pts.push([s.lon,s.lat]); });
+    M.sys.forEach(s=>pts.push([s.lon,s.lat]));
+    if(pts.length<3) b = S.area==="arb" ? VIEWS.arb.b.slice() : S.area==="nio" ? VIEWS.nio.b.slice() : VIEWS.bay.b.slice();
+    else { const xs=pts.map(p=>p[0]).sort((a,b)=>a-b), ys=pts.map(p=>p[1]).sort((a,b)=>a-b), q=a=>a[Math.floor(a.length*.03)], Q=a=>a[Math.ceil(a.length*.97)-1];
+      b=[q(xs)-2.5, Q(xs)+2.5, q(ys)-2, Q(ys)+2]; }
+  }
+  // match the map frame's shape (equirectangular with cos(lat) scaling)
+  const [ , , w, h] = rect, midLat=(b[2]+b[3])/2, cosl=Math.cos(midLat*Math.PI/180);
+  let lonSpan=b[1]-b[0], latSpan=b[3]-b[2];
+  lonSpan=Math.max(lonSpan, 9); latSpan=Math.max(latSpan, 7);
+  const want = w/h;   // = lonSpan*cosl / latSpan
+  if(lonSpan*cosl/latSpan < want) lonSpan = latSpan*want/cosl; else latSpan = lonSpan*cosl/want;
+  const cx=(b[0]+b[1])/2, cy=(b[2]+b[3])/2;
+  return {w:cx-lonSpan/2, e:cx+lonSpan/2, s:cy-latSpan/2, n:cy+latSpan/2};
+}
+
+function drawCard(M, tLim, anim){
+  const F = FORMATS[S.fmt], W=F.w, H=F.h, L=layout(S.fmt, W, H);
+  if(canvas.width!==W || canvas.height!==H){ canvas.width=W; canvas.height=H; }
+  const st = stats(M, tLim), live = tLim!=null && tLim<M.reach;
+  // background
+  const bg = ctx.createLinearGradient(0,0,W*0.3,H); TH.bg.forEach((c,i)=>bg.addColorStop(i/(TH.bg.length-1),c));
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+  if(TH.dark){ const r=ctx.createRadialGradient(W*0.85,H*0.05,10,W*0.85,H*0.05,W*0.8); r.addColorStop(0,"rgba(255,61,127,.22)"); r.addColorStop(1,"rgba(255,61,127,0)"); ctx.fillStyle=r; ctx.fillRect(0,0,W,H); }
+  drawHeader(M, st, L.head, tLim, live);
+  drawMap(M, st, L.map, tLim);
+  drawHeadline(M, st, L.line, live);
+  drawLandfall(M, st, L.land);
+  drawLadder(M, st, L.ladder);
+  if(L.days) drawDays(M, st, L.days);
+  drawFooter(L.foot);
+  return st;
+}
+function drawHeader(M, st, [x,y,w,h], tLim, live){
+  const big = S.fmt==="story" ? 150 : S.fmt==="wide" ? 96 : S.fmt==="square" ? 86 : 100;
+  ctx.font=font(400,big,"d"); ctx.textBaseline="alphabetic"; ctx.textAlign="left";
+  ctx.fillStyle=grad(40, 40+ctx.measureText("CYCLONE ODDS").width, TH.accent); ctx.fillText("CYCLONE ODDS", 40, y+big*0.92+(S.fmt==="story"?30:10));
+  const area = S.area==="nio" ? "North Indian Ocean" : S.area==="bay" ? "Bay of Bengal" : S.area==="arb" ? "Arabian Sea" : S.area;
+  const who = S.set==="all" ? `ECMWF ENS ${M.nEns} + IFS HRES + AIFS + AI-GFS = ${M.N} members` : `ECMWF ENS · ${M.N} members`;
+  const yy = y+big*0.92+(S.fmt==="story"?30:10);
+  const l1 = `${area} · ${who}`;
+  const l2 = live ? `T+${tLim} h · ${fmtIST(new Date(M.run.getTime()+tLim*3600e3))}`
+                  : `Run ${String(M.run.getUTCHours()).padStart(2,"0")}Z ${fmtDay(M.run).slice(4)} · next ${Math.round(M.reach/24)} days to ${fmtDay(new Date(M.run.getTime()+M.reach*3600e3))}`;
+  const maxW = w - 80 - (S.fmt==="story"? 0 : 200);
+  if(S.fmt==="wide"){ // one line beside the title
+    ctx.font=font(400,big,"d"); const tx=40+ctx.measureText("CYCLONE ODDS").width+30, mw=w-tx-200;
+    text(l1, tx, y+56, font(600, fitText(l1, mw, 600, 26), "b"), TH.sub);
+    text(l2, tx, y+92, font(live?800:400, fitText(l2, mw, live?800:400, 24), "b"), live?TH.accent[2]:TH.faint);
+  } else {
+    const a = S.fmt==="story"?32:S.fmt==="square"?22:24;
+    text(l1, 42, yy+a+8, font(600, fitText(l1, maxW, 600, a), "b"), TH.sub);
+    text(l2, 42, yy+2*a+16, font(live?800:400, fitText(l2, maxW, live?800:400, a-2), "b"), live?TH.accent[2]:TH.faint);
+  }
+  // brand
+  const logo = LOGOS[TH.logo], ls = S.fmt==="story" ? 200 : S.fmt==="square" ? 124 : S.fmt==="wide" ? 112 : 140;
+  if(logo && logo.complete) ctx.drawImage(logo, w-ls-28, S.fmt==="story"?24:12, ls, ls*logo.height/logo.width);
+  // thin accent rule
+  ctx.fillStyle=grad(0,W(),TH.accent); ctx.globalAlpha=.9; ctx.fillRect(0, y+h-4, w, 4); ctx.globalAlpha=1;
+}
+function W(){ return canvas.width; }
+
+function drawMap(M, st, rect, tLim){
+  const [x,y,w,h]=rect, v=viewBox(M, st, rect);
+  const X = lon=>x+(lon-v.w)/(v.e-v.w)*w, Y = lat=>y+(v.n-lat)/(v.n-v.s)*h;
+  ctx.save(); rrect(x,y,w,h,26); ctx.clip();
+  const sg=ctx.createLinearGradient(0,y,0,y+h); sg.addColorStop(0,TH.sea[0]); sg.addColorStop(1,TH.sea[1]); ctx.fillStyle=sg; ctx.fillRect(x,y,w,h);
+  // graticule
+  ctx.strokeStyle=TH.grid; ctx.lineWidth=1; ctx.setLineDash([3,6]);
+  const step = (v.e-v.w)>30 ? 10 : 5;
+  for(let lo=Math.ceil(v.w/step)*step; lo<v.e; lo+=step){ ctx.beginPath(); ctx.moveTo(X(lo),y); ctx.lineTo(X(lo),y+h); ctx.stroke(); }
+  for(let la=Math.ceil(v.s/step)*step; la<v.n; la+=step){ ctx.beginPath(); ctx.moveTo(x,Y(la)); ctx.lineTo(x+w,Y(la)); ctx.stroke(); }
+  ctx.setLineDash([]);
+  // land
+  ctx.fillStyle=TH.land; ctx.strokeStyle=TH.coast; ctx.lineWidth=1.3;
+  LAND.poly.forEach(([lo,la])=>{ ctx.beginPath(); lo.forEach((o,i)=>{ const px=X(o), py=Y(la[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py); }); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  // borders (Government of India view, from data.json)
+  ctx.strokeStyle=TH.border; ctx.lineWidth=1.1;
+  (DATA.boundary||[]).forEach(s=>{ ctx.beginPath(); s.lon.forEach((o,i)=>{ const px=X(o), py=Y(s.lat[i]); i?ctx.lineTo(px,py):ctx.moveTo(px,py); }); ctx.stroke(); });
+  // strike-probability glow + honeycomb
+  const P = probAt(M, tLim), N=M.N;
+  const glow = document.createElement("canvas"); glow.width=G.nx; glow.height=G.ny;
+  const gx = glow.getContext("2d"), img = gx.createImageData(G.nx, G.ny);
+  for(let c=0;c<P.length;c++){ const p=P[c]/N; if(p<0.04) continue; const col=hex2rgb(rgbHex(palColor(TH.pal,p/0.9)));
+    img.data[c*4]=col[0]; img.data[c*4+1]=col[1]; img.data[c*4+2]=col[2]; img.data[c*4+3]=Math.round(255*Math.min(1, p*1.6)); }
+  gx.putImageData(img,0,0);
+  ctx.save(); ctx.globalCompositeOperation=TH.blend; ctx.globalAlpha=TH.dark?.55:.45; ctx.imageSmoothingEnabled=true;
+  ctx.drawImage(glow, X(G.w), Y(G.n), X(G.e)-X(G.w), Y(G.s)-Y(G.n)); ctx.restore();
+  const r = S.fmt==="wide" ? 12 : 10.5, dx=Math.sqrt(3)*r, dy=1.5*r;
+  for(let row=0, py=y; py<y+h+r; row++, py+=dy){
+    for(let px=x+(row%2?dx/2:0); px<x+w+r; px+=dx){
+      const lon=v.w+(px-x)/w*(v.e-v.w), lat=v.n-(py-y)/h*(v.n-v.s);
+      const i=Math.floor((lon-G.w)/GRID), j=Math.floor((G.n-lat)/GRID); if(i<0||j<0||i>=G.nx||j>=G.ny) continue;
+      const p=P[j*G.nx+i]/N; if(p<0.05) continue;
+      ctx.fillStyle=palColor(TH.pal, p/0.9, Math.min(1,.45+p*1.1));
+      ctx.beginPath(); for(let k=0;k<6;k++){ const a=Math.PI/180*(60*k-30), rr=r*0.86; k?ctx.lineTo(px+rr*Math.cos(a),py+rr*Math.sin(a)):ctx.moveTo(px+rr*Math.cos(a),py+rr*Math.sin(a)); }
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  // deterministic tracks
+  const dl = [["hres","IFS HRES",TH.hres,[]],["aifs","AIFS",TH.aifs,[10,7]],["aigfs","AI-GFS",TH.aigfs,[2,6]]];
+  const lim = tLim==null ? M.reach : tLim;
+  dl.forEach(([k,lab,col,dash])=>{
+    const d=M.dets[k]; if(!d.key) return; const shift=(M.run-runDate(d.key))/3600e3;
+    d.tracks.forEach(t=>{ const pts=t.p.filter(r=>r[1]!=null && r[0]-shift>=0 && r[0]-shift<=lim);
+      if(pts.length<2) return;
+      ctx.save(); ctx.setLineDash(dash); ctx.lineCap="round"; ctx.lineJoin="round";
+      ctx.strokeStyle=TH.dark?"rgba(0,0,0,.55)":"rgba(255,255,255,.8)"; ctx.lineWidth=7; ctx.beginPath(); pts.forEach((r,i)=>i?ctx.lineTo(X(r[2]),Y(r[1])):ctx.moveTo(X(r[2]),Y(r[1]))); ctx.stroke();
+      ctx.strokeStyle=col; ctx.lineWidth=3.2; ctx.stroke(); ctx.restore();
+      pts.forEach(r=>{ if((r[0]-shift)%24===0){ ctx.fillStyle=col; ctx.beginPath(); ctx.arc(X(r[2]),Y(r[1]),4.2,0,7); ctx.fill(); } }); });
+  });
+  // moving members during the reel
+  if(tLim!=null && tLim<M.reach){
+    M.series.flat().forEach(ps=>{ const trail=ps.filter(q=>q.t<=tLim && q.t>tLim-24); if(!trail.length) return;
+      const q=trail[trail.length-1]; if(tLim-q.t>4) return;
+      ctx.strokeStyle=TH.dark?"rgba(255,255,255,.35)":"rgba(0,0,0,.35)"; ctx.lineWidth=1.6; ctx.beginPath(); trail.forEach((r,i)=>i?ctx.lineTo(X(r.lon),Y(r.lat)):ctx.moveTo(X(r.lon),Y(r.lat))); ctx.stroke();
+      const c=classOf(q.w); ctx.fillStyle=palColor(TH.pal, c<0?.05:(c+1)/7); ctx.strokeStyle=TH.dark?"#fff":"#000"; ctx.lineWidth=1.2;
+      ctx.beginPath(); ctx.arc(X(q.lon),Y(q.lat),5.5,0,7); ctx.fill(); ctx.stroke(); });
+  }
+  // member landfalls
+  M.landfalls.filter(l=>l.t<=lim).forEach(l=>{ const c=classOf(l.w), px=X(l.lon), py=Y(l.lat), s=6.5;
+    ctx.fillStyle=palColor(TH.pal, c<0?.08:(c+1)/7); ctx.strokeStyle=TH.dark?"#fff":"#2b1d10"; ctx.lineWidth=1.3;
+    ctx.beginPath(); ctx.moveTo(px,py-s); ctx.lineTo(px+s,py); ctx.lineTo(px,py+s); ctx.lineTo(px-s,py); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+  // systems now
+  if(tLim==null || tLim<=6) M.sys.forEach(s=>{ const px=X(s.lon), py=Y(s.lat);
+    for(const [rr,a] of [[22,.25],[14,.5]]){ ctx.strokeStyle=TH.accent[0]; ctx.globalAlpha=a; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,rr,0,7); ctx.stroke(); }
+    ctx.globalAlpha=1; ctx.fillStyle=TH.accent[0]; ctx.beginPath(); ctx.arc(px,py,6,0,7); ctx.fill();
+    pill(`${s.id}${s.name&&s.name!=="INVEST"?" "+s.name:" now"}${s.wind_kt?" · "+s.wind_kt+" kt":""}`, px+26, py-14, 22, TH.dark?"rgba(0,0,0,.55)":"rgba(255,255,255,.85)", TH.ink); });
+  // landfall bubbles (top sectors)
+  const placed=[];
+  st.sectors.filter(s=>s.p>=0.04).slice(0,5).forEach((s,i)=>{
+    const o=SECTORS[s.name]||[0,1], ax=X(s.lon), ay=Y(s.lat);
+    const pct=`${Math.round(s.p*100)}%`, nm=(SHORT[s.name]||s.name);
+    const big = i===0, fs = big ? 40 : 30, ns = big ? 19 : 16;
+    ctx.font=font(400,fs,"d"); const pw=ctx.measureText(pct).width; ctx.font=font(600,ns,"b"); const nw=ctx.measureText(nm).width;
+    const bw=Math.max(pw,nw)+28, bh=fs+ns+18;
+    const hit=(X0,Y0)=>placed.some(p=>!(X0+bw+6<p[0]||X0>p[0]+p[2]+6||Y0+bh+6<p[1]||Y0>p[1]+p[3]+6));
+    let bx0=ax+o[0]*95 - (o[0]<0?bw:o[0]>0?0:bw/2), by0=ay+o[1]*80 - (o[1]>0?0:bh/2), bx=bx0, by=by0;
+    for(let k=1;k<60;k++){ const cx=clamp(bx,x+8,x+w-bw-8), cy=clamp(by,y+8,y+h-bh-8); if(!hit(cx,cy)){ bx=cx; by=cy; break; }
+      const d=Math.ceil(k/2)*14*(k%2?1:-1); if(Math.abs(o[0])>=Math.abs(o[1])) by=by0+d; else bx=bx0+d; }
+    bx=clamp(bx,x+8,x+w-bw-8); by=clamp(by,y+8,y+h-bh-8);
+    placed.push([bx,by,bw,bh]);
+    ctx.strokeStyle=TH.dark?"rgba(255,255,255,.75)":"rgba(0,0,0,.6)"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(clamp(ax,bx,bx+bw),clamp(ay,by,by+bh)); ctx.stroke();
+    ctx.fillStyle=TH.dark?"#fff":"#1d1712"; ctx.beginPath(); ctx.arc(ax,ay,5,0,7); ctx.fill();
+    rrect(bx,by,bw,bh,14); ctx.fillStyle = big ? grad(bx,bx+bw,TH.accent) : (TH.dark?"rgba(20,8,40,.86)":"rgba(255,255,255,.92)"); ctx.fill();
+    if(!big){ ctx.strokeStyle=palColor(TH.pal,.6); ctx.lineWidth=2; ctx.stroke(); }
+    text(pct, bx+14, by+fs+4, font(400,fs,"d"), big?"#1a0a2a":TH.ink);
+    text(nm, bx+14, by+fs+ns+8, font(600,ns,"b"), big?"#1a0a2a":TH.sub);
+  });
+  ctx.restore();
+  // frame
+  rrect(x,y,w,h,26); ctx.strokeStyle=TH.dark?"rgba(255,255,255,.14)":"rgba(0,0,0,.12)"; ctx.lineWidth=2; ctx.stroke();
+  // legend: colour bar + lines
+  const lw = Math.min(330, w*0.42), lx=x+w-lw-18, ly=y+h-58;
+  rrect(lx-12, ly-30, lw+24, 78, 14); ctx.fillStyle=TH.dark?"rgba(10,4,24,.72)":"rgba(255,255,255,.85)"; ctx.fill();
+  text("Storm centre within 120 km", lx, ly-10, font(600,15,"b"), TH.sub);
+  for(let i=0;i<lw;i++){ ctx.fillStyle=palColor(TH.pal,(0.03+i/lw*0.87)/0.9); ctx.fillRect(lx+i, ly, 1, 12); }
+  [[.05,"5"],[.25,"25"],[.5,"50"],[.75,"75"],[.9,"90%"]].forEach(([p,s])=>text(s, lx+(p-0.03)/0.87*lw, ly+32, font(600,14,"b"), TH.faint, "center"));
+  const ll = [[TH.hres,"HRES",[]],[TH.aifs,"AIFS",[10,7]],[TH.aigfs,"AI-GFS",[2,6]]].filter((_,i)=>M.dets[["hres","aifs","aigfs"][i]].tracks.length);
+  let gx0 = x+18; const gy = y+h-22;
+  if(ll.length || M.landfalls.length){
+    const items = ll.length + (M.landfalls.length?1:0), boxW = Math.min(w-lw-70, 118*items+20);
+    rrect(x+8, gy-24, boxW, 40, 12); ctx.fillStyle=TH.dark?"rgba(10,4,24,.72)":"rgba(255,255,255,.85)"; ctx.fill();
+    ll.forEach(([c,l,d])=>{ ctx.save(); ctx.setLineDash(d); ctx.strokeStyle=c; ctx.lineWidth=3.2; ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(gx0,gy-4); ctx.lineTo(gx0+30,gy-4); ctx.stroke(); ctx.restore();
+      text(l, gx0+38, gy+1, font(600,15,"b"), TH.ink); gx0+=118; });
+    if(M.landfalls.length){ const s=6, px=gx0+8, py=gy-4; ctx.fillStyle=palColor(TH.pal,.6); ctx.beginPath(); ctx.moveTo(px,py-s); ctx.lineTo(px+s,py); ctx.lineTo(px,py+s); ctx.lineTo(px-s,py); ctx.fill();
+      text("landfall", gx0+20, gy+1, font(600,15,"b"), TH.ink); }
+  }
+}
+function rgbHex(rgba){ const m=rgba.match(/\d+/g); return "#"+m.slice(0,3).map(v=>(+v).toString(16).padStart(2,"0")).join(""); }
+function pill(s, x, y, px, bg, col){ ctx.font=font(600,px,"b"); const w=ctx.measureText(s).width+20; rrect(x,y-px,w,px+12,10); ctx.fillStyle=bg; ctx.fill(); text(s,x+10,y+1,font(600,px,"b"),col); }
+
+function headlineParts(M, st){
+  const pCS = Math.round(st.ladder[2]*100), pD = Math.round(st.ladder[0]*100), top = st.sectors[0];
+  const parts = [];
+  if(st.any < 0.1 && S.thr>0) return [["Quiet spell: ",0],[`${Math.round((1-st.any)*100)}%`,1],[" of members form no depression in this window",0]];
+  parts.push([`${pCS}%`,1],[" chance of a cyclone",0]);
+  if(top && top.p>=0.05){ parts.push(["  ·  most landfalls: ",0],[SHORT[top.name]||top.name,1],[` ${Math.round(top.p*100)}%`,1]);
+    if(st.medianT!=null) parts.push([" around ",0],[fmtDay(new Date(M.run.getTime()+st.medianT*3600e3)),1]); }
+  else if(pD>0) parts.push(["  ·  ",0],[`${pD}%`,1],[" reach depression",0]);
+  return parts;
+}
+function drawHeadline(M, st, [x,y,w,h], live){
+  rrect(x,y,w,h,18); ctx.fillStyle=TH.panel; ctx.fill();
+  const parts = headlineParts(M, st);
+  let px = S.fmt==="story" ? 40 : S.fmt==="wide" ? 26 : 30;
+  const measure = p => { let t=0; parts.forEach(([s,b])=>{ ctx.font=font(b?800:400,p,"b"); t+=ctx.measureText(s).width; }); return t; };
+  const lines = (S.fmt==="story"||S.fmt==="wide") ? 2 : 1;
+  if(lines===1){ while(measure(px)>w-150 && px>14) px--; drawRun(parts, x+20, y+h/2+px*0.36, px); }
+  else { // split at the "·"
+    const i = parts.findIndex(p=>p[0].includes("·")); const a = i>0?parts.slice(0,i):parts, b = i>0?[[parts[i][0].replace(/^\s*·\s*/,"").replace(/^\w/,c=>c.toUpperCase()),0],...parts.slice(i+1)]:[];
+    const meas = (ps,p)=>ps.reduce((t,[s,bb])=>{ ctx.font=font(bb?800:400,p,"b"); return t+ctx.measureText(s).width; },0);
+    while((meas(a,px)>w-40 || meas(b,px)>w-40) && px>14) px--;
+    drawRun(a, x+20, y+h*0.42, px); if(b.length) drawRun(b, x+20, y+h*0.42+px*1.25, px*0.82);
+  }
+  // run-to-run swing
+  if(MODEL && MODEL.trend!=null && !live && lines===1){ const d=MODEL.trend, s=(d>0?"▲ +":d<0?"▼ ":"● ")+d+" pts";
+    ctx.font=font(800,20,"b"); const tw=ctx.measureText(s).width; text("vs last run", x+w-20, y+h/2-6, font(400,13,"b"), TH.faint, "right");
+    text(s, x+w-20, y+h/2+16, font(800,20,"b"), d>0?TH.accent[0]:d<0?TH.aifs:TH.sub, "right"); }
+}
+function drawRun(parts, x, y, px){ let cx=x; parts.forEach(([s,b])=>{ ctx.font=font(b?800:400,px,"b"); ctx.fillStyle=b?TH.accent[b===1?1:0]:TH.ink; if(b&&TH.dark) ctx.fillStyle=TH.accent[2];
+  ctx.textAlign="left"; ctx.textBaseline="alphabetic"; ctx.fillText(s,cx,y); cx+=ctx.measureText(s).width; }); }
+
+function panelTitle(t, x, y, sub, maxW){ text(t, x, y, font(400, 34, "d"), TH.ink);
+  if(sub){ ctx.font=font(400,34,"d"); const w=ctx.measureText(t).width; const room=(maxW||9999)-w-12; if(room<60) return;
+    text(sub, x+w+12, y-2, font(400, fitText(sub, room, 400, 15), "b"), TH.faint); } }
+function drawLandfall(M, st, [x,y,w,h]){
+  rrect(x,y,w,h,22); ctx.fillStyle=TH.panel; ctx.fill();
+  panelTitle("WHERE IT HITS", x+20, y+44, "first landfall", w-40);
+  const rows = st.sectors.slice(0, S.fmt==="square"?4:5), noLand = 1 - st.nLand/M.N;
+  const all = rows.map(s=>[SHORT[s.name]||s.name, s.p, `${s.n}/${M.N}`]).concat([["Stays at sea / no system", noLand, `${M.N-st.nLand}/${M.N}`]]);
+  const top = y+66, rh = Math.min(48, (h-80)/all.length), bw = w-40;
+  all.forEach(([nm,p,cnt],i)=>{
+    const ry = top+i*rh, last = i===all.length-1;
+    text(nm, x+20, ry+18, font(600, S.fmt==="wide"?18:17, "b"), last?TH.faint:TH.ink);
+    text(`${Math.round(p*100)}%`, x+w-20, ry+19, font(400, 26, "d"), last?TH.faint:TH.ink, "right");
+    rrect(x+20, ry+25, bw, 10, 5); ctx.fillStyle=TH.dark?"rgba(255,255,255,.08)":"rgba(0,0,0,.07)"; ctx.fill();
+    if(p>0){ rrect(x+20, ry+25, Math.max(10,bw*p), 10, 5); ctx.fillStyle = last ? (TH.dark?"rgba(255,255,255,.3)":"rgba(0,0,0,.25)") : grad(x+20, x+20+bw, TH.accent); ctx.fill(); }
+  });
+  if(!rows.length) text("No member makes landfall in this window", x+20, top+rh+40, font(600,17,"b"), TH.sub);
+}
+function drawLadder(M, st, [x,y,w,h]){
+  rrect(x,y,w,h,22); ctx.fillStyle=TH.panel; ctx.fill();
+  panelTitle("HOW STRONG", x+20, y+44, "chance of reaching at least", w-40);
+  const n=IMD.length, gap=8, cw=(w-40-gap*(n-1))/n, base=y+h-40, top=y+70, hh=base-top-22;
+  IMD.forEach((c,i)=>{
+    const p=st.ladder[i], cx=x+20+i*(cw+gap), bh=p>0 ? Math.max(10, hh*p) : 0;
+    rrect(cx, base-hh, cw, hh, 8); ctx.fillStyle=TH.dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.05)"; ctx.fill();
+    if(bh){ rrect(cx, base-bh, cw, bh, 8); ctx.fillStyle=palColor(TH.pal,(i+1)/n); ctx.fill(); }
+    text(`${Math.round(p*100)}%`, cx+cw/2, base-bh-6, font(400, cw>60?26:22, "d"), TH.ink, "center");
+    text(c.k, cx+cw/2, base+20, font(800, cw>60?16:14, "b"), TH.ink, "center");
+    text(`${c.kt}+`, cx+cw/2, base+35, font(400, 11, "b"), TH.faint, "center");
+  });
+}
+function drawDays(M, st, [x,y,w,h]){
+  rrect(x,y,w,h,22); ctx.fillStyle=TH.panel; ctx.fill();
+  panelTitle("WHEN", x+20, y+40, "% of members landing each day (IST)", w-40);
+  const days = st.perDay, n=days.length; if(!n) return;
+  const max = Math.max(1, ...days.map(d=>d.n)), top=y+58, cell=(w-40)/n, ch=h-top+y-34;
+  days.forEach((d,i)=>{
+    const cx=x+20+i*cell, f=d.n/max;
+    rrect(cx+2, top, cell-4, ch, 6); ctx.fillStyle = d.n ? palColor(TH.pal, .15+.85*f, .35+.65*f) : (TH.dark?"rgba(255,255,255,.05)":"rgba(0,0,0,.05)"); ctx.fill();
+    const lum = d.n ? (()=>{ const c=palColor(TH.pal,.15+.85*f).match(/\d+/g).map(Number); return (0.3*c[0]+0.59*c[1]+0.11*c[2])*(.35+.65*f) + (TH.dark?0:255*(1-(.35+.65*f))); })() : 0;
+    if(d.n && cell>22) text(`${Math.round(d.n/M.N*100)}`, cx+cell/2, top+ch/2+9, font(400, cell>40?24:18, "d"), lum>150?"#1a0a2a":"#ffffff", "center");
+    const lab = fmtDay(d.date).split(" "), every = n>10 ? 2 : 1;
+    if(i%every===0){ text(lab[1], cx+cell/2, top+ch+17, font(800,13,"b"), TH.ink, "center"); }
+    if(i===0 || lab[1]==="1") text(lab[2], cx+cell/2, top+ch+31, font(400,11,"b"), TH.faint, "center");
+  });
+}
+function drawFooter([x,y,w,h]){
+  ctx.fillStyle=TH.dark?"rgba(0,0,0,.35)":"rgba(80,50,20,.07)"; ctx.fillRect(x,y,w,h);
+  const s1 = "Not an official forecast — follow IMD for warnings.";
+  const s2 = "ECMWF ENS/IFS/AIFS tracks © ECMWF CC BY 4.0 · NOAA AI-GFS · Natural Earth · India border as per GoI";
+  const big = S.fmt==="story";
+  text(s1, 40, y+(big?34:26), font(800, big?22:17, "b"), TH.dark?"#ff8fa3":"#be123c");
+  text(s2, 40, y+(big?62:48), font(400, fitText(s2, w*0.68, 400, big?16:13), "b"), TH.faint);
+  text("MASRAINMAN", w-40, y+(big?58:44), font(400, big?44:34, "d"), TH.ink, "right");
+}
+
+// ---------- page -------------------------------------------------------------------------------------------
+function chips(id, items, key, after){
+  const el=$(id); el.innerHTML="";
+  items.forEach(([v,l])=>{ const b=document.createElement("button"); b.className="chip"+(S[key]===v?" on":""); b.textContent=l;
+    b.onclick=()=>{ S[key]=v; [...el.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); (after||refresh)(); }; el.appendChild(b); });
+}
+function buildControls(){
+  const runs = Object.keys(DATA.products.ens||{}).filter(k=>(DATA.products.ens[k]||[]).length).sort().reverse();
+  // newest run first; each button shows which models have that run and how far it reaches
+  if(!S.run || !runs.includes(S.run) || S.followLatest) { S.run = runs[0]; S.followLatest = true; }
+  const box=$("run"); box.innerHTML="";
+  runs.forEach((k,i)=>{ const r=runDate(k), reach=runReach(k), b=document.createElement("button");
+    const has = [["hres","HRES"],["aifs","AIFS"],["aigfs","AI-GFS"]].filter(([p])=>(DATA.products[p]?.[k]||[]).length).map(x=>x[1]);
+    b.className="runbtn"+(k===S.run?" on":"");
+    b.innerHTML=`${i===0?'<span class="new">LATEST</span>':""}<b>${String(r.getUTCHours()).padStart(2,"0")}Z</b> ${fmtDay(r).slice(4)}`+
+      `<small>ENS 51 · ${Math.round(reach/24)} days${has.length?" · "+has.join(" · "):""}</small>`;
+    b.onclick=()=>{ S.run=k; S.followLatest=(i===0); [...box.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); refresh(); };
+    box.appendChild(b); });
+  const sysIds = new Set();
+  Object.values(DATA.products.ens||{}).forEach(ts=>ts.forEach(t=>{ const m=(t.n||"").match(/^(\d\d[AB])\b/); if(m && !/^7\d/.test(m[1])) sysIds.add(m[1]); }));
+  (DATA.systems||[]).forEach(s=>{ if(/[AB]$/.test(s.id)) sysIds.add(s.id); });
+  if(S.area.length===3 && !sysIds.has(S.area)) S.area="nio";
+  chips("area", [["nio","All NIO"],["bay","Bay of Bengal"],["arb","Arabian Sea"],...[...sysIds].sort().map(s=>[s,"🌀 "+s])], "area");
+  chips("win", WINDOWS.map(h=>[h, `${h/24} days`]), "win");
+  chips("thr", THRS.map(t=>[t.kt,t.label]), "thr");
+  chips("set", [["ens","ECMWF ENS 51"],["all","+ HRES · AIFS · AI-GFS"]], "set");
+  chips("view", Object.entries(VIEWS).map(([k,v])=>[k,v.label]), "view", redraw);
+  chips("theme", Object.entries(THEMES).map(([k,v])=>[k,v.label]), "theme", ()=>{ TH=THEMES[S.theme]; redraw(); });
+  chips("fmt", Object.entries(FORMATS).map(([k,v])=>[k,v.label]), "fmt", redraw);
+}
+function refresh(){
+  if(!DATA) return;
+  MODEL = compute(S.run);
+  // run-to-run swing in the cyclone chance (same settings, previous ENS run)
+  const runs = Object.keys(DATA.products.ens).filter(k=>DATA.products.ens[k].length).sort(), i=runs.indexOf(S.run);
+  MODEL.trend = null;
+  if(i>0){ const keep=S.win; try{ const prev=compute(runs[i-1]); S.win=keep;
+    const reach=Math.min(MODEL.reach, prev.reach + (runDate(runs[i-1])-runDate(S.run))/3600e3);
+    if(reach>=48){ const a=stats(MODEL), b=stats(prev); MODEL.trend=Math.round((a.ladder[2]-b.ladder[2])*100); } }catch(e){} }
+  redraw();
+}
+function redraw(){ if(!MODEL) return; const st=drawCard(MODEL, null); MODEL.st=st; $("caption").value=caption(MODEL, st);
+  const reachNote = MODEL.reach < S.win ? ` · this run reaches ${Math.round(MODEL.reach/24)} days` : "";
+  $("status").textContent = `Updated ${new Date(DATA.generated).toLocaleString("en-IN",{timeZone:"Asia/Kolkata",dateStyle:"medium",timeStyle:"short"})} IST${reachNote}`; }
+function caption(M, st){
+  const area = S.area==="nio" ? "North Indian Ocean" : S.area==="bay" ? "Bay of Bengal" : S.area==="arb" ? "Arabian Sea" : S.area;
+  const lines = [`🌀 CYCLONE ODDS · ${area} · ECMWF ${String(M.run.getUTCHours()).padStart(2,"0")}Z ${fmtDay(M.run).slice(4)} run, next ${Math.round(M.reach/24)} days`, ""];
+  lines.push(`• Chance of a cyclonic storm (34 kt+): ${Math.round(st.ladder[2]*100)}%`);
+  lines.push(`• Depression or stronger: ${Math.round(st.ladder[0]*100)}%`);
+  st.sectors.slice(0,3).forEach((s,i)=>lines.push(`${i?"  ":"• Landfall odds: "}${s.name} ${Math.round(s.p*100)}%${s.t.length?" (around "+fmtDay(new Date(M.run.getTime()+s.t[Math.floor(s.t.length/2)]*3600e3))+")":""}`));
+  if(!st.sectors.length) lines.push("• No member brings a landfall in this window");
+  lines.push("", "Every ensemble member counted — odds, not a forecast. Follow IMD for official warnings.", "",
+             "#MasRainman #Cyclone #BayOfBengal #TamilNaduWeather #ChennaiRains #IndiaWeather #NortheastMonsoon #ECMWF");
+  return lines.join("\n");
+}
+$("caption").onclick=async e=>{ e.target.select(); try{ await navigator.clipboard.writeText(e.target.value); $("status").textContent="Caption copied ✓"; }catch(_){} };
+function fileName(ext){ return `masrainman_cyclone_odds_${S.area}_${S.run}_${S.fmt}.${ext}`; }
+$("png").onclick=()=>{ canvas.toBlob(b=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=fileName("png"); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },"image/png"); };
+$("allruns").onclick=async ()=>{
+  const keep=S.run, runs=Object.keys(DATA.products.ens).filter(k=>DATA.products.ens[k].length).sort().reverse();
+  for(const k of runs){ S.run=k; refresh(); await new Promise(r=>setTimeout(r,150));
+    const b=await new Promise(r=>canvas.toBlob(r,"image/png")); const a=document.createElement("a");
+    a.href=URL.createObjectURL(b); a.download=fileName("png"); a.click(); await new Promise(r=>setTimeout(r,700)); }
+  S.run=keep; refresh(); $("status").textContent=`Saved ${runs.length} cards, one per run ✓`;
+};
+$("share").onclick=()=>{ canvas.toBlob(async b=>{ const f=new File([b], fileName("png"), {type:"image/png"});
+  if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], text:$("caption").value}); }catch(_){} }
+  else { $("png").click(); $("status").textContent="Sharing isn't available in this browser — the picture was saved instead."; } },"image/png"); };
+
+// 12-second reel: 8 s time sweep (honeycomb fills, members move, landfalls drop in) + 4 s hold
+$("reel").onclick=async ()=>{
+  if(!MODEL || !canvas.captureStream || !window.MediaRecorder){ $("status").textContent="This browser can't record video — try Chrome or Safari."; return; }
+  const types=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"], type=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+  const stream=canvas.captureStream(30), rec=new MediaRecorder(stream, type?{mimeType:type, videoBitsPerSecond:8e6}:{}), chunks=[];
+  rec.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+  const btn=$("reel"); btn.disabled=true; btn.textContent="● Recording…";
+  const done=new Promise(r=>rec.onstop=r); rec.start(250);
+  const t0=performance.now(), SWEEP=8000, TOTAL=12000;
+  await new Promise(res=>{ (function frame(){ const el=performance.now()-t0;
+      const t = el<SWEEP ? Math.round(MODEL.reach*el/SWEEP) : null; drawCard(MODEL, t);
+      if(el<TOTAL) requestAnimationFrame(frame); else res(); })(); });
+  rec.stop(); await done; redraw(); btn.disabled=false; btn.textContent="● Make 12-second reel";
+  const ext = (rec.mimeType||type).includes("mp4") ? "mp4" : "webm", blob=new Blob(chunks,{type:rec.mimeType||type});
+  const f=new File([blob], fileName(ext), {type:blob.type});
+  if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f]}); return; }catch(_){} }
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=fileName(ext); a.click();
+  $("status").textContent = ext==="webm" ? "Saved as WebM (Instagram accepts it after a quick convert; Safari saves MP4)." : "Reel saved ✓";
+};
+
+async function getJSON(u){ const r=await fetch(u+"?t="+Date.now(),{cache:"no-store"}); if(!r.ok) throw new Error(u+" "+r.status); return r.json(); }
+let STAMP=null;
+async function load(){
+  try{
+    [LAND, DATA] = await Promise.all([getJSON("land.json"), getJSON("../data.json")]);
+    MASK = decodeMask(LAND);
+    for(const n of ["logo_dark.png","logo.png"]){ const im=new Image(); im.src=n; LOGOS[n]=im; await im.decode().catch(()=>{}); }
+    try{ await document.fonts.load('400 40px "Bebas Neue"'); await document.fonts.load('800 20px Outfit'); await document.fonts.load('400 20px Outfit'); }catch(_){}
+    try{ STAMP=(await getJSON("../stamp.json")).stamp; }catch(_){}
+    buildControls(); refresh();
+  }catch(e){ $("status").textContent="Could not load the tracker data: "+e.message; }
+}
+setInterval(async ()=>{ try{ const s=(await getJSON("../stamp.json")).stamp; if(STAMP && s!==STAMP){ STAMP=s; DATA=await getJSON("../data.json"); buildControls(); refresh();
+      if(S.followLatest) $("status").textContent += " · new run loaded";  } }catch(_){} }, 5*60*1000);
+load();
+</script>
+</body>
+</html>

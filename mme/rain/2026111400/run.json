@@ -1,0 +1,1781 @@
+{
+ "cycle": "2026-11-14T00:00Z",
+ "groups": {
+  "ens": {
+   "title": "Ensemble Blend",
+   "models": {
+    "ecmwf_ens": {
+     "name": "ECMWF ENS",
+     "run": "2026-11-14T00:00Z"
+    },
+    "wn3": {
+     "name": "WeatherNext 3",
+     "run": "2026-11-14T00:00Z"
+    },
+    "aifs_ens": {
+     "name": "ECMWF AIFS ENS",
+     "run": "2026-11-14T00:00Z"
+    },
+    "gefs": {
+     "name": "NCEP GEFS",
+     "run": "2026-11-14T00:00Z"
+    },
+    "geps": {
+     "name": "CMC GEPS",
+     "run": "2026-11-14T00:00Z"
+    }
+   },
+   "used": [
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "ecmwf_ens",
+      0.3
+     ],
+     [
+      "wn3",
+      0.25
+     ],
+     [
+      "aifs_ens",
+      0.2
+     ],
+     [
+      "gefs",
+      0.15
+     ],
+     [
+      "geps",
+      0.1
+     ]
+    ],
+    [
+     [
+      "gefs",
+      0.6
+     ],
+     [
+      "geps",
+      0.4
+     ]
+    ]
+   ],
+   "maps": {
+    "south_india": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "north_india": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "karnataka": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "ap": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "telangana": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ]
+   }
+  },
+  "det": {
+   "title": "Deterministic Blend",
+   "models": {
+    "ecmwf_hres": {
+     "name": "ECMWF IFS HRES",
+     "run": "2026-11-14T00:00Z"
+    },
+    "aifs_single": {
+     "name": "ECMWF AIFS Single",
+     "run": "2026-11-14T00:00Z"
+    },
+    "icon": {
+     "name": "DWD ICON",
+     "run": "2026-11-14T00:00Z"
+    },
+    "gfs": {
+     "name": "NCEP GFS",
+     "run": "2026-11-14T00:00Z"
+    }
+   },
+   "used": [
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.35
+     ],
+     [
+      "aifs_single",
+      0.25
+     ],
+     [
+      "icon",
+      0.2
+     ],
+     [
+      "gfs",
+      0.2
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.437
+     ],
+     [
+      "aifs_single",
+      0.312
+     ],
+     [
+      "gfs",
+      0.25
+     ]
+    ],
+    [
+     [
+      "ecmwf_hres",
+      0.437
+     ],
+     [
+      "aifs_single",
+      0.312
+     ],
+     [
+      "gfs",
+      0.25
+     ]
+    ],
+    [
+     [
+      "aifs_single",
+      0.556
+     ],
+     [
+      "gfs",
+      0.444
+     ]
+    ],
+    [
+     [
+      "aifs_single",
+      0.556
+     ],
+     [
+      "gfs",
+      0.444
+     ]
+    ],
+    [
+     [
+      "aifs_single",
+      0.556
+     ],
+     [
+      "gfs",
+      0.444
+     ]
+    ],
+    [
+     [
+      "aifs_single",
+      0.556
+     ],
+     [
+      "gfs",
+      0.444
+     ]
+    ],
+    [
+     [
+      "aifs_single",
+      0.556
+     ],
+     [
+      "gfs",
+      0.444
+     ]
+    ],
+    [
+     [
+      "gfs",
+      1.0
+     ]
+    ]
+   ],
+   "maps": {
+    "south_india": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "north_india": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "karnataka": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "ap": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ],
+    "telangana": [
+     "d01",
+     "d02",
+     "d03",
+     "d04",
+     "d05",
+     "d06",
+     "d07",
+     "d08",
+     "d09",
+     "d10",
+     "d11",
+     "d12",
+     "d13",
+     "d14",
+     "d15",
+     "7day",
+     "15day"
+    ]
+   }
+  }
+ },
+ "days": [
+  {
+   "day": 1,
+   "end_ist": "2026-11-15T08:30+05:30"
+  },
+  {
+   "day": 2,
+   "end_ist": "2026-11-16T08:30+05:30"
+  },
+  {
+   "day": 3,
+   "end_ist": "2026-11-17T08:30+05:30"
+  },
+  {
+   "day": 4,
+   "end_ist": "2026-11-18T08:30+05:30"
+  },
+  {
+   "day": 5,
+   "end_ist": "2026-11-19T08:30+05:30"
+  },
+  {
+   "day": 6,
+   "end_ist": "2026-11-20T08:30+05:30"
+  },
+  {
+   "day": 7,
+   "end_ist": "2026-11-21T08:30+05:30"
+  },
+  {
+   "day": 8,
+   "end_ist": "2026-11-22T08:30+05:30"
+  },
+  {
+   "day": 9,
+   "end_ist": "2026-11-23T08:30+05:30"
+  },
+  {
+   "day": 10,
+   "end_ist": "2026-11-24T08:30+05:30"
+  },
+  {
+   "day": 11,
+   "end_ist": "2026-11-25T08:30+05:30"
+  },
+  {
+   "day": 12,
+   "end_ist": "2026-11-26T08:30+05:30"
+  },
+  {
+   "day": 13,
+   "end_ist": "2026-11-27T08:30+05:30"
+  },
+  {
+   "day": 14,
+   "end_ist": "2026-11-28T08:30+05:30"
+  },
+  {
+   "day": 15,
+   "end_ist": "2026-11-29T08:30+05:30"
+  }
+ ],
+ "rendered": "2026-11-14T10:23Z",
+ "models": {
+  "wn3": {
+   "name": "WeatherNext 3",
+   "run": "2026-11-14T00:00Z",
+   "periods": [
+    {
+     "key": "24h",
+     "hours": 24,
+     "label": "24 hours",
+     "end_ist": "2026-11-15T05:30+05:30"
+    },
+    {
+     "key": "7day",
+     "hours": 168,
+     "label": "7 days",
+     "end_ist": "2026-11-21T05:30+05:30"
+    },
+    {
+     "key": "15day",
+     "hours": 360,
+     "label": "15 days",
+     "end_ist": "2026-11-29T05:30+05:30"
+    }
+   ],
+   "maps": {
+    "south_india": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "24h",
+     "7day",
+     "15day"
+    ]
+   }
+  },
+  "ecmwf_hres": {
+   "name": "ECMWF IFS HRES",
+   "run": "2026-11-14T00:00Z",
+   "periods": [
+    {
+     "key": "24h",
+     "hours": 24,
+     "label": "24 hours",
+     "end_ist": "2026-11-15T05:30+05:30"
+    },
+    {
+     "key": "7day",
+     "hours": 168,
+     "label": "7 days",
+     "end_ist": "2026-11-21T05:30+05:30"
+    },
+    {
+     "key": "15day",
+     "hours": 360,
+     "label": "15 days",
+     "end_ist": "2026-11-29T05:30+05:30"
+    }
+   ],
+   "maps": {
+    "south_india": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "24h",
+     "7day",
+     "15day"
+    ]
+   }
+  },
+  "aifs_single": {
+   "name": "ECMWF AIFS Single",
+   "run": "2026-11-14T00:00Z",
+   "periods": [
+    {
+     "key": "24h",
+     "hours": 24,
+     "label": "24 hours",
+     "end_ist": "2026-11-15T05:30+05:30"
+    },
+    {
+     "key": "7day",
+     "hours": 168,
+     "label": "7 days",
+     "end_ist": "2026-11-21T05:30+05:30"
+    },
+    {
+     "key": "15day",
+     "hours": 360,
+     "label": "15 days",
+     "end_ist": "2026-11-29T05:30+05:30"
+    }
+   ],
+   "maps": {
+    "south_india": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "24h",
+     "7day",
+     "15day"
+    ]
+   }
+  },
+  "gfs": {
+   "name": "NCEP GFS",
+   "run": "2026-11-14T00:00Z",
+   "periods": [
+    {
+     "key": "24h",
+     "hours": 24,
+     "label": "24 hours",
+     "end_ist": "2026-11-15T05:30+05:30"
+    },
+    {
+     "key": "7day",
+     "hours": 168,
+     "label": "7 days",
+     "end_ist": "2026-11-21T05:30+05:30"
+    },
+    {
+     "key": "15day",
+     "hours": 360,
+     "label": "15 days",
+     "end_ist": "2026-11-29T05:30+05:30"
+    }
+   ],
+   "maps": {
+    "south_india": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "24h",
+     "7day",
+     "15day"
+    ]
+   }
+  },
+  "aigfs": {
+   "name": "NOAA AIGFS",
+   "run": "2026-11-14T00:00Z",
+   "periods": [
+    {
+     "key": "24h",
+     "hours": 24,
+     "label": "24 hours",
+     "end_ist": "2026-11-15T05:30+05:30"
+    },
+    {
+     "key": "7day",
+     "hours": 168,
+     "label": "7 days",
+     "end_ist": "2026-11-21T05:30+05:30"
+    },
+    {
+     "key": "15day",
+     "hours": 360,
+     "label": "15 days",
+     "end_ist": "2026-11-29T05:30+05:30"
+    }
+   ],
+   "maps": {
+    "south_india": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "tamilnadu": [
+     "24h",
+     "7day",
+     "15day"
+    ],
+    "kerala": [
+     "24h",
+     "7day",
+     "15day"
+    ]
+   }
+  }
+ },
+ "ew": {
+  "ecmwf_hres": {
+   "name": "ECMWF IFS HRES",
+   "label": "ECMWF IFS HRES",
+   "kind": "single",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    }
+   ]
+  },
+  "ecmwf_ens": {
+   "name": "ECMWF ENS",
+   "label": "ECMWF ENS (20 members)",
+   "kind": "members",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "aifs_single": {
+   "name": "ECMWF AIFS Single",
+   "label": "ECMWF AIFS Single",
+   "kind": "single",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "aifs_ens": {
+   "name": "ECMWF AIFS ENS",
+   "label": "ECMWF AIFS ENS (21 members)",
+   "kind": "members",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "wn3": {
+   "name": "WeatherNext 3",
+   "label": "WeatherNext 3 mean",
+   "kind": "mean",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "gfs": {
+   "name": "NCEP GFS",
+   "label": "NCEP GFS",
+   "kind": "single",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "gefs": {
+   "name": "NCEP GEFS",
+   "label": "NCEP GEFS mean",
+   "kind": "mean",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "aigfs": {
+   "name": "NOAA AIGFS",
+   "label": "NOAA AIGFS",
+   "kind": "single",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  },
+  "icon": {
+   "name": "DWD ICON",
+   "label": "DWD ICON",
+   "kind": "single",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    }
+   ]
+  },
+  "geps": {
+   "name": "CMC GEPS",
+   "label": "CMC GEPS (21 members)",
+   "kind": "members",
+   "run": "2026-11-14T00:00Z",
+   "days": [
+    {
+     "day": 1,
+     "end_ist": "2026-11-15T08:30+05:30",
+     "ew_south": "ew_south_d01.png",
+     "ew_north": "ew_north_d01.png"
+    },
+    {
+     "day": 2,
+     "end_ist": "2026-11-16T08:30+05:30",
+     "ew_south": "ew_south_d02.png",
+     "ew_north": "ew_north_d02.png"
+    },
+    {
+     "day": 3,
+     "end_ist": "2026-11-17T08:30+05:30",
+     "ew_south": "ew_south_d03.png",
+     "ew_north": "ew_north_d03.png"
+    },
+    {
+     "day": 4,
+     "end_ist": "2026-11-18T08:30+05:30",
+     "ew_south": "ew_south_d04.png",
+     "ew_north": "ew_north_d04.png"
+    },
+    {
+     "day": 5,
+     "end_ist": "2026-11-19T08:30+05:30",
+     "ew_south": "ew_south_d05.png",
+     "ew_north": "ew_north_d05.png"
+    },
+    {
+     "day": 6,
+     "end_ist": "2026-11-20T08:30+05:30",
+     "ew_south": "ew_south_d06.png",
+     "ew_north": "ew_north_d06.png"
+    },
+    {
+     "day": 7,
+     "end_ist": "2026-11-21T08:30+05:30",
+     "ew_south": "ew_south_d07.png",
+     "ew_north": "ew_north_d07.png"
+    },
+    {
+     "day": 8,
+     "end_ist": "2026-11-22T08:30+05:30",
+     "ew_south": "ew_south_d08.png",
+     "ew_north": "ew_north_d08.png"
+    },
+    {
+     "day": 9,
+     "end_ist": "2026-11-23T08:30+05:30",
+     "ew_south": "ew_south_d09.png",
+     "ew_north": "ew_north_d09.png"
+    },
+    {
+     "day": 10,
+     "end_ist": "2026-11-24T08:30+05:30",
+     "ew_south": "ew_south_d10.png",
+     "ew_north": "ew_north_d10.png"
+    }
+   ]
+  }
+ }
+}

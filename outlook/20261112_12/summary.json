@@ -1,0 +1,4882 @@
+{
+ "run": "20261112_12",
+ "init": "2026-11-12T12:00:00+00:00",
+ "generated": "2026-11-12 21:41 UTC",
+ "demo": false,
+ "errors": {
+  "consistency": "ValueError: min() iterable argument is empty"
+ },
+ "genesis": {
+  "windows": [
+   {
+    "id": "d1_5",
+    "label": "Days 1-5",
+    "maps": {
+     "lpa": {
+      "png": "outlook/20261112_12/genesis_lpa_d1_5.png",
+      "max": 61.0
+     },
+     "dep": {
+      "png": "outlook/20261112_12/genesis_dep_d1_5.png",
+      "max": 61.0
+     },
+     "cs": {
+      "png": "outlook/20261112_12/genesis_cs_d1_5.png",
+      "max": 55.0
+     }
+    }
+   },
+   {
+    "id": "d6_10",
+    "label": "Days 6-10",
+    "maps": {
+     "lpa": {
+      "png": "outlook/20261112_12/genesis_lpa_d6_10.png",
+      "max": 24.0
+     },
+     "dep": {
+      "png": "outlook/20261112_12/genesis_dep_d6_10.png",
+      "max": 18.0
+     },
+     "cs": {
+      "png": "outlook/20261112_12/genesis_cs_d6_10.png",
+      "max": 4.0
+     }
+    }
+   },
+   {
+    "id": "d11_15",
+    "label": "Days 11-15",
+    "maps": {
+     "lpa": {
+      "png": "outlook/20261112_12/genesis_lpa_d11_15.png",
+      "max": 8.0
+     },
+     "dep": {
+      "png": "outlook/20261112_12/genesis_dep_d11_15.png",
+      "max": 10.0
+     },
+     "cs": {
+      "png": "outlook/20261112_12/genesis_cs_d11_15.png",
+      "max": 8.0
+     }
+    }
+   },
+   {
+    "id": "d1_15",
+    "label": "Days 1-15",
+    "maps": {
+     "lpa": {
+      "png": "outlook/20261112_12/genesis_lpa_d1_15.png",
+      "max": 63.0
+     },
+     "dep": {
+      "png": "outlook/20261112_12/genesis_dep_d1_15.png",
+      "max": 63.0
+     },
+     "cs": {
+      "png": "outlook/20261112_12/genesis_cs_d1_15.png",
+      "max": 57.0
+     }
+    }
+   }
+  ],
+  "basin": [
+   {
+    "window": "d1_5",
+    "basin": "Bay of Bengal",
+    "lpa": 76.0,
+    "dep": 76.0,
+    "cs": 86.0
+   },
+   {
+    "window": "d1_5",
+    "basin": "Arabian Sea",
+    "lpa": 2.0,
+    "dep": 2.0,
+    "cs": 2.0
+   },
+   {
+    "window": "d6_10",
+    "basin": "Bay of Bengal",
+    "lpa": 43.0,
+    "dep": 35.0,
+    "cs": 14.0
+   },
+   {
+    "window": "d6_10",
+    "basin": "Arabian Sea",
+    "lpa": 6.0,
+    "dep": 6.0,
+    "cs": 0.0
+   },
+   {
+    "window": "d11_15",
+    "basin": "Bay of Bengal",
+    "lpa": 22.0,
+    "dep": 29.0,
+    "cs": 10.0
+   },
+   {
+    "window": "d11_15",
+    "basin": "Arabian Sea",
+    "lpa": 12.0,
+    "dep": 12.0,
+    "cs": 2.0
+   },
+   {
+    "window": "d1_15",
+    "basin": "Bay of Bengal",
+    "lpa": 88.0,
+    "dep": 88.0,
+    "cs": 94.0
+   },
+   {
+    "window": "d1_15",
+    "basin": "Arabian Sea",
+    "lpa": 18.0,
+    "dep": 18.0,
+    "cs": 4.0
+   }
+  ],
+  "existing": [
+   {
+    "storm": "70A",
+    "lat": 6.6,
+    "lon": 66.2
+   },
+   {
+    "storm": "70B",
+    "lat": 7.2,
+    "lon": 87.2
+   },
+   {
+    "storm": "71B",
+    "lat": 6.5,
+    "lon": 88.2
+   }
+  ],
+  "consistency": {
+   "png": "outlook/20261112_12/genesis_consistency.png",
+   "runs": [
+    "20261111_00",
+    "20261111_12",
+    "20261112_00",
+    "20261112_12"
+   ],
+   "valid_from": "2026-11-12T12:00:00+00:00",
+   "valid_to": "2026-11-26T00:00:00+00:00",
+   "max_runs": 4
+  }
+ },
+ "cyclones": [
+  {
+   "storm": "70B",
+   "basin": "Bay of Bengal",
+   "tracked": 50,
+   "members": 51,
+   "p_form": 98.0,
+   "start": {
+    "lat": 7.2,
+    "lon": 90.0,
+    "step": 0
+   },
+   "reach": {
+    "D": 98.0,
+    "DD": 80.0,
+    "CS": 73.0,
+    "SCS": 51.0,
+    "VSCS": 35.0
+   },
+   "peak_med": 53.0,
+   "peak_p10": 21.0,
+   "peak_p90": 101.0,
+   "peak_step_med": 132.0,
+   "scenarios": [
+    {
+     "scenario": "Landfall: Andhra Pradesh",
+     "pct": 24.0,
+     "members": 12
+    },
+    {
+     "scenario": "Landfall: Bangladesh",
+     "pct": 20.0,
+     "members": 10
+    },
+    {
+     "scenario": "Weakens over sea",
+     "pct": 18.0,
+     "members": 9
+    },
+    {
+     "scenario": "Moves close to the coast, no landfall",
+     "pct": 10.0,
+     "members": 5
+    },
+    {
+     "scenario": "Landfall: West Bengal",
+     "pct": 8.0,
+     "members": 4
+    },
+    {
+     "scenario": "Landfall: Odisha",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Thailand",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Tamil Nadu & Puducherry",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Starts over land",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Landfall: Sri Lanka",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Does not form / not tracked",
+     "pct": 2.0,
+     "members": 1
+    }
+   ],
+   "days": [
+    {
+     "day": 0,
+     "valid": "12 Nov",
+     "members": 22,
+     "lat": 7.2,
+     "lon": 90.0,
+     "wind_med": 24.0,
+     "wind_p90": 28.0,
+     "cls": "D",
+     "p_dep": 43.0,
+     "p_cs": 0.0,
+     "spread_km": 523.0,
+     "mslp": 1009.0
+    },
+    {
+     "day": 1,
+     "valid": "13 Nov",
+     "members": 25,
+     "lat": 6.1,
+     "lon": 89.0,
+     "wind_med": 29.0,
+     "wind_p90": 34.0,
+     "cls": "DD",
+     "p_dep": 49.0,
+     "p_cs": 6.0,
+     "spread_km": 171.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 2,
+     "valid": "14 Nov",
+     "members": 33,
+     "lat": 8.3,
+     "lon": 87.8,
+     "wind_med": 32.0,
+     "wind_p90": 46.0,
+     "cls": "DD",
+     "p_dep": 65.0,
+     "p_cs": 20.0,
+     "spread_km": 158.0,
+     "mslp": 1005.0
+    },
+    {
+     "day": 3,
+     "valid": "15 Nov",
+     "members": 36,
+     "lat": 10.8,
+     "lon": 86.6,
+     "wind_med": 36.0,
+     "wind_p90": 55.0,
+     "cls": "CS",
+     "p_dep": 71.0,
+     "p_cs": 43.0,
+     "spread_km": 171.0,
+     "mslp": 1000.0
+    },
+    {
+     "day": 4,
+     "valid": "16 Nov",
+     "members": 36,
+     "lat": 12.7,
+     "lon": 87.0,
+     "wind_med": 42.0,
+     "wind_p90": 59.0,
+     "cls": "CS",
+     "p_dep": 71.0,
+     "p_cs": 51.0,
+     "spread_km": 211.0,
+     "mslp": 992.0
+    },
+    {
+     "day": 5,
+     "valid": "17 Nov",
+     "members": 36,
+     "lat": 14.2,
+     "lon": 87.2,
+     "wind_med": 42.0,
+     "wind_p90": 69.0,
+     "cls": "CS",
+     "p_dep": 71.0,
+     "p_cs": 51.0,
+     "spread_km": 235.0,
+     "mslp": 992.0
+    },
+    {
+     "day": 6,
+     "valid": "18 Nov",
+     "members": 36,
+     "lat": 16.1,
+     "lon": 86.3,
+     "wind_med": 51.0,
+     "wind_p90": 86.0,
+     "cls": "SCS",
+     "p_dep": 69.0,
+     "p_cs": 59.0,
+     "spread_km": 356.0,
+     "mslp": 986.0
+    },
+    {
+     "day": 7,
+     "valid": "19 Nov",
+     "members": 36,
+     "lat": 18.3,
+     "lon": 86.4,
+     "wind_med": 34.0,
+     "wind_p90": 71.0,
+     "cls": "CS",
+     "p_dep": 69.0,
+     "p_cs": 35.0,
+     "spread_km": 557.0,
+     "mslp": 1002.0
+    },
+    {
+     "day": 8,
+     "valid": "20 Nov",
+     "members": 16,
+     "lat": 18.9,
+     "lon": 86.0,
+     "wind_med": 23.0,
+     "wind_p90": 37.0,
+     "cls": "D",
+     "p_dep": 29.0,
+     "p_cs": 6.0,
+     "spread_km": 622.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 9,
+     "valid": "21 Nov",
+     "members": 4,
+     "lat": 13.6,
+     "lon": 82.6,
+     "wind_med": 21.0,
+     "wind_p90": 26.0,
+     "cls": "D",
+     "p_dep": 6.0,
+     "p_cs": 0.0,
+     "spread_km": 512.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 10,
+     "valid": "22 Nov",
+     "members": 1
+    },
+    {
+     "day": 11,
+     "valid": "23 Nov",
+     "members": 1
+    },
+    {
+     "day": 12,
+     "valid": "24 Nov",
+     "members": 1
+    },
+    {
+     "day": 13,
+     "valid": "25 Nov",
+     "members": 1
+    },
+    {
+     "day": 14,
+     "valid": "26 Nov",
+     "members": 1
+    },
+    {
+     "day": 15,
+     "valid": "27 Nov",
+     "members": 0
+    }
+   ],
+   "landfalls": [
+    {
+     "lat": 21.900000000000002,
+     "lon": 89.3,
+     "step": 168.0,
+     "kt": 55.9827072,
+     "member": 1,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 21.6,
+     "lon": 92.05,
+     "step": 173.0,
+     "kt": 52.095019199999996,
+     "member": 2,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 13.083333333333332,
+     "lon": 80.28333333333333,
+     "step": 161.0,
+     "kt": 34.017269999999996,
+     "member": 3,
+     "region": "Tamil Nadu & Puducherry"
+    },
+    {
+     "lat": 19.933333333333334,
+     "lon": 86.0,
+     "step": 170.0,
+     "kt": 39.071264400000004,
+     "member": 6,
+     "region": "Odisha"
+    },
+    {
+     "lat": 19.450000000000003,
+     "lon": 85.1,
+     "step": 183.0,
+     "kt": 76.0043004,
+     "member": 7,
+     "region": "Odisha"
+    },
+    {
+     "lat": 7.566666666666667,
+     "lon": 100.03333333333333,
+     "step": 2.0,
+     "kt": 20.9935152,
+     "member": 9,
+     "region": "Thailand"
+    },
+    {
+     "lat": 19.05,
+     "lon": 84.65,
+     "step": 153.0,
+     "kt": 62.0086236,
+     "member": 10,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 12.100000000000001,
+     "lon": 79.85,
+     "step": 159.0,
+     "kt": 34.989191999999996,
+     "member": 11,
+     "region": "Tamil Nadu & Puducherry"
+    },
+    {
+     "lat": 17.3,
+     "lon": 82.60000000000001,
+     "step": 162.0,
+     "kt": 53.0669412,
+     "member": 14,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 14.350000000000001,
+     "lon": 80.16666666666667,
+     "step": 248.0,
+     "kt": 19.0496712,
+     "member": 15,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 21.46666666666667,
+     "lon": 92.26666666666668,
+     "step": 163.0,
+     "kt": 76.9762224,
+     "member": 16,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 15.333333333333334,
+     "lon": 80.10000000000001,
+     "step": 200.0,
+     "kt": 26.047509599999998,
+     "member": 17,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 18.3,
+     "lon": 84.0,
+     "step": 168.0,
+     "kt": 28.9632756,
+     "member": 18,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 14.5,
+     "lon": 80.10000000000001,
+     "step": 156.0,
+     "kt": 57.9265512,
+     "member": 19,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 9.216666666666667,
+     "lon": 99.18333333333334,
+     "step": 1.0,
+     "kt": 19.0496712,
+     "member": 21,
+     "region": "Thailand"
+    },
+    {
+     "lat": 21.933333333333334,
+     "lon": 88.21666666666667,
+     "step": 173.0,
+     "kt": 63.95246759999999,
+     "member": 22,
+     "region": "West Bengal"
+    },
+    {
+     "lat": 21.8,
+     "lon": 89.4,
+     "step": 165.0,
+     "kt": 87.0842112,
+     "member": 23,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 22.566666666666666,
+     "lon": 91.1,
+     "step": 176.0,
+     "kt": 64.9243896,
+     "member": 26,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 19.85,
+     "lon": 85.93333333333334,
+     "step": 175.0,
+     "kt": 52.095019199999996,
+     "member": 28,
+     "region": "Odisha"
+    },
+    {
+     "lat": 22.6,
+     "lon": 91.73333333333333,
+     "step": 164.0,
+     "kt": 37.904958,
+     "member": 29,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 16.4,
+     "lon": 81.45,
+     "step": 189.0,
+     "kt": 32.073426,
+     "member": 33,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 21.85,
+     "lon": 89.2,
+     "step": 155.0,
+     "kt": 57.9265512,
+     "member": 34,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 18.1,
+     "lon": 83.60000000000001,
+     "step": 162.0,
+     "kt": 53.0669412,
+     "member": 36,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 9.8,
+     "lon": 80.0,
+     "step": 270.0,
+     "kt": 27.9913536,
+     "member": 38,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 21.8,
+     "lon": 89.4,
+     "step": 162.0,
+     "kt": 50.9287128,
+     "member": 39,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 22.116666666666667,
+     "lon": 88.26666666666668,
+     "step": 169.0,
+     "kt": 62.98054559999999,
+     "member": 40,
+     "region": "West Bengal"
+    },
+    {
+     "lat": 21.7,
+     "lon": 88.55000000000001,
+     "step": 173.0,
+     "kt": 36.933036,
+     "member": 42,
+     "region": "West Bengal"
+    },
+    {
+     "lat": 18.633333333333333,
+     "lon": 84.26666666666667,
+     "step": 173.0,
+     "kt": 56.9546292,
+     "member": 43,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 22.55,
+     "lon": 91.2,
+     "step": 143.0,
+     "kt": 103.995654,
+     "member": 44,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 18.233333333333334,
+     "lon": 83.76666666666667,
+     "step": 179.0,
+     "kt": 30.907119599999998,
+     "member": 45,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 21.733333333333334,
+     "lon": 88.78333333333333,
+     "step": 169.0,
+     "kt": 54.0388632,
+     "member": 46,
+     "region": "West Bengal"
+    },
+    {
+     "lat": 22.900000000000002,
+     "lon": 91.55000000000001,
+     "step": 169.0,
+     "kt": 55.0107852,
+     "member": 47,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 17.5,
+     "lon": 82.7,
+     "step": 156.0,
+     "kt": 34.017269999999996,
+     "member": 49,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 9.183333333333334,
+     "lon": 99.7,
+     "step": 2.0,
+     "kt": 20.9935152,
+     "member": 50,
+     "region": "Thailand"
+    },
+    {
+     "lat": 18.26666666666667,
+     "lon": 83.86666666666667,
+     "step": 178.0,
+     "kt": 32.073426,
+     "member": 51,
+     "region": "Andhra Pradesh"
+    }
+   ],
+   "mean_track": [
+    [
+     6,
+     6.72,
+     89.21
+    ],
+    [
+     12,
+     6.76,
+     88.49
+    ],
+    [
+     24,
+     6.06,
+     89.0
+    ],
+    [
+     30,
+     6.54,
+     89.37
+    ],
+    [
+     36,
+     7.36,
+     89.42
+    ],
+    [
+     42,
+     8.01,
+     88.62
+    ],
+    [
+     48,
+     8.27,
+     87.84
+    ],
+    [
+     54,
+     9.1,
+     87.57
+    ],
+    [
+     60,
+     9.74,
+     86.92
+    ],
+    [
+     66,
+     10.19,
+     86.65
+    ],
+    [
+     72,
+     10.81,
+     86.6
+    ],
+    [
+     78,
+     11.37,
+     86.56
+    ],
+    [
+     84,
+     11.91,
+     86.66
+    ],
+    [
+     90,
+     12.36,
+     86.65
+    ],
+    [
+     96,
+     12.66,
+     86.97
+    ],
+    [
+     102,
+     13.1,
+     87.12
+    ],
+    [
+     108,
+     13.43,
+     87.15
+    ],
+    [
+     114,
+     13.88,
+     87.14
+    ],
+    [
+     120,
+     14.23,
+     87.16
+    ],
+    [
+     126,
+     14.61,
+     86.96
+    ],
+    [
+     132,
+     14.99,
+     86.69
+    ],
+    [
+     138,
+     15.55,
+     86.49
+    ],
+    [
+     144,
+     16.11,
+     86.35
+    ],
+    [
+     150,
+     16.69,
+     86.0
+    ],
+    [
+     156,
+     17.24,
+     85.68
+    ],
+    [
+     162,
+     17.69,
+     86.0
+    ],
+    [
+     168,
+     18.31,
+     86.36
+    ],
+    [
+     174,
+     18.96,
+     86.39
+    ],
+    [
+     180,
+     19.27,
+     86.49
+    ]
+   ],
+   "hres": {
+    "peak": 44.0,
+    "track": [
+     [
+      0,
+      7.0,
+      87.2
+     ],
+     [
+      6,
+      7.3,
+      86.4
+     ],
+     [
+      12,
+      6.4,
+      85.7
+     ],
+     [
+      24,
+      5.3,
+      88.3
+     ],
+     [
+      30,
+      6.2,
+      89.7
+     ],
+     [
+      36,
+      8.1,
+      89.5
+     ],
+     [
+      48,
+      8.7,
+      87.7
+     ],
+     [
+      54,
+      9.0,
+      86.6
+     ],
+     [
+      60,
+      9.2,
+      86.6
+     ],
+     [
+      66,
+      9.7,
+      86.6
+     ],
+     [
+      72,
+      11.0,
+      86.4
+     ],
+     [
+      78,
+      11.0,
+      86.2
+     ],
+     [
+      84,
+      11.7,
+      86.3
+     ],
+     [
+      90,
+      12.4,
+      86.0
+     ],
+     [
+      96,
+      12.6,
+      86.4
+     ],
+     [
+      102,
+      12.8,
+      86.6
+     ],
+     [
+      108,
+      13.1,
+      86.6
+     ],
+     [
+      114,
+      13.3,
+      86.8
+     ],
+     [
+      120,
+      14.0,
+      86.6
+     ],
+     [
+      126,
+      14.4,
+      85.9
+     ],
+     [
+      132,
+      14.5,
+      85.7
+     ],
+     [
+      138,
+      14.5,
+      85.5
+     ],
+     [
+      144,
+      15.2,
+      85.5
+     ],
+     [
+      150,
+      15.6,
+      85.0
+     ],
+     [
+      156,
+      16.2,
+      84.7
+     ],
+     [
+      162,
+      17.2,
+      84.1
+     ],
+     [
+      168,
+      17.1,
+      84.2
+     ],
+     [
+      174,
+      17.6,
+      83.8
+     ],
+     [
+      180,
+      18.6,
+      83.9
+     ]
+    ],
+    "wind": [
+     [
+      0,
+      21.0
+     ],
+     [
+      6,
+      22.0
+     ],
+     [
+      12,
+      25.0
+     ],
+     [
+      24,
+      28.0
+     ],
+     [
+      30,
+      30.0
+     ],
+     [
+      36,
+      27.0
+     ],
+     [
+      48,
+      28.0
+     ],
+     [
+      54,
+      35.0
+     ],
+     [
+      60,
+      37.0
+     ],
+     [
+      66,
+      36.0
+     ],
+     [
+      72,
+      33.0
+     ],
+     [
+      78,
+      42.0
+     ],
+     [
+      84,
+      41.0
+     ],
+     [
+      90,
+      39.0
+     ],
+     [
+      96,
+      39.0
+     ],
+     [
+      102,
+      33.0
+     ],
+     [
+      108,
+      39.0
+     ],
+     [
+      114,
+      35.0
+     ],
+     [
+      120,
+      31.0
+     ],
+     [
+      126,
+      36.0
+     ],
+     [
+      132,
+      33.0
+     ],
+     [
+      138,
+      32.0
+     ],
+     [
+      144,
+      37.0
+     ],
+     [
+      150,
+      35.0
+     ],
+     [
+      156,
+      35.0
+     ],
+     [
+      162,
+      44.0
+     ],
+     [
+      168,
+      36.0
+     ],
+     [
+      174,
+      32.0
+     ],
+     [
+      180,
+      25.0
+     ]
+    ]
+   },
+   "track_png": "outlook/20261112_12/sys_70B_track.png",
+   "plume_png": "outlook/20261112_12/sys_70B_plume.png"
+  },
+  {
+   "storm": "71B",
+   "basin": "Bay of Bengal",
+   "tracked": 31,
+   "members": 51,
+   "p_form": 61.0,
+   "start": {
+    "lat": 6.5,
+    "lon": 88.2,
+    "step": 0
+   },
+   "reach": {
+    "D": 61.0,
+    "DD": 39.0,
+    "CS": 27.0,
+    "SCS": 20.0,
+    "VSCS": 14.0
+   },
+   "peak_med": 32.0,
+   "peak_p10": 23.0,
+   "peak_p90": 89.0,
+   "peak_step_med": 132.0,
+   "scenarios": [
+    {
+     "scenario": "Does not form / not tracked",
+     "pct": 39.0,
+     "members": 20
+    },
+    {
+     "scenario": "Weakens over sea",
+     "pct": 16.0,
+     "members": 8
+    },
+    {
+     "scenario": "Landfall: Andhra Pradesh",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Bangladesh",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Sri Lanka",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Thailand",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Landfall: West Bengal",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Moves close to the coast, no landfall",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Starts over land",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Recurves north-east over sea",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Landfall: Other coast",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Landfall: Odisha",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Landfall: Tamil Nadu & Puducherry",
+     "pct": 2.0,
+     "members": 1
+    }
+   ],
+   "days": [
+    {
+     "day": 0,
+     "valid": "12 Nov",
+     "members": 2,
+     "lat": 6.5,
+     "lon": 88.2,
+     "wind_med": 29.0,
+     "wind_p90": 30.0,
+     "cls": "DD",
+     "p_dep": 4.0,
+     "p_cs": 0.0,
+     "spread_km": 431.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 1,
+     "valid": "13 Nov",
+     "members": 6,
+     "lat": 5.4,
+     "lon": 89.0,
+     "wind_med": 30.0,
+     "wind_p90": 33.0,
+     "cls": "DD",
+     "p_dep": 12.0,
+     "p_cs": 0.0,
+     "spread_km": 185.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 2,
+     "valid": "14 Nov",
+     "members": 11,
+     "lat": 8.7,
+     "lon": 87.6,
+     "wind_med": 35.0,
+     "wind_p90": 49.0,
+     "cls": "CS",
+     "p_dep": 22.0,
+     "p_cs": 14.0,
+     "spread_km": 128.0,
+     "mslp": 1003.0
+    },
+    {
+     "day": 3,
+     "valid": "15 Nov",
+     "members": 11,
+     "lat": 11.0,
+     "lon": 86.3,
+     "wind_med": 38.0,
+     "wind_p90": 79.0,
+     "cls": "CS",
+     "p_dep": 22.0,
+     "p_cs": 12.0,
+     "spread_km": 219.0,
+     "mslp": 996.0
+    },
+    {
+     "day": 4,
+     "valid": "16 Nov",
+     "members": 13,
+     "lat": 12.9,
+     "lon": 87.6,
+     "wind_med": 38.0,
+     "wind_p90": 72.0,
+     "cls": "CS",
+     "p_dep": 24.0,
+     "p_cs": 16.0,
+     "spread_km": 287.0,
+     "mslp": 996.0
+    },
+    {
+     "day": 5,
+     "valid": "17 Nov",
+     "members": 12,
+     "lat": 14.1,
+     "lon": 87.0,
+     "wind_med": 39.0,
+     "wind_p90": 71.0,
+     "cls": "CS",
+     "p_dep": 24.0,
+     "p_cs": 16.0,
+     "spread_km": 218.0,
+     "mslp": 994.0
+    },
+    {
+     "day": 6,
+     "valid": "18 Nov",
+     "members": 11,
+     "lat": 16.0,
+     "lon": 86.2,
+     "wind_med": 44.0,
+     "wind_p90": 104.0,
+     "cls": "CS",
+     "p_dep": 22.0,
+     "p_cs": 16.0,
+     "spread_km": 326.0,
+     "mslp": 993.0
+    },
+    {
+     "day": 7,
+     "valid": "19 Nov",
+     "members": 12,
+     "lat": 18.5,
+     "lon": 86.4,
+     "wind_med": 28.0,
+     "wind_p90": 60.0,
+     "cls": "DD",
+     "p_dep": 24.0,
+     "p_cs": 10.0,
+     "spread_km": 508.0,
+     "mslp": 1005.0
+    },
+    {
+     "day": 8,
+     "valid": "20 Nov",
+     "members": 7,
+     "lat": 14.0,
+     "lon": 91.2,
+     "wind_med": 30.0,
+     "wind_p90": 54.0,
+     "cls": "DD",
+     "p_dep": 10.0,
+     "p_cs": 4.0,
+     "spread_km": 975.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 9,
+     "valid": "21 Nov",
+     "members": 8,
+     "lat": 12.7,
+     "lon": 91.7,
+     "wind_med": 21.0,
+     "wind_p90": 40.0,
+     "cls": "D",
+     "p_dep": 14.0,
+     "p_cs": 4.0,
+     "spread_km": 925.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 10,
+     "valid": "22 Nov",
+     "members": 3,
+     "lat": 8.8,
+     "lon": 90.5,
+     "wind_med": 45.0,
+     "wind_p90": 48.0,
+     "cls": "CS",
+     "p_dep": 4.0,
+     "p_cs": 4.0,
+     "spread_km": 989.0,
+     "mslp": 1003.0
+    },
+    {
+     "day": 11,
+     "valid": "23 Nov",
+     "members": 4,
+     "lat": 9.0,
+     "lon": 87.8,
+     "wind_med": 34.0,
+     "wind_p90": 52.0,
+     "cls": "DD",
+     "p_dep": 6.0,
+     "p_cs": 4.0,
+     "spread_km": 963.0,
+     "mslp": 1003.0
+    },
+    {
+     "day": 12,
+     "valid": "24 Nov",
+     "members": 8,
+     "lat": 7.0,
+     "lon": 88.9,
+     "wind_med": 21.0,
+     "wind_p90": 44.0,
+     "cls": "D",
+     "p_dep": 10.0,
+     "p_cs": 4.0,
+     "spread_km": 895.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 13,
+     "valid": "25 Nov",
+     "members": 6,
+     "lat": 7.3,
+     "lon": 85.8,
+     "wind_med": 22.0,
+     "wind_p90": 34.0,
+     "cls": "D",
+     "p_dep": 10.0,
+     "p_cs": 2.0,
+     "spread_km": 1017.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 14,
+     "valid": "26 Nov",
+     "members": 4,
+     "lat": 7.9,
+     "lon": 80.6,
+     "wind_med": 22.0,
+     "wind_p90": 30.0,
+     "cls": "D",
+     "p_dep": 8.0,
+     "p_cs": 2.0,
+     "spread_km": 1318.0,
+     "mslp": 1006.0
+    },
+    {
+     "day": 15,
+     "valid": "27 Nov",
+     "members": 5,
+     "lat": 8.4,
+     "lon": 79.7,
+     "wind_med": 26.0,
+     "wind_p90": 29.0,
+     "cls": "D",
+     "p_dep": 10.0,
+     "p_cs": 0.0,
+     "spread_km": 1167.0,
+     "mslp": 1007.0
+    }
+   ],
+   "landfalls": [
+    {
+     "lat": 15.616666666666667,
+     "lon": 80.2,
+     "step": 161.0,
+     "kt": 40.0431864,
+     "member": 5,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 5.441666666666666,
+     "lon": 100.43333333333334,
+     "step": 239.0,
+     "kt": 14.9675988,
+     "member": 7,
+     "region": "Thailand"
+    },
+    {
+     "lat": 21.76666666666667,
+     "lon": 88.6,
+     "step": 152.0,
+     "kt": 110.9934924,
+     "member": 8,
+     "region": "West Bengal"
+    },
+    {
+     "lat": 16.416666666666668,
+     "lon": 81.33333333333333,
+     "step": 175.0,
+     "kt": 37.904958,
+     "member": 9,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 22.25,
+     "lon": 89.7,
+     "step": 157.0,
+     "kt": 55.0107852,
+     "member": 12,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 10.233333333333334,
+     "lon": 99.03333333333335,
+     "step": 194.0,
+     "kt": 32.073426,
+     "member": 16,
+     "region": "Thailand"
+    },
+    {
+     "lat": 7.1000000000000005,
+     "lon": 81.8,
+     "step": 228.0,
+     "kt": 28.9632756,
+     "member": 19,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 19.8,
+     "lon": 85.86666666666667,
+     "step": 184.0,
+     "kt": 68.03453999999999,
+     "member": 21,
+     "region": "Odisha"
+    },
+    {
+     "lat": 22.733333333333334,
+     "lon": 91.51666666666668,
+     "step": 163.0,
+     "kt": 56.9546292,
+     "member": 24,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 10.45,
+     "lon": 79.85,
+     "step": 195.0,
+     "kt": 16.9114428,
+     "member": 27,
+     "region": "Tamil Nadu & Puducherry"
+    },
+    {
+     "lat": 18.21666666666667,
+     "lon": 83.91666666666667,
+     "step": 173.0,
+     "kt": 34.017269999999996,
+     "member": 31,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 6.083333333333333,
+     "lon": 80.95,
+     "step": 325.0,
+     "kt": 22.9373592,
+     "member": 33,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 7.8,
+     "lon": 81.5,
+     "step": 351.0,
+     "kt": 26.047509599999998,
+     "member": 34,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 22.0,
+     "lon": 92.26666666666668,
+     "step": 194.0,
+     "kt": 62.0086236,
+     "member": 35,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 4.4375,
+     "lon": 95.85833333333333,
+     "step": 13.0,
+     "kt": 22.9373592,
+     "member": 46,
+     "region": "Other coast"
+    },
+    {
+     "lat": 5.155555555555556,
+     "lon": 97.27777777777779,
+     "step": 203.0,
+     "kt": 18.0777492,
+     "member": 49,
+     "region": "Other coast"
+    },
+    {
+     "lat": 21.76666666666667,
+     "lon": 88.26666666666667,
+     "step": 202.0,
+     "kt": 27.9913536,
+     "member": 50,
+     "region": "West Bengal"
+    }
+   ],
+   "mean_track": [],
+   "hres": {
+    "peak": 44.0,
+    "track": [
+     [
+      0,
+      7.0,
+      87.2
+     ],
+     [
+      6,
+      7.3,
+      86.4
+     ],
+     [
+      12,
+      6.4,
+      85.7
+     ],
+     [
+      24,
+      5.3,
+      88.3
+     ],
+     [
+      30,
+      6.2,
+      89.7
+     ],
+     [
+      36,
+      8.1,
+      89.5
+     ],
+     [
+      48,
+      8.7,
+      87.7
+     ],
+     [
+      54,
+      9.0,
+      86.6
+     ],
+     [
+      60,
+      9.2,
+      86.6
+     ],
+     [
+      66,
+      9.7,
+      86.6
+     ],
+     [
+      72,
+      11.0,
+      86.4
+     ],
+     [
+      78,
+      11.0,
+      86.2
+     ],
+     [
+      84,
+      11.7,
+      86.3
+     ],
+     [
+      90,
+      12.4,
+      86.0
+     ],
+     [
+      96,
+      12.6,
+      86.4
+     ],
+     [
+      102,
+      12.8,
+      86.6
+     ],
+     [
+      108,
+      13.1,
+      86.6
+     ],
+     [
+      114,
+      13.3,
+      86.8
+     ],
+     [
+      120,
+      14.0,
+      86.6
+     ],
+     [
+      126,
+      14.4,
+      85.9
+     ],
+     [
+      132,
+      14.5,
+      85.7
+     ],
+     [
+      138,
+      14.5,
+      85.5
+     ],
+     [
+      144,
+      15.2,
+      85.5
+     ],
+     [
+      150,
+      15.6,
+      85.0
+     ],
+     [
+      156,
+      16.2,
+      84.7
+     ],
+     [
+      162,
+      17.2,
+      84.1
+     ],
+     [
+      168,
+      17.1,
+      84.2
+     ],
+     [
+      174,
+      17.6,
+      83.8
+     ],
+     [
+      180,
+      18.6,
+      83.9
+     ]
+    ],
+    "wind": [
+     [
+      0,
+      21.0
+     ],
+     [
+      6,
+      22.0
+     ],
+     [
+      12,
+      25.0
+     ],
+     [
+      24,
+      28.0
+     ],
+     [
+      30,
+      30.0
+     ],
+     [
+      36,
+      27.0
+     ],
+     [
+      48,
+      28.0
+     ],
+     [
+      54,
+      35.0
+     ],
+     [
+      60,
+      37.0
+     ],
+     [
+      66,
+      36.0
+     ],
+     [
+      72,
+      33.0
+     ],
+     [
+      78,
+      42.0
+     ],
+     [
+      84,
+      41.0
+     ],
+     [
+      90,
+      39.0
+     ],
+     [
+      96,
+      39.0
+     ],
+     [
+      102,
+      33.0
+     ],
+     [
+      108,
+      39.0
+     ],
+     [
+      114,
+      35.0
+     ],
+     [
+      120,
+      31.0
+     ],
+     [
+      126,
+      36.0
+     ],
+     [
+      132,
+      33.0
+     ],
+     [
+      138,
+      32.0
+     ],
+     [
+      144,
+      37.0
+     ],
+     [
+      150,
+      35.0
+     ],
+     [
+      156,
+      35.0
+     ],
+     [
+      162,
+      44.0
+     ],
+     [
+      168,
+      36.0
+     ],
+     [
+      174,
+      32.0
+     ],
+     [
+      180,
+      25.0
+     ]
+    ]
+   },
+   "track_png": "outlook/20261112_12/sys_71B_track.png",
+   "plume_png": "outlook/20261112_12/sys_71B_plume.png"
+  },
+  {
+   "storm": "72B",
+   "basin": "Bay of Bengal",
+   "tracked": 22,
+   "members": 51,
+   "p_form": 43.0,
+   "start": {
+    "lat": 9.0,
+    "lon": 89.1,
+    "step": 18
+   },
+   "reach": {
+    "D": 43.0,
+    "DD": 16.0,
+    "CS": 12.0,
+    "SCS": 6.0,
+    "VSCS": 6.0
+   },
+   "peak_med": 28.0,
+   "peak_p10": 23.0,
+   "peak_p90": 75.0,
+   "peak_step_med": 288.0,
+   "scenarios": [
+    {
+     "scenario": "Does not form / not tracked",
+     "pct": 57.0,
+     "members": 29
+    },
+    {
+     "scenario": "Weakens over sea",
+     "pct": 12.0,
+     "members": 6
+    },
+    {
+     "scenario": "Landfall: Sri Lanka",
+     "pct": 12.0,
+     "members": 6
+    },
+    {
+     "scenario": "Moves close to the coast, no landfall",
+     "pct": 8.0,
+     "members": 4
+    },
+    {
+     "scenario": "Landfall: Other coast",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Landfall: Thailand",
+     "pct": 4.0,
+     "members": 2
+    },
+    {
+     "scenario": "Landfall: Andhra Pradesh",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Landfall: Bangladesh",
+     "pct": 2.0,
+     "members": 1
+    }
+   ],
+   "days": [
+    {
+     "day": 0,
+     "valid": "12 Nov",
+     "members": 0
+    },
+    {
+     "day": 1,
+     "valid": "13 Nov",
+     "members": 0
+    },
+    {
+     "day": 2,
+     "valid": "14 Nov",
+     "members": 1
+    },
+    {
+     "day": 3,
+     "valid": "15 Nov",
+     "members": 3,
+     "lat": 7.7,
+     "lon": 89.1,
+     "wind_med": 32.0,
+     "wind_p90": 42.0,
+     "cls": "DD",
+     "p_dep": 6.0,
+     "p_cs": 2.0,
+     "spread_km": 643.0,
+     "mslp": 1002.0
+    },
+    {
+     "day": 4,
+     "valid": "16 Nov",
+     "members": 2,
+     "lat": 12.7,
+     "lon": 87.3,
+     "wind_med": 51.0,
+     "wind_p90": 55.0,
+     "cls": "SCS",
+     "p_dep": 4.0,
+     "p_cs": 4.0,
+     "spread_km": 117.0,
+     "mslp": 990.0
+    },
+    {
+     "day": 5,
+     "valid": "17 Nov",
+     "members": 2,
+     "lat": 15.2,
+     "lon": 88.7,
+     "wind_med": 47.0,
+     "wind_p90": 47.0,
+     "cls": "CS",
+     "p_dep": 4.0,
+     "p_cs": 4.0,
+     "spread_km": 91.0,
+     "mslp": 992.0
+    },
+    {
+     "day": 6,
+     "valid": "18 Nov",
+     "members": 2,
+     "lat": 16.9,
+     "lon": 87.7,
+     "wind_med": 52.0,
+     "wind_p90": 69.0,
+     "cls": "SCS",
+     "p_dep": 4.0,
+     "p_cs": 2.0,
+     "spread_km": 384.0,
+     "mslp": 986.0
+    },
+    {
+     "day": 7,
+     "valid": "19 Nov",
+     "members": 2,
+     "lat": 13.6,
+     "lon": 92.8,
+     "wind_med": 18.0,
+     "wind_p90": 21.0,
+     "cls": "D",
+     "p_dep": 2.0,
+     "p_cs": 0.0,
+     "spread_km": 1215.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 8,
+     "valid": "20 Nov",
+     "members": 3,
+     "lat": 10.1,
+     "lon": 88.9,
+     "wind_med": 19.0,
+     "wind_p90": 21.0,
+     "cls": "D",
+     "p_dep": 6.0,
+     "p_cs": 0.0,
+     "spread_km": 815.0,
+     "mslp": 1009.0
+    },
+    {
+     "day": 9,
+     "valid": "21 Nov",
+     "members": 5,
+     "lat": 7.5,
+     "lon": 90.8,
+     "wind_med": 22.0,
+     "wind_p90": 26.0,
+     "cls": "D",
+     "p_dep": 8.0,
+     "p_cs": 0.0,
+     "spread_km": 486.0,
+     "mslp": 1009.0
+    },
+    {
+     "day": 10,
+     "valid": "22 Nov",
+     "members": 9,
+     "lat": 7.2,
+     "lon": 91.7,
+     "wind_med": 22.0,
+     "wind_p90": 34.0,
+     "cls": "D",
+     "p_dep": 12.0,
+     "p_cs": 2.0,
+     "spread_km": 602.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 11,
+     "valid": "23 Nov",
+     "members": 9,
+     "lat": 7.5,
+     "lon": 86.7,
+     "wind_med": 21.0,
+     "wind_p90": 40.0,
+     "cls": "D",
+     "p_dep": 16.0,
+     "p_cs": 2.0,
+     "spread_km": 660.0,
+     "mslp": 1009.0
+    },
+    {
+     "day": 12,
+     "valid": "24 Nov",
+     "members": 7,
+     "lat": 7.3,
+     "lon": 89.1,
+     "wind_med": 20.0,
+     "wind_p90": 63.0,
+     "cls": "D",
+     "p_dep": 12.0,
+     "p_cs": 4.0,
+     "spread_km": 732.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 13,
+     "valid": "25 Nov",
+     "members": 10,
+     "lat": 7.0,
+     "lon": 87.2,
+     "wind_med": 22.0,
+     "wind_p90": 48.0,
+     "cls": "D",
+     "p_dep": 18.0,
+     "p_cs": 4.0,
+     "spread_km": 816.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 14,
+     "valid": "26 Nov",
+     "members": 10,
+     "lat": 7.3,
+     "lon": 86.0,
+     "wind_med": 21.0,
+     "wind_p90": 68.0,
+     "cls": "D",
+     "p_dep": 20.0,
+     "p_cs": 4.0,
+     "spread_km": 805.0,
+     "mslp": 1006.0
+    },
+    {
+     "day": 15,
+     "valid": "27 Nov",
+     "members": 8,
+     "lat": 7.1,
+     "lon": 86.4,
+     "wind_med": 29.0,
+     "wind_p90": 50.0,
+     "cls": "DD",
+     "p_dep": 14.0,
+     "p_cs": 8.0,
+     "spread_km": 702.0,
+     "mslp": 1004.0
+    }
+   ],
+   "landfalls": [
+    {
+     "lat": 9.033333333333333,
+     "lon": 80.8,
+     "step": 260.0,
+     "kt": 25.0755876,
+     "member": 5,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 9.066666666666666,
+     "lon": 80.53333333333333,
+     "step": 247.0,
+     "kt": 19.0496712,
+     "member": 8,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 7.2,
+     "lon": 81.85000000000001,
+     "step": 317.0,
+     "kt": 22.9373592,
+     "member": 12,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 15.0,
+     "lon": 80.0,
+     "step": 198.0,
+     "kt": 19.0496712,
+     "member": 13,
+     "region": "Andhra Pradesh"
+    },
+    {
+     "lat": 5.550000000000001,
+     "lon": 95.73333333333333,
+     "step": 229.0,
+     "kt": 13.9956768,
+     "member": 15,
+     "region": "Other coast"
+    },
+    {
+     "lat": 5.166666666666667,
+     "lon": 97.36666666666666,
+     "step": 232.0,
+     "kt": 15.939520800000002,
+     "member": 24,
+     "region": "Other coast"
+    },
+    {
+     "lat": 7.966666666666667,
+     "lon": 81.46666666666667,
+     "step": 284.0,
+     "kt": 18.0777492,
+     "member": 27,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 6.716666666666667,
+     "lon": 81.78333333333333,
+     "step": 301.0,
+     "kt": 88.0561332,
+     "member": 28,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 6.8,
+     "lon": 99.9,
+     "step": 210.0,
+     "kt": 27.9913536,
+     "member": 29,
+     "region": "Thailand"
+    },
+    {
+     "lat": 6.233333333333333,
+     "lon": 80.06666666666668,
+     "step": 236.0,
+     "kt": 20.0215932,
+     "member": 31,
+     "region": "Sri Lanka"
+    },
+    {
+     "lat": 22.166666666666668,
+     "lon": 90.1,
+     "step": 154.0,
+     "kt": 84.9459828,
+     "member": 37,
+     "region": "Bangladesh"
+    },
+    {
+     "lat": 6.45,
+     "lon": 100.26666666666668,
+     "step": 298.0,
+     "kt": 18.0777492,
+     "member": 48,
+     "region": "Thailand"
+    }
+   ],
+   "mean_track": [
+    [
+     252,
+     7.1,
+     88.0
+    ],
+    [
+     270,
+     7.93,
+     90.03
+    ],
+    [
+     300,
+     7.2,
+     88.12
+    ],
+    [
+     306,
+     7.35,
+     87.98
+    ],
+    [
+     318,
+     7.18,
+     86.72
+    ],
+    [
+     330,
+     7.38,
+     86.86
+    ]
+   ],
+   "hres": null,
+   "track_png": "outlook/20261112_12/sys_72B_track.png",
+   "plume_png": "outlook/20261112_12/sys_72B_plume.png"
+  },
+  {
+   "storm": "73B",
+   "basin": "Bay of Bengal",
+   "tracked": 10,
+   "members": 51,
+   "p_form": 20.0,
+   "start": {
+    "lat": 7.4,
+    "lon": 93.3,
+    "step": 192
+   },
+   "reach": {
+    "D": 20.0,
+    "DD": 12.0,
+    "CS": 6.0,
+    "SCS": 2.0,
+    "VSCS": 0.0
+   },
+   "peak_med": 29.0,
+   "peak_p10": 20.0,
+   "peak_p90": 40.0,
+   "peak_step_med": 312.0,
+   "scenarios": [
+    {
+     "scenario": "Does not form / not tracked",
+     "pct": 80.0,
+     "members": 41
+    },
+    {
+     "scenario": "Weakens over sea",
+     "pct": 8.0,
+     "members": 4
+    },
+    {
+     "scenario": "Landfall: Other coast",
+     "pct": 6.0,
+     "members": 3
+    },
+    {
+     "scenario": "Landfall: Thailand",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Landfall: Sri Lanka",
+     "pct": 2.0,
+     "members": 1
+    },
+    {
+     "scenario": "Starts over land",
+     "pct": 2.0,
+     "members": 1
+    }
+   ],
+   "days": [
+    {
+     "day": 0,
+     "valid": "12 Nov",
+     "members": 0
+    },
+    {
+     "day": 1,
+     "valid": "13 Nov",
+     "members": 0
+    },
+    {
+     "day": 2,
+     "valid": "14 Nov",
+     "members": 0
+    },
+    {
+     "day": 3,
+     "valid": "15 Nov",
+     "members": 0
+    },
+    {
+     "day": 4,
+     "valid": "16 Nov",
+     "members": 0
+    },
+    {
+     "day": 5,
+     "valid": "17 Nov",
+     "members": 0
+    },
+    {
+     "day": 6,
+     "valid": "18 Nov",
+     "members": 0
+    },
+    {
+     "day": 7,
+     "valid": "19 Nov",
+     "members": 0
+    },
+    {
+     "day": 8,
+     "valid": "20 Nov",
+     "members": 1
+    },
+    {
+     "day": 9,
+     "valid": "21 Nov",
+     "members": 1
+    },
+    {
+     "day": 10,
+     "valid": "22 Nov",
+     "members": 4,
+     "lat": 6.9,
+     "lon": 91.0,
+     "wind_med": 21.0,
+     "wind_p90": 24.0,
+     "cls": "D",
+     "p_dep": 6.0,
+     "p_cs": 0.0,
+     "spread_km": 808.0,
+     "mslp": 1010.0
+    },
+    {
+     "day": 11,
+     "valid": "23 Nov",
+     "members": 4,
+     "lat": 6.5,
+     "lon": 92.2,
+     "wind_med": 19.0,
+     "wind_p90": 24.0,
+     "cls": "D",
+     "p_dep": 4.0,
+     "p_cs": 0.0,
+     "spread_km": 424.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 12,
+     "valid": "24 Nov",
+     "members": 6,
+     "lat": 7.4,
+     "lon": 88.6,
+     "wind_med": 21.0,
+     "wind_p90": 31.0,
+     "cls": "D",
+     "p_dep": 8.0,
+     "p_cs": 2.0,
+     "spread_km": 768.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 13,
+     "valid": "25 Nov",
+     "members": 6,
+     "lat": 5.9,
+     "lon": 91.3,
+     "wind_med": 23.0,
+     "wind_p90": 25.0,
+     "cls": "D",
+     "p_dep": 10.0,
+     "p_cs": 0.0,
+     "spread_km": 569.0,
+     "mslp": 1008.0
+    },
+    {
+     "day": 14,
+     "valid": "26 Nov",
+     "members": 6,
+     "lat": 5.4,
+     "lon": 89.8,
+     "wind_med": 26.0,
+     "wind_p90": 36.0,
+     "cls": "D",
+     "p_dep": 10.0,
+     "p_cs": 2.0,
+     "spread_km": 586.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 15,
+     "valid": "27 Nov",
+     "members": 4,
+     "lat": 7.4,
+     "lon": 87.8,
+     "wind_med": 27.0,
+     "wind_p90": 39.0,
+     "cls": "D",
+     "p_dep": 6.0,
+     "p_cs": 2.0,
+     "spread_km": 620.0,
+     "mslp": 1006.0
+    }
+   ],
+   "landfalls": [
+    {
+     "lat": 4.333333333333333,
+     "lon": 96.03333333333335,
+     "step": 304.0,
+     "kt": 19.0496712,
+     "member": 5,
+     "region": "Other coast"
+    },
+    {
+     "lat": 3.9333333333333336,
+     "lon": 98.4,
+     "step": 304.0,
+     "kt": 16.9114428,
+     "member": 13,
+     "region": "Other coast"
+    },
+    {
+     "lat": 8.766666666666667,
+     "lon": 99.5,
+     "step": 283.0,
+     "kt": 25.0755876,
+     "member": 27,
+     "region": "Thailand"
+    },
+    {
+     "lat": 5.327777777777778,
+     "lon": 95.96666666666667,
+     "step": 263.0,
+     "kt": 20.9935152,
+     "member": 28,
+     "region": "Other coast"
+    },
+    {
+     "lat": 6.3,
+     "lon": 80.10000000000001,
+     "step": 234.0,
+     "kt": 19.0496712,
+     "member": 29,
+     "region": "Sri Lanka"
+    }
+   ],
+   "mean_track": [
+    [
+     282,
+     7.06,
+     89.68
+    ],
+    [
+     288,
+     7.35,
+     88.6
+    ],
+    [
+     294,
+     6.44,
+     91.5
+    ],
+    [
+     306,
+     6.62,
+     92.82
+    ],
+    [
+     312,
+     5.9,
+     91.28
+    ],
+    [
+     318,
+     6.64,
+     92.3
+    ],
+    [
+     324,
+     6.23,
+     92.87
+    ],
+    [
+     330,
+     5.17,
+     89.95
+    ],
+    [
+     336,
+     5.43,
+     89.83
+    ],
+    [
+     348,
+     7.43,
+     88.38
+    ]
+   ],
+   "hres": null,
+   "track_png": "outlook/20261112_12/sys_73B_track.png",
+   "plume_png": "outlook/20261112_12/sys_73B_plume.png"
+  },
+  {
+   "storm": "71A",
+   "basin": "Arabian Sea",
+   "tracked": 5,
+   "members": 51,
+   "p_form": 10.0,
+   "start": {
+    "lat": 3.8,
+    "lon": 63.3,
+    "step": 24
+   },
+   "reach": {
+    "D": 10.0,
+    "DD": 6.0,
+    "CS": 4.0,
+    "SCS": 0.0,
+    "VSCS": 0.0
+   },
+   "peak_med": 29.0,
+   "peak_p10": 21.0,
+   "peak_p90": 43.0,
+   "peak_step_med": 210.0,
+   "scenarios": [
+    {
+     "scenario": "Does not form / not tracked",
+     "pct": 90.0,
+     "members": 46
+    },
+    {
+     "scenario": "Weakens over sea",
+     "pct": 8.0,
+     "members": 4
+    },
+    {
+     "scenario": "Recurves north-east over sea",
+     "pct": 2.0,
+     "members": 1
+    }
+   ],
+   "days": [
+    {
+     "day": 0,
+     "valid": "12 Nov",
+     "members": 0
+    },
+    {
+     "day": 1,
+     "valid": "13 Nov",
+     "members": 1
+    },
+    {
+     "day": 2,
+     "valid": "14 Nov",
+     "members": 1
+    },
+    {
+     "day": 3,
+     "valid": "15 Nov",
+     "members": 1
+    },
+    {
+     "day": 4,
+     "valid": "16 Nov",
+     "members": 1
+    },
+    {
+     "day": 5,
+     "valid": "17 Nov",
+     "members": 0
+    },
+    {
+     "day": 6,
+     "valid": "18 Nov",
+     "members": 0
+    },
+    {
+     "day": 7,
+     "valid": "19 Nov",
+     "members": 0
+    },
+    {
+     "day": 8,
+     "valid": "20 Nov",
+     "members": 0
+    },
+    {
+     "day": 9,
+     "valid": "21 Nov",
+     "members": 2,
+     "lat": 5.6,
+     "lon": 67.1,
+     "wind_med": 17.0,
+     "wind_p90": 20.0,
+     "cls": "D",
+     "p_dep": 2.0,
+     "p_cs": 0.0,
+     "spread_km": 535.0,
+     "mslp": 1010.0
+    },
+    {
+     "day": 10,
+     "valid": "22 Nov",
+     "members": 2,
+     "lat": 5.2,
+     "lon": 65.8,
+     "wind_med": 17.0,
+     "wind_p90": 18.0,
+     "cls": "D",
+     "p_dep": 2.0,
+     "p_cs": 0.0,
+     "spread_km": 731.0,
+     "mslp": 1010.0
+    },
+    {
+     "day": 11,
+     "valid": "23 Nov",
+     "members": 1
+    },
+    {
+     "day": 12,
+     "valid": "24 Nov",
+     "members": 1
+    },
+    {
+     "day": 13,
+     "valid": "25 Nov",
+     "members": 2,
+     "lat": 4.9,
+     "lon": 69.0,
+     "wind_med": 23.0,
+     "wind_p90": 24.0,
+     "cls": "D",
+     "p_dep": 4.0,
+     "p_cs": 0.0,
+     "spread_km": 569.0,
+     "mslp": 1007.0
+    },
+    {
+     "day": 14,
+     "valid": "26 Nov",
+     "members": 0
+    },
+    {
+     "day": 15,
+     "valid": "27 Nov",
+     "members": 0
+    }
+   ],
+   "landfalls": [],
+   "mean_track": [],
+   "hres": null,
+   "track_png": "outlook/20261112_12/sys_71A_track.png",
+   "plume_png": "outlook/20261112_12/sys_71A_plume.png"
+  }
+ ],
+ "pdi": {
+  "forecast": {
+   "median": 1.73,
+   "p10": 0.04,
+   "p90": 7.75,
+   "mean": 3.25,
+   "p_any": 94.0
+  },
+  "window": "12 Nov \u2013 27 Nov",
+  "clim_window_mean": 1.54,
+  "clim_window_median": 0.09,
+  "clim_window_p_zero": 49.0,
+  "p_exceed_clim": 53.0,
+  "clim_season_mean": 7.55,
+  "clim_counts": {
+   "dep": 4.8,
+   "cs": 3.0,
+   "scs": 1.7
+  },
+  "season_to_date": {
+   "pdi": 4.58,
+   "dep": 1,
+   "cs": 1,
+   "last_fix": "2026-10-28 12:00"
+  },
+  "seasons": [
+   {
+    "year": 1991,
+    "dep": 3,
+    "cs": 1,
+    "scs": 0,
+    "pdi": 0.44
+   },
+   {
+    "year": 1992,
+    "dep": 8,
+    "cs": 8,
+    "scs": 2,
+    "pdi": 15.49
+   },
+   {
+    "year": 1993,
+    "dep": 6,
+    "cs": 4,
+    "scs": 3,
+    "pdi": 8.97
+   },
+   {
+    "year": 1994,
+    "dep": 2,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 2.06
+   },
+   {
+    "year": 1995,
+    "dep": 4,
+    "cs": 4,
+    "scs": 3,
+    "pdi": 6.73
+   },
+   {
+    "year": 1996,
+    "dep": 7,
+    "cs": 5,
+    "scs": 3,
+    "pdi": 6.91
+   },
+   {
+    "year": 1997,
+    "dep": 3,
+    "cs": 1,
+    "scs": 1,
+    "pdi": 1.95
+   },
+   {
+    "year": 1998,
+    "dep": 9,
+    "cs": 5,
+    "scs": 3,
+    "pdi": 5.15
+   },
+   {
+    "year": 1999,
+    "dep": 4,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 17.13
+   },
+   {
+    "year": 2000,
+    "dep": 4,
+    "cs": 4,
+    "scs": 2,
+    "pdi": 7.77
+   },
+   {
+    "year": 2001,
+    "dep": 4,
+    "cs": 3,
+    "scs": 0,
+    "pdi": 0.5
+   },
+   {
+    "year": 2002,
+    "dep": 4,
+    "cs": 3,
+    "scs": 1,
+    "pdi": 1.17
+   },
+   {
+    "year": 2003,
+    "dep": 4,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 2.23
+   },
+   {
+    "year": 2004,
+    "dep": 6,
+    "cs": 4,
+    "scs": 3,
+    "pdi": 9.9
+   },
+   {
+    "year": 2005,
+    "dep": 6,
+    "cs": 3,
+    "scs": 1,
+    "pdi": 1.9
+   },
+   {
+    "year": 2006,
+    "dep": 2,
+    "cs": 2,
+    "scs": 1,
+    "pdi": 13.14
+   },
+   {
+    "year": 2007,
+    "dep": 2,
+    "cs": 2,
+    "scs": 1,
+    "pdi": 12.06
+   },
+   {
+    "year": 2008,
+    "dep": 5,
+    "cs": 3,
+    "scs": 0,
+    "pdi": 0.68
+   },
+   {
+    "year": 2009,
+    "dep": 2,
+    "cs": 2,
+    "scs": 0,
+    "pdi": 0.53
+   },
+   {
+    "year": 2010,
+    "dep": 5,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 4.13
+   },
+   {
+    "year": 2011,
+    "dep": 5,
+    "cs": 2,
+    "scs": 1,
+    "pdi": 3.17
+   },
+   {
+    "year": 2012,
+    "dep": 5,
+    "cs": 2,
+    "scs": 0,
+    "pdi": 0.63
+   },
+   {
+    "year": 2013,
+    "dep": 6,
+    "cs": 4,
+    "scs": 4,
+    "pdi": 21.75
+   },
+   {
+    "year": 2014,
+    "dep": 3,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 15.17
+   },
+   {
+    "year": 2015,
+    "dep": 4,
+    "cs": 2,
+    "scs": 2,
+    "pdi": 23.99
+   },
+   {
+    "year": 2016,
+    "dep": 4,
+    "cs": 3,
+    "scs": 1,
+    "pdi": 4.25
+   },
+   {
+    "year": 2017,
+    "dep": 6,
+    "cs": 1,
+    "scs": 1,
+    "pdi": 6.63
+   },
+   {
+    "year": 2018,
+    "dep": 5,
+    "cs": 4,
+    "scs": 4,
+    "pdi": 10.18
+   },
+   {
+    "year": 2019,
+    "dep": 7,
+    "cs": 5,
+    "scs": 3,
+    "pdi": 38.78
+   },
+   {
+    "year": 2020,
+    "dep": 7,
+    "cs": 4,
+    "scs": 2,
+    "pdi": 3.32
+   },
+   {
+    "year": 2021,
+    "dep": 5,
+    "cs": 2,
+    "scs": 1,
+    "pdi": 2.54
+   },
+   {
+    "year": 2022,
+    "dep": 5,
+    "cs": 3,
+    "scs": 1,
+    "pdi": 1.34
+   },
+   {
+    "year": 2023,
+    "dep": 5,
+    "cs": 4,
+    "scs": 3,
+    "pdi": 8.39
+   },
+   {
+    "year": 2024,
+    "dep": 5,
+    "cs": 2,
+    "scs": 1,
+    "pdi": 1.64
+   },
+   {
+    "year": 2025,
+    "dep": 6,
+    "cs": 4,
+    "scs": 2,
+    "pdi": 3.47
+   }
+  ],
+  "png": "outlook/20261112_12/pdi.png"
+ },
+ "consistency": null,
+ "active_break": {
+  "days": [
+   {
+    "step": 0,
+    "valid": "Thu 12 Nov 12Z",
+    "date": "2026-11-12",
+    "score": 23.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 8.0,
+    "parts": {
+     "vort": {
+      "value": 0.3,
+      "score": 10.0
+     },
+     "east": {
+      "value": 2.8,
+      "score": 13.0
+     },
+     "moist": {
+      "value": 47.5,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 28.7,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 4.2,
+      "score": 69.0
+     }
+    },
+    "tn_rain_hres": 0.4
+   },
+   {
+    "step": 24,
+    "valid": "Fri 13 Nov 12Z",
+    "date": "2026-11-13",
+    "score": 36.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 7.5,
+    "parts": {
+     "vort": {
+      "value": 1.1,
+      "score": 38.0
+     },
+     "east": {
+      "value": 4.6,
+      "score": 44.0
+     },
+     "moist": {
+      "value": 113.8,
+      "score": 5.0
+     },
+     "rh": {
+      "value": 18.0,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 4.3,
+      "score": 71.0
+     }
+    },
+    "tn_rain_hres": 0.2
+   },
+   {
+    "step": 48,
+    "valid": "Sat 14 Nov 12Z",
+    "date": "2026-11-14",
+    "score": 35.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 6.9,
+    "parts": {
+     "vort": {
+      "value": 1.6,
+      "score": 54.0
+     },
+     "east": {
+      "value": 4.2,
+      "score": 37.0
+     },
+     "moist": {
+      "value": 79.0,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 27.1,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 3.8,
+      "score": 63.0
+     }
+    },
+    "tn_rain_hres": 0.2
+   },
+   {
+    "step": 72,
+    "valid": "Sun 15 Nov 12Z",
+    "date": "2026-11-15",
+    "score": 38.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 6.4,
+    "parts": {
+     "vort": {
+      "value": 3.8,
+      "score": 100.0
+     },
+     "east": {
+      "value": -0.2,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 4.3,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 45.9,
+      "score": 3.0
+     },
+     "grad": {
+      "value": 4.4,
+      "score": 74.0
+     }
+    },
+    "tn_rain_hres": 0.2
+   },
+   {
+    "step": 96,
+    "valid": "Mon 16 Nov 12Z",
+    "date": "2026-11-16",
+    "score": 37.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 5.9,
+    "parts": {
+     "vort": {
+      "value": 3.8,
+      "score": 100.0
+     },
+     "east": {
+      "value": -5.3,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 0.7,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 20.6,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 4.5,
+      "score": 74.0
+     }
+    },
+    "tn_rain_hres": 0.4
+   },
+   {
+    "step": 120,
+    "valid": "Tue 17 Nov 12Z",
+    "date": "2026-11-17",
+    "score": 40.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 5.3,
+    "parts": {
+     "vort": {
+      "value": 4.0,
+      "score": 100.0
+     },
+     "east": {
+      "value": -5.6,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 2.5,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 8.1,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 5.8,
+      "score": 97.0
+     }
+    },
+    "tn_rain_hres": 0.6
+   },
+   {
+    "step": 144,
+    "valid": "Wed 18 Nov 12Z",
+    "date": "2026-11-18",
+    "score": 40.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 4.8,
+    "parts": {
+     "vort": {
+      "value": 3.5,
+      "score": 100.0
+     },
+     "east": {
+      "value": -5.2,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 6.0,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 11.2,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 6.1,
+      "score": 100.0
+     }
+    },
+    "tn_rain_hres": 0.2
+   },
+   {
+    "step": 168,
+    "valid": "Thu 19 Nov 12Z",
+    "date": "2026-11-19",
+    "score": 19.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 4.3,
+    "parts": {
+     "vort": {
+      "value": 0.7,
+      "score": 22.0
+     },
+     "east": {
+      "value": -2.8,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 10.1,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 12.7,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 4.3,
+      "score": 71.0
+     }
+    },
+    "tn_rain_hres": 0.0
+   },
+   {
+    "step": 192,
+    "valid": "Fri 20 Nov 12Z",
+    "date": "2026-11-20",
+    "score": 8.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 3.7,
+    "parts": {
+     "vort": {
+      "value": -0.1,
+      "score": 0.0
+     },
+     "east": {
+      "value": 1.7,
+      "score": 0.0
+     },
+     "moist": {
+      "value": 73.2,
+      "score": 0.0
+     },
+     "rh": {
+      "value": 21.2,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 1.9,
+      "score": 31.0
+     }
+    },
+    "tn_rain_hres": 0.1
+   },
+   {
+    "step": 216,
+    "valid": "Sat 21 Nov 12Z",
+    "date": "2026-11-21",
+    "score": 21.0,
+    "state": "Subdued / break-like",
+    "mjo_adj": 3.2,
+    "parts": {
+     "vort": {
+      "value": -0.1,
+      "score": 0.0
+     },
+     "east": {
+      "value": 4.3,
+      "score": 38.0
+     },
+     "moist": {
+      "value": 170.2,
+      "score": 23.0
+     },
+     "rh": {
+      "value": 35.7,
+      "score": 0.0
+     },
+     "grad": {
+      "value": 1.8,
+      "score": 30.0
+     }
+    },
+    "tn_rain_hres": 0.5
+   },
+   {
+    "step": 240,
+    "valid": "Sun 22 Nov 12Z",
+    "date": "2026-11-22",
+    "score": 54.0,
+    "state": "Moderate",
+    "mjo_adj": 2.7,
+    "parts": {
+     "vort": {
+      "value": 0.1,
+      "score": 2.0
+     },
+     "east": {
+      "value": 7.9,
+      "score": 99.0
+     },
+     "moist": {
+      "value": 371.8,
+      "score": 91.0
+     },
+     "rh": {
+      "value": 49.0,
+      "score": 12.0
+     },
+     "grad": {
+      "value": 2.5,
+      "score": 42.0
+     }
+    },
+    "tn_rain_hres": null
+   }
+  ],
+  "mjo": {
+   "date": "2026-11-10",
+   "rmm1": -0.1105017,
+   "rmm2": -2.9676888,
+   "phase": 2,
+   "amp": 2.9697454,
+   "effect": "favourable",
+   "modifier": 8,
+   "recent": [
+    {
+     "date": "2026-10-22",
+     "rmm1": -0.23161113,
+     "rmm2": -0.90096718,
+     "phase": 2,
+     "amp": 0.93026102
+    },
+    {
+     "date": "2026-10-23",
+     "rmm1": -0.19503447,
+     "rmm2": -0.83112401,
+     "phase": 2,
+     "amp": 0.85370106
+    },
+    {
+     "date": "2026-10-24",
+     "rmm1": -0.21339706,
+     "rmm2": -1.1122527,
+     "phase": 2,
+     "amp": 1.1325389
+    },
+    {
+     "date": "2026-10-25",
+     "rmm1": -0.29808772,
+     "rmm2": -1.4219762,
+     "phase": 2,
+     "amp": 1.4528842
+    },
+    {
+     "date": "2026-10-26",
+     "rmm1": -0.37822846,
+     "rmm2": -1.3748426,
+     "phase": 2,
+     "amp": 1.4259205
+    },
+    {
+     "date": "2026-10-27",
+     "rmm1": -0.2753861,
+     "rmm2": -1.3771112,
+     "phase": 2,
+     "amp": 1.4043763
+    },
+    {
+     "date": "2026-10-28",
+     "rmm1": -0.10499824,
+     "rmm2": -1.3889943,
+     "phase": 2,
+     "amp": 1.3929572
+    },
+    {
+     "date": "2026-10-29",
+     "rmm1": -0.20791781,
+     "rmm2": -1.4222785,
+     "phase": 2,
+     "amp": 1.4373956
+    },
+    {
+     "date": "2026-10-30",
+     "rmm1": -0.25074822,
+     "rmm2": -1.1127225,
+     "phase": 2,
+     "amp": 1.1406254
+    },
+    {
+     "date": "2026-10-31",
+     "rmm1": -0.47792763,
+     "rmm2": -1.2398685,
+     "phase": 2,
+     "amp": 1.3287922
+    },
+    {
+     "date": "2026-11-01",
+     "rmm1": -0.55537975,
+     "rmm2": -1.4705272,
+     "phase": 2,
+     "amp": 1.5719086
+    },
+    {
+     "date": "2026-11-02",
+     "rmm1": -0.48846394,
+     "rmm2": -1.7253201,
+     "phase": 2,
+     "amp": 1.7931331
+    },
+    {
+     "date": "2026-11-03",
+     "rmm1": -0.67636317,
+     "rmm2": -1.9833822,
+     "phase": 2,
+     "amp": 2.0955362
+    },
+    {
+     "date": "2026-11-04",
+     "rmm1": -0.67741567,
+     "rmm2": -2.0531466,
+     "phase": 2,
+     "amp": 2.1620138
+    },
+    {
+     "date": "2026-11-05",
+     "rmm1": -0.73561919,
+     "rmm2": -1.9706912,
+     "phase": 2,
+     "amp": 2.1035111
+    },
+    {
+     "date": "2026-11-06",
+     "rmm1": -0.92415851,
+     "rmm2": -2.0711145,
+     "phase": 2,
+     "amp": 2.2679472
+    },
+    {
+     "date": "2026-11-07",
+     "rmm1": -0.83596736,
+     "rmm2": -2.2865779,
+     "phase": 2,
+     "amp": 2.4346006
+    },
+    {
+     "date": "2026-11-08",
+     "rmm1": -0.51935917,
+     "rmm2": -2.7849989,
+     "phase": 2,
+     "amp": 2.8330114
+    },
+    {
+     "date": "2026-11-09",
+     "rmm1": -0.51167363,
+     "rmm2": -3.0144424,
+     "phase": 2,
+     "amp": 3.0575602
+    },
+    {
+     "date": "2026-11-10",
+     "rmm1": -0.1105017,
+     "rmm2": -2.9676888,
+     "phase": 2,
+     "amp": 2.9697454
+    }
+   ]
+  },
+  "png": "outlook/20261112_12/active_break.png",
+  "indicators": [
+   {
+    "key": "vort",
+    "label": "SW Bay of Bengal 850 hPa vorticity",
+    "units": "10\u207b\u2075 s\u207b\u00b9",
+    "quiet": 0.0,
+    "active": 3.0,
+    "weight": 0.2
+   },
+   {
+    "key": "east",
+    "label": "Easterly wind 850 hPa (10-14N, 80-86E)",
+    "units": "m/s",
+    "quiet": 2.0,
+    "active": 8.0,
+    "weight": 0.2
+   },
+   {
+    "key": "moist",
+    "label": "Moisture flux to TN coast (TCWV \u00d7 easterly)",
+    "units": "kg m\u207b\u00b9 s\u207b\u00b9",
+    "quiet": 100.0,
+    "active": 400.0,
+    "weight": 0.25
+   },
+   {
+    "key": "rh",
+    "label": "Mid-level humidity over TN (700/500 hPa)",
+    "units": "%",
+    "quiet": 45.0,
+    "active": 78.0,
+    "weight": 0.2
+   },
+   {
+    "key": "grad",
+    "label": "Pressure gradient central India \u2212 SW Bay",
+    "units": "hPa",
+    "quiet": 0.0,
+    "active": 6.0,
+    "weight": 0.15
+   }
+  ]
+ },
+ "environment": [
+  {
+   "day": 1,
+   "png": "outlook/20261112_12/environment_d1.png"
+  },
+  {
+   "day": 3,
+   "png": "outlook/20261112_12/environment_d3.png"
+  },
+  {
+   "day": 5,
+   "png": "outlook/20261112_12/environment_d5.png"
+  }
+ ],
+ "nem": {
+  "weeks": [
+   {
+    "id": "w1",
+    "name": "Week 1",
+    "days": "Days 1-7",
+    "from": "2026-11-12",
+    "to": "2026-11-18",
+    "source": "ECMWF ENS (50 members)",
+    "lead_confidence": "High",
+    "png": "outlook/20261112_12/nem_w1.png",
+    "areas": [
+     {
+      "area": "Tamil Nadu",
+      "mean": 4.4,
+      "p10": 1.4,
+      "p90": 6.4,
+      "p25": 2.2,
+      "p75": 4.6,
+      "normal": 41.8,
+      "dep": -89.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 2.0,
+      "p_below": 98.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "North coastal TN",
+      "mean": 5.5,
+      "p10": 0.7,
+      "p90": 7.7,
+      "p25": 0.9,
+      "p75": 2.3,
+      "normal": 60.7,
+      "dep": -91.0,
+      "category": "Below normal",
+      "p_above": 2.0,
+      "p_near": 0.0,
+      "p_below": 98.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Delta TN",
+      "mean": 4.1,
+      "p10": 0.6,
+      "p90": 7.2,
+      "p25": 1.0,
+      "p75": 3.5,
+      "normal": 49.3,
+      "dep": -92.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 2.0,
+      "p_below": 98.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "South TN",
+      "mean": 8.2,
+      "p10": 2.5,
+      "p90": 14.3,
+      "p25": 4.7,
+      "p75": 10.4,
+      "normal": 49.5,
+      "dep": -83.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Interior & west TN",
+      "mean": 2.1,
+      "p10": 0.5,
+      "p90": 2.5,
+      "p25": 0.9,
+      "p75": 1.8,
+      "normal": 29.1,
+      "dep": -93.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 2.0,
+      "p_below": 98.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Andhra Pradesh",
+      "mean": 7.3,
+      "p10": 0.3,
+      "p90": 27.4,
+      "p25": 0.4,
+      "p75": 8.3,
+      "normal": 25.5,
+      "dep": -71.0,
+      "category": "Below normal",
+      "p_above": 8.0,
+      "p_near": 10.0,
+      "p_below": 82.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Odisha",
+      "mean": 10.4,
+      "p10": 0.1,
+      "p90": 27.6,
+      "p25": 1.0,
+      "p75": 12.4,
+      "normal": 6.4,
+      "dep": 61.0,
+      "category": "Above normal",
+      "p_above": 40.0,
+      "p_near": 4.0,
+      "p_below": 56.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Karnataka",
+      "mean": 0.2,
+      "p10": 0.0,
+      "p90": 0.1,
+      "p25": 0.0,
+      "p75": 0.1,
+      "normal": 10.4,
+      "dep": -99.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Kerala",
+      "mean": 7.7,
+      "p10": 3.5,
+      "p90": 11.8,
+      "p25": 5.4,
+      "p75": 8.9,
+      "normal": 41.2,
+      "dep": -81.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Puducherry",
+      "mean": 4.6,
+      "p10": 0.6,
+      "p90": 7.9,
+      "p25": 1.1,
+      "p75": 3.2,
+      "normal": 53.2,
+      "dep": -91.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 4.0,
+      "p_below": 96.0,
+      "confidence": "High",
+      "members": 50
+     },
+     {
+      "area": "Telangana",
+      "mean": 0.9,
+      "p10": 0.0,
+      "p90": 1.4,
+      "p25": 0.0,
+      "p75": 0.1,
+      "normal": 7.2,
+      "dep": -88.0,
+      "category": "Below normal",
+      "p_above": 4.0,
+      "p_near": 0.0,
+      "p_below": 96.0,
+      "confidence": "High",
+      "members": 50
+     }
+    ]
+   },
+   {
+    "id": "w2",
+    "name": "Week 2",
+    "days": "Days 8-14",
+    "from": "2026-11-19",
+    "to": "2026-11-25",
+    "source": "ECMWF ENS (50 members)",
+    "lead_confidence": "Moderate",
+    "png": "outlook/20261112_12/nem_w2.png",
+    "areas": [
+     {
+      "area": "Tamil Nadu",
+      "mean": 35.5,
+      "p10": 10.8,
+      "p90": 68.3,
+      "p25": 18.3,
+      "p75": 49.0,
+      "normal": 43.9,
+      "dep": -19.0,
+      "category": "Below normal",
+      "p_above": 18.0,
+      "p_near": 22.0,
+      "p_below": 60.0,
+      "confidence": "Moderate",
+      "members": 50
+     },
+     {
+      "area": "North coastal TN",
+      "mean": 32.9,
+      "p10": 7.3,
+      "p90": 71.1,
+      "p25": 14.1,
+      "p75": 52.0,
+      "normal": 68.5,
+      "dep": -52.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 14.0,
+      "p_below": 80.0,
+      "confidence": "Moderate",
+      "members": 50
+     },
+     {
+      "area": "Delta TN",
+      "mean": 43.0,
+      "p10": 10.1,
+      "p90": 84.2,
+      "p25": 25.0,
+      "p75": 54.3,
+      "normal": 68.5,
+      "dep": -37.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 12.0,
+      "p_below": 76.0,
+      "confidence": "Moderate",
+      "members": 50
+     },
+     {
+      "area": "South TN",
+      "mean": 51.3,
+      "p10": 18.1,
+      "p90": 91.0,
+      "p25": 29.7,
+      "p75": 60.2,
+      "normal": 43.1,
+      "dep": 19.0,
+      "category": "Above normal",
+      "p_above": 40.0,
+      "p_near": 28.0,
+      "p_below": 32.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Interior & west TN",
+      "mean": 25.9,
+      "p10": 6.6,
+      "p90": 56.5,
+      "p25": 11.7,
+      "p75": 36.2,
+      "normal": 29.1,
+      "dep": -11.0,
+      "category": "Near normal",
+      "p_above": 26.0,
+      "p_near": 14.0,
+      "p_below": 60.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Andhra Pradesh",
+      "mean": 14.4,
+      "p10": 0.7,
+      "p90": 36.8,
+      "p25": 2.3,
+      "p75": 22.9,
+      "normal": 13.0,
+      "dep": 11.0,
+      "category": "Near normal",
+      "p_above": 34.0,
+      "p_near": 8.0,
+      "p_below": 58.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Odisha",
+      "mean": 14.9,
+      "p10": 0.0,
+      "p90": 40.8,
+      "p25": 0.2,
+      "p75": 25.0,
+      "normal": 1.8,
+      "dep": 740.0,
+      "category": "Above normal",
+      "p_above": 54.0,
+      "p_near": 8.0,
+      "p_below": 38.0,
+      "confidence": "Moderate",
+      "members": 50
+     },
+     {
+      "area": "Karnataka",
+      "mean": 6.1,
+      "p10": 0.3,
+      "p90": 16.5,
+      "p25": 1.4,
+      "p75": 8.1,
+      "normal": 4.7,
+      "dep": 29.0,
+      "category": "Above normal",
+      "p_above": 36.0,
+      "p_near": 10.0,
+      "p_below": 54.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Kerala",
+      "mean": 25.5,
+      "p10": 10.2,
+      "p90": 48.9,
+      "p25": 14.3,
+      "p75": 33.7,
+      "normal": 26.9,
+      "dep": -5.0,
+      "category": "Near normal",
+      "p_above": 28.0,
+      "p_near": 18.0,
+      "p_below": 54.0,
+      "confidence": "Low",
+      "members": 50
+     },
+     {
+      "area": "Puducherry",
+      "mean": 35.5,
+      "p10": 10.2,
+      "p90": 68.2,
+      "p25": 17.6,
+      "p75": 49.3,
+      "normal": 66.9,
+      "dep": -47.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 16.0,
+      "p_below": 78.0,
+      "confidence": "Moderate",
+      "members": 50
+     },
+     {
+      "area": "Telangana",
+      "mean": 5.4,
+      "p10": 0.0,
+      "p90": 17.9,
+      "p25": 0.0,
+      "p75": 7.0,
+      "normal": 1.9,
+      "dep": 187.0,
+      "category": "Above normal",
+      "p_above": 30.0,
+      "p_near": 2.0,
+      "p_below": 68.0,
+      "confidence": "Low",
+      "members": 50
+     }
+    ]
+   },
+   {
+    "id": "w3",
+    "name": "Week 3",
+    "days": "Days 15-21",
+    "from": "2026-11-26",
+    "to": "2026-12-02",
+    "source": "NOAA CFSv2 lagged ensemble (16 members)",
+    "lead_confidence": "Low",
+    "png": "outlook/20261112_12/nem_w3.png",
+    "areas": [
+     {
+      "area": "Tamil Nadu",
+      "mean": 5.2,
+      "p10": 0.2,
+      "p90": 14.8,
+      "p25": 0.6,
+      "p75": 7.2,
+      "normal": 36.7,
+      "dep": -86.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "North coastal TN",
+      "mean": 6.5,
+      "p10": 0.1,
+      "p90": 24.0,
+      "p25": 0.3,
+      "p75": 5.7,
+      "normal": 64.0,
+      "dep": -90.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Delta TN",
+      "mean": 6.9,
+      "p10": 0.4,
+      "p90": 18.0,
+      "p25": 1.0,
+      "p75": 8.9,
+      "normal": 57.5,
+      "dep": -88.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "South TN",
+      "mean": 8.3,
+      "p10": 0.1,
+      "p90": 28.0,
+      "p25": 1.0,
+      "p75": 10.1,
+      "normal": 33.6,
+      "dep": -75.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 12.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Interior & west TN",
+      "mean": 2.7,
+      "p10": 0.1,
+      "p90": 7.5,
+      "p25": 0.2,
+      "p75": 3.2,
+      "normal": 23.2,
+      "dep": -88.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Andhra Pradesh",
+      "mean": 2.6,
+      "p10": 0.0,
+      "p90": 10.4,
+      "p25": 0.1,
+      "p75": 1.6,
+      "normal": 13.1,
+      "dep": -80.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 12.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Odisha",
+      "mean": 0.2,
+      "p10": 0.0,
+      "p90": 0.5,
+      "p25": 0.0,
+      "p75": 0.0,
+      "normal": 1.1,
+      "dep": -82.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 6.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Karnataka",
+      "mean": 2.5,
+      "p10": 0.1,
+      "p90": 5.9,
+      "p25": 0.3,
+      "p75": 1.9,
+      "normal": 3.8,
+      "dep": -33.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Kerala",
+      "mean": 8.2,
+      "p10": 1.2,
+      "p90": 17.9,
+      "p25": 2.9,
+      "p75": 13.9,
+      "normal": 17.7,
+      "dep": -54.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 19.0,
+      "p_below": 75.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Puducherry",
+      "mean": 10.1,
+      "p10": 2.1,
+      "p90": 27.3,
+      "p25": 3.9,
+      "p75": 14.2,
+      "normal": 57.7,
+      "dep": -83.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Telangana",
+      "mean": 1.3,
+      "p10": 0.0,
+      "p90": 2.4,
+      "p25": 0.0,
+      "p75": 0.1,
+      "normal": 1.6,
+      "dep": -18.0,
+      "category": "Near normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     }
+    ]
+   },
+   {
+    "id": "w4",
+    "name": "Week 4",
+    "days": "Days 22-28",
+    "from": "2026-12-03",
+    "to": "2026-12-09",
+    "source": "NOAA CFSv2 lagged ensemble (16 members)",
+    "lead_confidence": "Low",
+    "png": "outlook/20261112_12/nem_w4.png",
+    "areas": [
+     {
+      "area": "Tamil Nadu",
+      "mean": 9.7,
+      "p10": 0.1,
+      "p90": 27.9,
+      "p25": 0.4,
+      "p75": 11.2,
+      "normal": 25.8,
+      "dep": -63.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 12.0,
+      "p_below": 81.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "North coastal TN",
+      "mean": 15.6,
+      "p10": 0.0,
+      "p90": 49.0,
+      "p25": 0.0,
+      "p75": 19.2,
+      "normal": 47.9,
+      "dep": -67.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Delta TN",
+      "mean": 16.5,
+      "p10": 0.1,
+      "p90": 33.0,
+      "p25": 0.6,
+      "p75": 15.3,
+      "normal": 42.5,
+      "dep": -61.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 6.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "South TN",
+      "mean": 10.1,
+      "p10": 0.0,
+      "p90": 19.7,
+      "p25": 0.7,
+      "p75": 10.1,
+      "normal": 21.6,
+      "dep": -53.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 6.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Interior & west TN",
+      "mean": 5.5,
+      "p10": 0.0,
+      "p90": 20.6,
+      "p25": 0.0,
+      "p75": 6.5,
+      "normal": 15.9,
+      "dep": -65.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 6.0,
+      "p_below": 81.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Andhra Pradesh",
+      "mean": 2.6,
+      "p10": 0.0,
+      "p90": 4.5,
+      "p25": 0.0,
+      "p75": 0.9,
+      "normal": 11.5,
+      "dep": -77.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Odisha",
+      "mean": 0.0,
+      "p10": 0.0,
+      "p90": 0.0,
+      "p25": 0.0,
+      "p75": 0.0,
+      "normal": 2.6,
+      "dep": -99.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Karnataka",
+      "mean": 1.3,
+      "p10": 0.0,
+      "p90": 2.4,
+      "p25": 0.1,
+      "p75": 1.5,
+      "normal": 3.3,
+      "dep": -62.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Kerala",
+      "mean": 4.9,
+      "p10": 0.1,
+      "p90": 14.0,
+      "p25": 0.5,
+      "p75": 6.1,
+      "normal": 11.8,
+      "dep": -58.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 12.0,
+      "p_below": 75.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Puducherry",
+      "mean": 15.7,
+      "p10": 0.2,
+      "p90": 44.7,
+      "p25": 0.9,
+      "p75": 19.6,
+      "normal": 46.4,
+      "dep": -66.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Telangana",
+      "mean": 0.8,
+      "p10": 0.0,
+      "p90": 0.5,
+      "p25": 0.0,
+      "p75": 0.0,
+      "normal": 2.3,
+      "dep": -65.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     }
+    ]
+   },
+   {
+    "id": "w5",
+    "name": "Days 29-30",
+    "days": "Days 29-30 (partial)",
+    "from": "2026-12-10",
+    "to": "2026-12-11",
+    "source": "NOAA CFSv2 lagged ensemble (16 members)",
+    "lead_confidence": "Low",
+    "png": "outlook/20261112_12/nem_w5.png",
+    "areas": [
+     {
+      "area": "Tamil Nadu",
+      "mean": 1.3,
+      "p10": 0.0,
+      "p90": 2.6,
+      "p25": 0.0,
+      "p75": 0.9,
+      "normal": 6.8,
+      "dep": -81.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "North coastal TN",
+      "mean": 4.3,
+      "p10": 0.0,
+      "p90": 7.4,
+      "p25": 0.0,
+      "p75": 0.2,
+      "normal": 9.7,
+      "dep": -56.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Delta TN",
+      "mean": 0.8,
+      "p10": 0.0,
+      "p90": 2.4,
+      "p25": 0.0,
+      "p75": 0.2,
+      "normal": 10.6,
+      "dep": -92.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "South TN",
+      "mean": 0.8,
+      "p10": 0.0,
+      "p90": 2.7,
+      "p25": 0.0,
+      "p75": 1.0,
+      "normal": 6.4,
+      "dep": -87.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Interior & west TN",
+      "mean": 0.5,
+      "p10": 0.0,
+      "p90": 1.0,
+      "p25": 0.0,
+      "p75": 0.2,
+      "normal": 4.9,
+      "dep": -89.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Andhra Pradesh",
+      "mean": 0.7,
+      "p10": 0.0,
+      "p90": 0.7,
+      "p25": 0.0,
+      "p75": 0.2,
+      "normal": 1.3,
+      "dep": -47.0,
+      "category": "Below normal",
+      "p_above": 6.0,
+      "p_near": 6.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Odisha",
+      "mean": 0.0,
+      "p10": 0.0,
+      "p90": 0.0,
+      "p25": 0.0,
+      "p75": 0.0,
+      "normal": 0.6,
+      "dep": -97.0,
+      "category": "Below normal",
+      "p_above": 0.0,
+      "p_near": 0.0,
+      "p_below": 100.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Karnataka",
+      "mean": 0.1,
+      "p10": 0.0,
+      "p90": 0.4,
+      "p25": 0.0,
+      "p75": 0.1,
+      "normal": 0.5,
+      "dep": null,
+      "category": "n/a",
+      "p_above": 6.0,
+      "p_near": 6.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Kerala",
+      "mean": 1.2,
+      "p10": 0.0,
+      "p90": 3.6,
+      "p25": 0.1,
+      "p75": 1.3,
+      "normal": 3.4,
+      "dep": -66.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Puducherry",
+      "mean": 2.1,
+      "p10": 0.0,
+      "p90": 7.5,
+      "p25": 0.0,
+      "p75": 1.1,
+      "normal": 9.2,
+      "dep": -77.0,
+      "category": "Below normal",
+      "p_above": 12.0,
+      "p_near": 0.0,
+      "p_below": 88.0,
+      "confidence": "Low",
+      "members": 16
+     },
+     {
+      "area": "Telangana",
+      "mean": 0.0,
+      "p10": 0.0,
+      "p90": 0.0,
+      "p25": 0.0,
+      "p75": 0.0,
+      "normal": 0.1,
+      "dep": null,
+      "category": "n/a",
+      "p_above": 6.0,
+      "p_near": 0.0,
+      "p_below": 94.0,
+      "confidence": "Low",
+      "members": 16
+     }
+    ]
+   }
+  ],
+  "total": [
+   {
+    "area": "Tamil Nadu",
+    "mean": 56.1,
+    "normal": 155.0,
+    "dep": -64.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "North coastal TN",
+    "mean": 64.8,
+    "normal": 250.8,
+    "dep": -74.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Delta TN",
+    "mean": 71.3,
+    "normal": 228.4,
+    "dep": -69.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "South TN",
+    "mean": 78.7,
+    "normal": 154.2,
+    "dep": -49.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Interior & west TN",
+    "mean": 36.7,
+    "normal": 102.2,
+    "dep": -64.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Andhra Pradesh",
+    "mean": 27.6,
+    "normal": 64.4,
+    "dep": -57.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Odisha",
+    "mean": 25.5,
+    "normal": 12.5,
+    "dep": 104.0,
+    "category": "Above normal"
+   },
+   {
+    "area": "Karnataka",
+    "mean": 10.2,
+    "normal": 22.7,
+    "dep": -55.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Kerala",
+    "mean": 47.5,
+    "normal": 101.0,
+    "dep": -53.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Puducherry",
+    "mean": 68.0,
+    "normal": 233.4,
+    "dep": -71.0,
+    "category": "Below normal"
+   },
+   {
+    "area": "Telangana",
+    "mean": 8.4,
+    "normal": 13.1,
+    "dep": -36.0,
+    "category": "Below normal"
+   }
+  ],
+  "weeks_covered": [
+   "w1",
+   "w2",
+   "w3",
+   "w4",
+   "w5"
+  ],
+  "climatology": "NOAA CPC Unified gauge daily normal 1991-2020 (land only)"
+ },
+ "verification": {
+  "png": "outlook/20261112_12/verification.png",
+  "track": [
+   {
+    "lead_h": 24,
+    "ens_km": 272.0,
+    "ens_n": 73,
+    "hres_km": 209.0,
+    "hres_n": 47,
+    "ens_int_mae": 6.0,
+    "ens_int_bias": -3.4,
+    "hres_int_mae": 7.4,
+    "hres_int_bias": -3.2
+   },
+   {
+    "lead_h": 48,
+    "ens_km": 229.0,
+    "ens_n": 68,
+    "hres_km": 179.0,
+    "hres_n": 40,
+    "ens_int_mae": 6.7,
+    "ens_int_bias": -3.2,
+    "hres_int_mae": 7.8,
+    "hres_int_bias": -4.5
+   },
+   {
+    "lead_h": 72,
+    "ens_km": 269.0,
+    "ens_n": 67,
+    "hres_km": 226.0,
+    "hres_n": 30,
+    "ens_int_mae": 7.8,
+    "ens_int_bias": -4.1,
+    "hres_int_mae": 10.2,
+    "hres_int_bias": -4.6
+   },
+   {
+    "lead_h": 96,
+    "ens_km": 247.0,
+    "ens_n": 77,
+    "hres_km": 326.0,
+    "hres_n": 29,
+    "ens_int_mae": 6.7,
+    "ens_int_bias": -3.0,
+    "hres_int_mae": 10.0,
+    "hres_int_bias": -7.6
+   },
+   {
+    "lead_h": 120,
+    "ens_km": 360.0,
+    "ens_n": 68,
+    "hres_km": 364.0,
+    "hres_n": 29,
+    "ens_int_mae": 8.9,
+    "ens_int_bias": -2.0,
+    "hres_int_mae": 9.5,
+    "hres_int_bias": -4.5
+   }
+  ],
+  "detection": {
+   "bins": [
+    {
+     "lead": "1-3 days",
+     "hits": 9,
+     "opportunities": 20,
+     "pod": 45.0
+    },
+    {
+     "lead": "3-7 days",
+     "hits": 4,
+     "opportunities": 40,
+     "pod": 10.0
+    },
+    {
+     "lead": "7-15 days",
+     "hits": 2,
+     "opportunities": 72,
+     "pod": 3.0
+    }
+   ],
+   "far": 87.0,
+   "predictions_verified": 151,
+   "false_alarms": 131,
+   "false_list": [
+    {
+     "run": "20261029_00",
+     "storm": "72B",
+     "p": 33.0,
+     "t_gen": "2026-11-08T00"
+    },
+    {
+     "run": "20261030_00",
+     "storm": "71B",
+     "p": 47.0,
+     "t_gen": "2026-11-09T06"
+    },
+    {
+     "run": "20261031_00",
+     "storm": "71B",
+     "p": 59.0,
+     "t_gen": "2026-11-09T18"
+    },
+    {
+     "run": "20261031_12",
+     "storm": "71B",
+     "p": 65.0,
+     "t_gen": "2026-11-08T18"
+    },
+    {
+     "run": "20261101_00",
+     "storm": "71B",
+     "p": 59.0,
+     "t_gen": "2026-11-09T06"
+    },
+    {
+     "run": "20261103_12",
+     "storm": "71B",
+     "p": 80.0,
+     "t_gen": "2026-11-09T12"
+    },
+    {
+     "run": "20261104_12",
+     "storm": "70B",
+     "p": 67.0,
+     "t_gen": "2026-11-09T18"
+    },
+    {
+     "run": "20261106_12",
+     "storm": "70A",
+     "p": 37.0,
+     "t_gen": "2026-11-08T12"
+    }
+   ],
+   "observed": [
+    {
+     "src": "IBTrACS",
+     "id": "UNNAMED",
+     "time": "2026-09-22 18Z",
+     "lat": 17.6,
+     "lon": 84.8,
+     "peak_kt": 40.0,
+     "detected_runs": 0
+    },
+    {
+     "src": "IBTrACS",
+     "id": "ARNAB",
+     "time": "2026-10-26 00Z",
+     "lat": 16.0,
+     "lon": 89.1,
+     "peak_kt": 105.0,
+     "detected_runs": 1
+    },
+    {
+     "src": "ECMWF analysis",
+     "id": "04B",
+     "time": "2026-11-01 00Z",
+     "lat": 11.5,
+     "lon": 86.4,
+     "peak_kt": 39.0,
+     "detected_runs": 1
+    },
+    {
+     "src": "ECMWF analysis",
+     "id": "70A",
+     "time": "2026-10-14 00Z",
+     "lat": 6.8,
+     "lon": 58.2,
+     "peak_kt": 33.0,
+     "detected_runs": 5
+    },
+    {
+     "src": "ECMWF analysis",
+     "id": "70B",
+     "time": "2026-10-14 00Z",
+     "lat": 9.1,
+     "lon": 83.8,
+     "peak_kt": 33.0,
+     "detected_runs": 3
+    },
+    {
+     "src": "ECMWF analysis",
+     "id": "72B",
+     "time": "2026-10-26 12Z",
+     "lat": 9.1,
+     "lon": 98.1,
+     "peak_kt": 25.0,
+     "detected_runs": 5
+    }
+   ]
+  },
+  "rain": [
+   {
+    "lead_day": 1,
+    "n": 30070,
+    "days": 23,
+    "ens_mae": 6.0,
+    "ens_rmse": 9.8,
+    "ens_bias": 2.9,
+    "hres_mae": 6.3,
+    "hres_rmse": 10.6,
+    "hres_bias": 3.1,
+    "brier_2.5": 0.347,
+    "bss_2.5": -1.15,
+    "freq_2.5": 20.0,
+    "brier_15.6": 0.064,
+    "bss_15.6": -0.08,
+    "freq_15.6": 6.0,
+    "brier_64.5": 0.005,
+    "bss_64.5": 0.0,
+    "freq_64.5": 0.0
+   },
+   {
+    "lead_day": 2,
+    "n": 27449,
+    "days": 21,
+    "ens_mae": 6.1,
+    "ens_rmse": 9.5,
+    "ens_bias": 2.7,
+    "hres_mae": 5.7,
+    "hres_rmse": 9.6,
+    "hres_bias": 2.2,
+    "brier_2.5": 0.363,
+    "bss_2.5": -1.16,
+    "freq_2.5": 21.0,
+    "brier_15.6": 0.065,
+    "bss_15.6": -0.05,
+    "freq_15.6": 7.0,
+    "brier_64.5": 0.004,
+    "bss_64.5": 0.0,
+    "freq_64.5": 0.0
+   },
+   {
+    "lead_day": 3,
+    "n": 24830,
+    "days": 19,
+    "ens_mae": 6.2,
+    "ens_rmse": 8.9,
+    "ens_bias": 3.1,
+    "hres_mae": 6.3,
+    "hres_rmse": 9.2,
+    "hres_bias": 3.1,
+    "brier_2.5": 0.393,
+    "bss_2.5": -1.26,
+    "freq_2.5": 22.0,
+    "brier_15.6": 0.066,
+    "bss_15.6": -0.04,
+    "freq_15.6": 7.0,
+    "brier_64.5": 0.002,
+    "bss_64.5": -0.01,
+    "freq_64.5": 0.0
+   }
+  ],
+  "active_break": {
+   "summary": {
+    "n": 11,
+    "corr": 0.68,
+    "rain_active": 5.2,
+    "rain_moderate": 4.2,
+    "rain_subdued": 2.3
+   },
+   "recent": [
+    {
+     "date": "2026-11-01",
+     "score": 38.0,
+     "tn_mean": 5.1
+    },
+    {
+     "date": "2026-11-02",
+     "score": 29.0,
+     "tn_mean": 1.8
+    },
+    {
+     "date": "2026-11-03",
+     "score": 28.0,
+     "tn_mean": 1.7
+    },
+    {
+     "date": "2026-11-04",
+     "score": 39.0,
+     "tn_mean": 5.1
+    },
+    {
+     "date": "2026-11-05",
+     "score": 53.0,
+     "tn_mean": 4.0
+    },
+    {
+     "date": "2026-11-06",
+     "score": 63.0,
+     "tn_mean": 5.5
+    },
+    {
+     "date": "2026-11-07",
+     "score": 54.0,
+     "tn_mean": 5.8
+    },
+    {
+     "date": "2026-11-08",
+     "score": 66.0,
+     "tn_mean": 4.8
+    },
+    {
+     "date": "2026-11-09",
+     "score": 46.0,
+     "tn_mean": 2.8
+    },
+    {
+     "date": "2026-11-10",
+     "score": 38.0,
+     "tn_mean": 0.2
+    },
+    {
+     "date": "2026-11-11",
+     "score": 31.0,
+     "tn_mean": 0.1
+    }
+   ]
+  },
+  "runs_archived": 85,
+  "period": "15 Jul 2026 \u2013 12 Nov 2026",
+  "obs_sources": "Tracks/intensity: IBTrACS (IMD) where published, else ECMWF analysis (T+0). Rain: TN-SMART station 24-h totals (08:30 IST)."
+ },
+ "names": {},
+ "takeaways": [
+  "70B (Bay of Bengal): 98% of members track it, 98% reach depression, 73% cyclonic storm; median peak 53 kt. Most common outcome: Landfall: Andhra Pradesh (24%).",
+  "71B (Bay of Bengal): 61% of members track it, 61% reach depression, 27% cyclonic storm; median peak 32 kt. Most common outcome: Landfall: Andhra Pradesh (6%).",
+  "New development signal over the Bay of Bengal in days 6-10: 35% of members form a depression.",
+  "New development signal over the Bay of Bengal in days 11-15: 29% of members form a depression.",
+  "Tamil Nadu week 1 (12/11\u201318/11): 4 mm vs normal 42 mm \u2192 below normal (high confidence).",
+  "Tamil Nadu week 2 (19/11\u201325/11): 36 mm vs normal 44 mm \u2192 below normal (moderate confidence).",
+  "Extended range for Tamil Nadu (low confidence): Week 3 below normal, Week 4 below normal, Days 29-30 below normal.",
+  "No strongly active NEM spell indicated in days 0-10.",
+  "Model guidance only \u2014 follow IMD for official forecasts and warnings."
+ ]
+}

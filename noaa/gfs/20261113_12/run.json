@@ -1,0 +1,1302 @@
+{
+ "model": "gfs",
+ "model_label": "NCEP GFS",
+ "base": "noaa/gfs",
+ "run": "20261113_12",
+ "init": "2026-11-13T12:00Z",
+ "last_hour": 360,
+ "resol": "0p25",
+ "grid_deg": 0.25,
+ "persistent_tracks": 95,
+ "frames": [
+  {
+   "hour": 24,
+   "mslp": "mslp_T024.png",
+   "barbs": "barbs_T024.png",
+   "rain": "rain_T024.png",
+   "rain24": "rain24_T024.png",
+   "w850": "w850_T024.png",
+   "ew_south": "ew_south_T024.png",
+   "ew_north": "ew_north_T024.png",
+   "valid": "2026-11-14T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 6.5,
+     "lon": 87.5,
+     "mslp": 1004.4,
+     "dep": 5.24,
+     "wind": 27.4,
+     "circ": 0.728,
+     "score": 0.819
+    },
+    {
+     "id": "T16",
+     "lat": 7.8,
+     "lon": 83.5,
+     "mslp": 1006.5,
+     "dep": 3.76,
+     "wind": 22.1,
+     "circ": 0.715,
+     "score": 0.766
+    },
+    {
+     "id": "T01",
+     "lat": 9.2,
+     "lon": 85.8,
+     "mslp": 1008.0,
+     "dep": 1.2,
+     "wind": 15.9,
+     "circ": 0.915,
+     "score": 0.631
+    },
+    {
+     "id": "T19",
+     "lat": 22.0,
+     "lon": 58.2,
+     "mslp": 1013.0,
+     "dep": 2.06,
+     "wind": 16.5,
+     "circ": 0.591,
+     "score": 0.568
+    },
+    {
+     "id": "T02",
+     "lat": 25.5,
+     "lon": 63.2,
+     "mslp": 1012.0,
+     "dep": 2.14,
+     "wind": 14.9,
+     "circ": 0.635,
+     "score": 0.529
+    },
+    {
+     "id": "T22",
+     "lat": 20.8,
+     "lon": 93.0,
+     "mslp": 1011.4,
+     "dep": 1.17,
+     "wind": 11.0,
+     "circ": 0.655,
+     "score": 0.468
+    },
+    {
+     "id": "T20",
+     "lat": 14.2,
+     "lon": 73.8,
+     "mslp": 1010.9,
+     "dep": 1.0,
+     "wind": 8.4,
+     "circ": 0.639,
+     "score": 0.426
+    }
+   ]
+  },
+  {
+   "hour": 48,
+   "mslp": "mslp_T048.png",
+   "barbs": "barbs_T048.png",
+   "rain": "rain_T048.png",
+   "rain24": "rain24_T048.png",
+   "w850": "w850_T048.png",
+   "ew_south": "ew_south_T048.png",
+   "ew_north": "ew_north_T048.png",
+   "valid": "2026-11-15T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 9.5,
+     "lon": 86.2,
+     "mslp": 1001.1,
+     "dep": 7.04,
+     "wind": 29.5,
+     "circ": 0.97,
+     "score": 1.001
+    },
+    {
+     "id": "T16",
+     "lat": 11.8,
+     "lon": 83.8,
+     "mslp": 1005.8,
+     "dep": 2.91,
+     "wind": 26.9,
+     "circ": 0.825,
+     "score": 0.854
+    },
+    {
+     "id": "T30",
+     "lat": 12.8,
+     "lon": 82.0,
+     "mslp": 1007.2,
+     "dep": 2.61,
+     "wind": 24.4,
+     "circ": 0.639,
+     "score": 0.775
+    },
+    {
+     "id": "T33",
+     "lat": 25.2,
+     "lon": 69.0,
+     "mslp": 1008.6,
+     "dep": 2.13,
+     "wind": 12.9,
+     "circ": 0.669,
+     "score": 0.551
+    },
+    {
+     "id": "T32",
+     "lat": 11.0,
+     "lon": 91.2,
+     "mslp": 1008.6,
+     "dep": 1.15,
+     "wind": 16.5,
+     "circ": 0.663,
+     "score": 0.512
+    },
+    {
+     "id": "T26",
+     "lat": 25.5,
+     "lon": 63.5,
+     "mslp": 1010.2,
+     "dep": 1.75,
+     "wind": 13.3,
+     "circ": 0.657,
+     "score": 0.509
+    },
+    {
+     "id": "T29",
+     "lat": 15.0,
+     "lon": 73.5,
+     "mslp": 1009.9,
+     "dep": 0.9,
+     "wind": 11.9,
+     "circ": 0.673,
+     "score": 0.462
+    },
+    {
+     "id": "T34",
+     "lat": 17.5,
+     "lon": 73.5,
+     "mslp": 1009.9,
+     "dep": 1.0,
+     "wind": 12.7,
+     "circ": 0.563,
+     "score": 0.457
+    },
+    {
+     "id": "T31",
+     "lat": 4.8,
+     "lon": 76.2,
+     "mslp": 1009.9,
+     "dep": 1.19,
+     "wind": 22.5,
+     "circ": 0.576,
+     "score": 0.457
+    },
+    {
+     "id": "T35",
+     "lat": 17.0,
+     "lon": 97.0,
+     "mslp": 1009.4,
+     "dep": 0.86,
+     "wind": 5.3,
+     "circ": 0.69,
+     "score": 0.408
+    },
+    {
+     "id": "T39",
+     "lat": 20.5,
+     "lon": 94.8,
+     "mslp": 1009.9,
+     "dep": 0.84,
+     "wind": 8.0,
+     "circ": 0.563,
+     "score": 0.4
+    },
+    {
+     "id": "T40",
+     "lat": 25.2,
+     "lon": 88.2,
+     "mslp": 1009.9,
+     "dep": 0.83,
+     "wind": 5.0,
+     "circ": 0.567,
+     "score": 0.291
+    }
+   ]
+  },
+  {
+   "hour": 72,
+   "mslp": "mslp_T072.png",
+   "barbs": "barbs_T072.png",
+   "rain": "rain_T072.png",
+   "rain24": "rain24_T072.png",
+   "w850": "w850_T072.png",
+   "ew_south": "ew_south_T072.png",
+   "ew_north": "ew_north_T072.png",
+   "valid": "2026-11-16T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 12.0,
+     "lon": 85.2,
+     "mslp": 990.2,
+     "dep": 15.16,
+     "wind": 39.9,
+     "circ": 1.0,
+     "score": 1.066
+    },
+    {
+     "id": "T44",
+     "lat": 8.8,
+     "lon": 77.8,
+     "mslp": 1007.4,
+     "dep": 1.75,
+     "wind": 17.0,
+     "circ": 0.744,
+     "score": 0.609
+    },
+    {
+     "id": "T33",
+     "lat": 24.8,
+     "lon": 67.8,
+     "mslp": 1009.2,
+     "dep": 1.98,
+     "wind": 10.6,
+     "circ": 0.663,
+     "score": 0.579
+    },
+    {
+     "id": "T34",
+     "lat": 15.0,
+     "lon": 74.8,
+     "mslp": 1008.7,
+     "dep": 1.03,
+     "wind": 15.5,
+     "circ": 0.589,
+     "score": 0.53
+    },
+    {
+     "id": "T48",
+     "lat": 21.8,
+     "lon": 70.8,
+     "mslp": 1009.3,
+     "dep": 1.11,
+     "wind": 11.7,
+     "circ": 0.678,
+     "score": 0.522
+    },
+    {
+     "id": "T45",
+     "lat": 14.5,
+     "lon": 78.5,
+     "mslp": 1008.4,
+     "dep": 0.92,
+     "wind": 11.0,
+     "circ": 0.608,
+     "score": 0.431
+    },
+    {
+     "id": "T46",
+     "lat": 25.8,
+     "lon": 61.0,
+     "mslp": 1010.7,
+     "dep": 1.07,
+     "wind": 11.0,
+     "circ": 0.652,
+     "score": 0.389
+    }
+   ]
+  },
+  {
+   "hour": 96,
+   "mslp": "mslp_T096.png",
+   "barbs": "barbs_T096.png",
+   "rain": "rain_T096.png",
+   "rain24": "rain24_T096.png",
+   "w850": "w850_T096.png",
+   "ew_south": "ew_south_T096.png",
+   "ew_north": "ew_north_T096.png",
+   "valid": "2026-11-17T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 12.5,
+     "lon": 86.0,
+     "mslp": 986.9,
+     "dep": 18.55,
+     "wind": 42.1,
+     "circ": 1.0,
+     "score": 1.041
+    },
+    {
+     "id": "T62",
+     "lat": 21.8,
+     "lon": 70.5,
+     "mslp": 1009.9,
+     "dep": 1.48,
+     "wind": 11.8,
+     "circ": 0.649,
+     "score": 0.567
+    },
+    {
+     "id": "T34",
+     "lat": 15.8,
+     "lon": 73.2,
+     "mslp": 1008.9,
+     "dep": 1.34,
+     "wind": 14.5,
+     "circ": 0.605,
+     "score": 0.511
+    },
+    {
+     "id": "T52",
+     "lat": 12.0,
+     "lon": 75.5,
+     "mslp": 1008.3,
+     "dep": 0.82,
+     "wind": 13.4,
+     "circ": 0.663,
+     "score": 0.482
+    },
+    {
+     "id": "T57",
+     "lat": 24.5,
+     "lon": 92.2,
+     "mslp": 1011.4,
+     "dep": 1.63,
+     "wind": 5.4,
+     "circ": 0.59,
+     "score": 0.444
+    },
+    {
+     "id": "T60",
+     "lat": 14.8,
+     "lon": 78.0,
+     "mslp": 1008.5,
+     "dep": 1.13,
+     "wind": 10.3,
+     "circ": 0.595,
+     "score": 0.44
+    },
+    {
+     "id": "T61",
+     "lat": 21.2,
+     "lon": 73.2,
+     "mslp": 1010.0,
+     "dep": 1.09,
+     "wind": 9.3,
+     "circ": 0.563,
+     "score": 0.421
+    },
+    {
+     "id": "T64",
+     "lat": 25.8,
+     "lon": 62.8,
+     "mslp": 1011.3,
+     "dep": 1.22,
+     "wind": 11.1,
+     "circ": 0.629,
+     "score": 0.384
+    }
+   ]
+  },
+  {
+   "hour": 120,
+   "mslp": "mslp_T120.png",
+   "barbs": "barbs_T120.png",
+   "rain": "rain_T120.png",
+   "rain24": "rain24_T120.png",
+   "w850": "w850_T120.png",
+   "ew_south": "ew_south_T120.png",
+   "ew_north": "ew_north_T120.png",
+   "valid": "2026-11-18T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 13.0,
+     "lon": 84.5,
+     "mslp": 990.7,
+     "dep": 15.33,
+     "wind": 37.9,
+     "circ": 1.0,
+     "score": 1.08
+    },
+    {
+     "id": "T73",
+     "lat": 18.8,
+     "lon": 88.0,
+     "mslp": 1007.7,
+     "dep": 2.99,
+     "wind": 30.0,
+     "circ": 0.615,
+     "score": 0.815
+    },
+    {
+     "id": "T74",
+     "lat": 9.0,
+     "lon": 77.5,
+     "mslp": 1006.7,
+     "dep": 1.51,
+     "wind": 13.8,
+     "circ": 0.652,
+     "score": 0.566
+    },
+    {
+     "id": "T76",
+     "lat": 21.5,
+     "lon": 70.0,
+     "mslp": 1011.3,
+     "dep": 1.35,
+     "wind": 12.1,
+     "circ": 0.609,
+     "score": 0.527
+    },
+    {
+     "id": "T68",
+     "lat": 11.5,
+     "lon": 75.0,
+     "mslp": 1007.6,
+     "dep": 1.44,
+     "wind": 14.3,
+     "circ": 0.627,
+     "score": 0.509
+    },
+    {
+     "id": "T71",
+     "lat": 23.5,
+     "lon": 88.2,
+     "mslp": 1012.4,
+     "dep": 1.16,
+     "wind": 8.6,
+     "circ": 0.697,
+     "score": 0.486
+    },
+    {
+     "id": "T70",
+     "lat": 10.8,
+     "lon": 76.5,
+     "mslp": 1007.4,
+     "dep": 0.99,
+     "wind": 14.7,
+     "circ": 0.572,
+     "score": 0.486
+    },
+    {
+     "id": "T72",
+     "lat": 6.2,
+     "lon": 81.0,
+     "mslp": 1006.6,
+     "dep": 1.46,
+     "wind": 15.1,
+     "circ": 0.722,
+     "score": 0.485
+    },
+    {
+     "id": "T69",
+     "lat": 15.0,
+     "lon": 78.5,
+     "mslp": 1008.5,
+     "dep": 1.14,
+     "wind": 11.0,
+     "circ": 0.595,
+     "score": 0.446
+    },
+    {
+     "id": "T77",
+     "lat": 15.8,
+     "lon": 97.5,
+     "mslp": 1010.5,
+     "dep": 0.94,
+     "wind": 7.4,
+     "circ": 0.622,
+     "score": 0.42
+    }
+   ]
+  },
+  {
+   "hour": 144,
+   "mslp": "mslp_T144.png",
+   "barbs": "barbs_T144.png",
+   "rain": "rain_T144.png",
+   "rain24": "rain24_T144.png",
+   "w850": "w850_T144.png",
+   "ew_south": "ew_south_T144.png",
+   "ew_north": "ew_north_T144.png",
+   "valid": "2026-11-19T12:00Z",
+   "systems": [
+    {
+     "id": "T17",
+     "lat": 16.0,
+     "lon": 82.0,
+     "mslp": 992.0,
+     "dep": 15.55,
+     "wind": 33.7,
+     "circ": 1.0,
+     "score": 1.079
+    },
+    {
+     "id": "T83",
+     "lat": 9.2,
+     "lon": 77.8,
+     "mslp": 1006.5,
+     "dep": 1.59,
+     "wind": 14.4,
+     "circ": 0.695,
+     "score": 0.579
+    },
+    {
+     "id": "T81",
+     "lat": 22.5,
+     "lon": 96.0,
+     "mslp": 1015.5,
+     "dep": 1.86,
+     "wind": 11.0,
+     "circ": 0.699,
+     "score": 0.54
+    },
+    {
+     "id": "T84",
+     "lat": 5.2,
+     "lon": 95.0,
+     "mslp": 1008.5,
+     "dep": 1.12,
+     "wind": 11.7,
+     "circ": 0.886,
+     "score": 0.457
+    },
+    {
+     "id": "T68",
+     "lat": 11.0,
+     "lon": 79.5,
+     "mslp": 1006.6,
+     "dep": 1.17,
+     "wind": 10.2,
+     "circ": 0.59,
+     "score": 0.441
+    }
+   ]
+  },
+  {
+   "hour": 168,
+   "mslp": "mslp_T168.png",
+   "barbs": "barbs_T168.png",
+   "rain": "rain_T168.png",
+   "rain24": "rain24_T168.png",
+   "w850": "w850_T168.png",
+   "ew_south": "ew_south_T168.png",
+   "ew_north": "ew_north_T168.png",
+   "valid": "2026-11-20T12:00Z",
+   "systems": [
+    {
+     "id": "T89",
+     "lat": 14.5,
+     "lon": 78.5,
+     "mslp": 1007.3,
+     "dep": 2.22,
+     "wind": 12.7,
+     "circ": 0.681,
+     "score": 0.641
+    },
+    {
+     "id": "T17",
+     "lat": 19.0,
+     "lon": 78.8,
+     "mslp": 1008.9,
+     "dep": 1.79,
+     "wind": 10.6,
+     "circ": 0.977,
+     "score": 0.635
+    },
+    {
+     "id": "T90",
+     "lat": 19.2,
+     "lon": 73.2,
+     "mslp": 1008.7,
+     "dep": 1.98,
+     "wind": 16.7,
+     "circ": 0.667,
+     "score": 0.633
+    },
+    {
+     "id": "T83",
+     "lat": 9.0,
+     "lon": 77.5,
+     "mslp": 1007.8,
+     "dep": 1.04,
+     "wind": 10.2,
+     "circ": 0.86,
+     "score": 0.55
+    }
+   ]
+  },
+  {
+   "hour": 192,
+   "mslp": "mslp_T192.png",
+   "barbs": "barbs_T192.png",
+   "rain": "rain_T192.png",
+   "rain24": "rain24_T192.png",
+   "w850": "w850_T192.png",
+   "ew_south": "ew_south_T192.png",
+   "ew_north": "ew_north_T192.png",
+   "valid": "2026-11-21T12:00Z",
+   "systems": [
+    {
+     "id": "T99",
+     "lat": 20.8,
+     "lon": 73.2,
+     "mslp": 1009.9,
+     "dep": 1.98,
+     "wind": 12.3,
+     "circ": 0.747,
+     "score": 0.607
+    },
+    {
+     "id": "T90",
+     "lat": 19.2,
+     "lon": 73.2,
+     "mslp": 1010.0,
+     "dep": 1.27,
+     "wind": 12.4,
+     "circ": 0.672,
+     "score": 0.541
+    },
+    {
+     "id": "T100",
+     "lat": 15.8,
+     "lon": 76.8,
+     "mslp": 1009.4,
+     "dep": 1.9,
+     "wind": 9.5,
+     "circ": 0.564,
+     "score": 0.497
+    },
+    {
+     "id": "T98",
+     "lat": 22.2,
+     "lon": 95.8,
+     "mslp": 1013.7,
+     "dep": 1.33,
+     "wind": 5.7,
+     "circ": 0.585,
+     "score": 0.418
+    }
+   ]
+  },
+  {
+   "hour": 216,
+   "mslp": "mslp_T216.png",
+   "barbs": "barbs_T216.png",
+   "rain": "rain_T216.png",
+   "rain24": "rain24_T216.png",
+   "w850": "w850_T216.png",
+   "ew_south": "ew_south_T216.png",
+   "ew_north": "ew_north_T216.png",
+   "valid": "2026-11-22T12:00Z",
+   "systems": [
+    {
+     "id": "T109",
+     "lat": 10.0,
+     "lon": 87.2,
+     "mslp": 1008.2,
+     "dep": 2.27,
+     "wind": 17.9,
+     "circ": 0.789,
+     "score": 0.68
+    },
+    {
+     "id": "T116",
+     "lat": 11.5,
+     "lon": 86.0,
+     "mslp": 1009.1,
+     "dep": 1.37,
+     "wind": 18.7,
+     "circ": 0.747,
+     "score": 0.583
+    },
+    {
+     "id": "T117",
+     "lat": 16.8,
+     "lon": 74.5,
+     "mslp": 1009.8,
+     "dep": 1.42,
+     "wind": 9.9,
+     "circ": 0.721,
+     "score": 0.561
+    },
+    {
+     "id": "T113",
+     "lat": 15.2,
+     "lon": 74.8,
+     "mslp": 1010.0,
+     "dep": 1.2,
+     "wind": 11.0,
+     "circ": 0.628,
+     "score": 0.521
+    },
+    {
+     "id": "T111",
+     "lat": 25.8,
+     "lon": 62.8,
+     "mslp": 1013.1,
+     "dep": 1.93,
+     "wind": 13.0,
+     "circ": 0.612,
+     "score": 0.512
+    },
+    {
+     "id": "T98",
+     "lat": 20.8,
+     "lon": 93.0,
+     "mslp": 1011.3,
+     "dep": 1.37,
+     "wind": 12.2,
+     "circ": 0.638,
+     "score": 0.492
+    },
+    {
+     "id": "T119",
+     "lat": 25.8,
+     "lon": 61.0,
+     "mslp": 1013.4,
+     "dep": 2.17,
+     "wind": 11.3,
+     "circ": 0.601,
+     "score": 0.492
+    },
+    {
+     "id": "T120",
+     "lat": 21.0,
+     "lon": 73.2,
+     "mslp": 1010.3,
+     "dep": 1.7,
+     "wind": 9.4,
+     "circ": 0.586,
+     "score": 0.485
+    },
+    {
+     "id": "T99",
+     "lat": 19.2,
+     "lon": 73.2,
+     "mslp": 1010.5,
+     "dep": 0.96,
+     "wind": 9.5,
+     "circ": 0.672,
+     "score": 0.467
+    },
+    {
+     "id": "T114",
+     "lat": 16.8,
+     "lon": 97.8,
+     "mslp": 1011.1,
+     "dep": 1.09,
+     "wind": 4.8,
+     "circ": 0.663,
+     "score": 0.414
+    }
+   ]
+  },
+  {
+   "hour": 240,
+   "mslp": "mslp_T240.png",
+   "barbs": "barbs_T240.png",
+   "rain": "rain_T240.png",
+   "rain24": "rain24_T240.png",
+   "w850": "w850_T240.png",
+   "ew_south": "ew_south_T240.png",
+   "ew_north": "ew_north_T240.png",
+   "valid": "2026-11-23T12:00Z",
+   "systems": [
+    {
+     "id": "T109",
+     "lat": 12.8,
+     "lon": 83.2,
+     "mslp": 1008.2,
+     "dep": 2.37,
+     "wind": 20.3,
+     "circ": 1.0,
+     "score": 0.757
+    },
+    {
+     "id": "T117",
+     "lat": 16.0,
+     "lon": 73.2,
+     "mslp": 1010.4,
+     "dep": 1.09,
+     "wind": 12.6,
+     "circ": 0.744,
+     "score": 0.529
+    },
+    {
+     "id": "T127",
+     "lat": 20.2,
+     "lon": 94.8,
+     "mslp": 1010.5,
+     "dep": 1.54,
+     "wind": 7.3,
+     "circ": 0.684,
+     "score": 0.5
+    },
+    {
+     "id": "T124",
+     "lat": 20.8,
+     "lon": 93.0,
+     "mslp": 1011.0,
+     "dep": 0.96,
+     "wind": 12.0,
+     "circ": 0.753,
+     "score": 0.496
+    },
+    {
+     "id": "T126",
+     "lat": 12.0,
+     "lon": 75.0,
+     "mslp": 1009.9,
+     "dep": 1.15,
+     "wind": 11.5,
+     "circ": 0.651,
+     "score": 0.483
+    },
+    {
+     "id": "T125",
+     "lat": 13.8,
+     "lon": 73.8,
+     "mslp": 1010.1,
+     "dep": 1.14,
+     "wind": 11.7,
+     "circ": 0.651,
+     "score": 0.468
+    },
+    {
+     "id": "T129",
+     "lat": 17.5,
+     "lon": 95.8,
+     "mslp": 1010.8,
+     "dep": 1.06,
+     "wind": 7.2,
+     "circ": 0.701,
+     "score": 0.458
+    },
+    {
+     "id": "T119",
+     "lat": 25.8,
+     "lon": 62.8,
+     "mslp": 1013.7,
+     "dep": 1.28,
+     "wind": 9.7,
+     "circ": 0.562,
+     "score": 0.383
+    }
+   ]
+  },
+  {
+   "hour": 264,
+   "mslp": "mslp_T264.png",
+   "barbs": "barbs_T264.png",
+   "rain": "rain_T264.png",
+   "rain24": "rain24_T264.png",
+   "w850": "w850_T264.png",
+   "ew_south": "ew_south_T264.png",
+   "ew_north": "ew_north_T264.png",
+   "valid": "2026-11-24T12:00Z",
+   "systems": [
+    {
+     "id": "T109",
+     "lat": 10.5,
+     "lon": 82.8,
+     "mslp": 1007.3,
+     "dep": 2.6,
+     "wind": 19.5,
+     "circ": 1.0,
+     "score": 0.799
+    },
+    {
+     "id": "T124",
+     "lat": 20.5,
+     "lon": 93.0,
+     "mslp": 1010.6,
+     "dep": 1.64,
+     "wind": 15.7,
+     "circ": 0.649,
+     "score": 0.551
+    },
+    {
+     "id": "T134",
+     "lat": 14.8,
+     "lon": 73.8,
+     "mslp": 1009.2,
+     "dep": 1.66,
+     "wind": 11.8,
+     "circ": 0.619,
+     "score": 0.539
+    },
+    {
+     "id": "T132",
+     "lat": 13.0,
+     "lon": 85.8,
+     "mslp": 1009.6,
+     "dep": 1.0,
+     "wind": 16.1,
+     "circ": 0.681,
+     "score": 0.501
+    },
+    {
+     "id": "T125",
+     "lat": 12.8,
+     "lon": 74.2,
+     "mslp": 1009.6,
+     "dep": 1.05,
+     "wind": 11.9,
+     "circ": 0.669,
+     "score": 0.487
+    },
+    {
+     "id": "T137",
+     "lat": 9.2,
+     "lon": 78.0,
+     "mslp": 1009.3,
+     "dep": 0.91,
+     "wind": 13.2,
+     "circ": 0.561,
+     "score": 0.475
+    },
+    {
+     "id": "T140",
+     "lat": 14.5,
+     "lon": 78.2,
+     "mslp": 1010.1,
+     "dep": 0.96,
+     "wind": 11.5,
+     "circ": 0.572,
+     "score": 0.428
+    },
+    {
+     "id": "T136",
+     "lat": 19.2,
+     "lon": 97.8,
+     "mslp": 1011.2,
+     "dep": 0.93,
+     "wind": 4.2,
+     "circ": 0.661,
+     "score": 0.399
+    },
+    {
+     "id": "T130",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1012.0,
+     "dep": 1.0,
+     "wind": 5.6,
+     "circ": 0.615,
+     "score": 0.397
+    },
+    {
+     "id": "T141",
+     "lat": 25.8,
+     "lon": 65.5,
+     "mslp": 1013.5,
+     "dep": 1.1,
+     "wind": 9.5,
+     "circ": 0.713,
+     "score": 0.392
+    }
+   ]
+  },
+  {
+   "hour": 288,
+   "mslp": "mslp_T288.png",
+   "barbs": "barbs_T288.png",
+   "rain": "rain_T288.png",
+   "rain24": "rain24_T288.png",
+   "w850": "w850_T288.png",
+   "ew_south": "ew_south_T288.png",
+   "ew_north": "ew_north_T288.png",
+   "valid": "2026-11-25T12:00Z",
+   "systems": [
+    {
+     "id": "T109",
+     "lat": 9.2,
+     "lon": 82.2,
+     "mslp": 1007.1,
+     "dep": 2.07,
+     "wind": 18.6,
+     "circ": 1.0,
+     "score": 0.744
+    },
+    {
+     "id": "T132",
+     "lat": 13.5,
+     "lon": 90.0,
+     "mslp": 1009.8,
+     "dep": 1.04,
+     "wind": 15.1,
+     "circ": 0.813,
+     "score": 0.536
+    },
+    {
+     "id": "T146",
+     "lat": 6.2,
+     "lon": 81.5,
+     "mslp": 1007.9,
+     "dep": 1.28,
+     "wind": 17.7,
+     "circ": 0.778,
+     "score": 0.521
+    },
+    {
+     "id": "T134",
+     "lat": 12.8,
+     "lon": 74.2,
+     "mslp": 1008.4,
+     "dep": 1.21,
+     "wind": 9.1,
+     "circ": 0.633,
+     "score": 0.454
+    },
+    {
+     "id": "T147",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1012.6,
+     "dep": 1.38,
+     "wind": 6.8,
+     "circ": 0.655,
+     "score": 0.452
+    },
+    {
+     "id": "T152",
+     "lat": 18.2,
+     "lon": 80.5,
+     "mslp": 1011.1,
+     "dep": 1.41,
+     "wind": 7.3,
+     "circ": 0.569,
+     "score": 0.45
+    },
+    {
+     "id": "T145",
+     "lat": 25.8,
+     "lon": 61.0,
+     "mslp": 1013.5,
+     "dep": 1.07,
+     "wind": 10.9,
+     "circ": 0.652,
+     "score": 0.377
+    }
+   ]
+  },
+  {
+   "hour": 312,
+   "mslp": "mslp_T312.png",
+   "barbs": "barbs_T312.png",
+   "rain": "rain_T312.png",
+   "rain24": "rain24_T312.png",
+   "w850": "w850_T312.png",
+   "ew_south": "ew_south_T312.png",
+   "ew_north": "ew_north_T312.png",
+   "valid": "2026-11-26T12:00Z",
+   "systems": [
+    {
+     "id": "T155",
+     "lat": 10.0,
+     "lon": 85.5,
+     "mslp": 1007.0,
+     "dep": 3.12,
+     "wind": 16.6,
+     "circ": 0.807,
+     "score": 0.728
+    },
+    {
+     "id": "T132",
+     "lat": 13.5,
+     "lon": 88.0,
+     "mslp": 1009.9,
+     "dep": 1.31,
+     "wind": 18.0,
+     "circ": 0.886,
+     "score": 0.652
+    },
+    {
+     "id": "T109",
+     "lat": 7.8,
+     "lon": 83.5,
+     "mslp": 1007.4,
+     "dep": 2.09,
+     "wind": 16.6,
+     "circ": 0.937,
+     "score": 0.627
+    },
+    {
+     "id": "T160",
+     "lat": 6.0,
+     "lon": 81.0,
+     "mslp": 1008.2,
+     "dep": 1.4,
+     "wind": 18.6,
+     "circ": 0.81,
+     "score": 0.543
+    },
+    {
+     "id": "T162",
+     "lat": 23.8,
+     "lon": 91.0,
+     "mslp": 1013.0,
+     "dep": 1.04,
+     "wind": 6.1,
+     "circ": 0.657,
+     "score": 0.423
+    },
+    {
+     "id": "T168",
+     "lat": 25.8,
+     "lon": 61.2,
+     "mslp": 1012.9,
+     "dep": 1.08,
+     "wind": 11.3,
+     "circ": 0.646,
+     "score": 0.379
+    }
+   ]
+  },
+  {
+   "hour": 336,
+   "mslp": "mslp_T336.png",
+   "barbs": "barbs_T336.png",
+   "rain": "rain_T336.png",
+   "rain24": "rain24_T336.png",
+   "w850": "w850_T336.png",
+   "ew_south": "ew_south_T336.png",
+   "ew_north": "ew_north_T336.png",
+   "valid": "2026-11-27T12:00Z",
+   "systems": [
+    {
+     "id": "T155",
+     "lat": 12.2,
+     "lon": 82.2,
+     "mslp": 1009.9,
+     "dep": 1.83,
+     "wind": 23.1,
+     "circ": 0.711,
+     "score": 0.689
+    },
+    {
+     "id": "T109",
+     "lat": 8.5,
+     "lon": 85.2,
+     "mslp": 1008.8,
+     "dep": 1.54,
+     "wind": 15.0,
+     "circ": 1.0,
+     "score": 0.644
+    },
+    {
+     "id": "T172",
+     "lat": 19.2,
+     "lon": 73.2,
+     "mslp": 1010.5,
+     "dep": 1.47,
+     "wind": 10.2,
+     "circ": 0.753,
+     "score": 0.55
+    },
+    {
+     "id": "T175",
+     "lat": 21.0,
+     "lon": 73.0,
+     "mslp": 1010.9,
+     "dep": 1.66,
+     "wind": 9.0,
+     "circ": 0.753,
+     "score": 0.527
+    },
+    {
+     "id": "T179",
+     "lat": 21.8,
+     "lon": 96.0,
+     "mslp": 1015.1,
+     "dep": 1.47,
+     "wind": 5.6,
+     "circ": 0.598,
+     "score": 0.433
+    },
+    {
+     "id": "T162",
+     "lat": 23.8,
+     "lon": 90.8,
+     "mslp": 1014.3,
+     "dep": 0.91,
+     "wind": 5.4,
+     "circ": 0.713,
+     "score": 0.425
+    }
+   ]
+  },
+  {
+   "hour": 360,
+   "mslp": "mslp_T360.png",
+   "barbs": "barbs_T360.png",
+   "rain": "rain_T360.png",
+   "rain24": "rain24_T360.png",
+   "w850": "w850_T360.png",
+   "ew_south": "ew_south_T360.png",
+   "ew_north": "ew_north_T360.png",
+   "valid": "2026-11-28T12:00Z",
+   "systems": [
+    {
+     "id": "T155",
+     "lat": 12.0,
+     "lon": 81.0,
+     "mslp": 1009.1,
+     "dep": 3.6,
+     "wind": 22.7,
+     "circ": 0.675,
+     "score": 0.817
+    },
+    {
+     "id": "T109",
+     "lat": 9.5,
+     "lon": 82.8,
+     "mslp": 1010.3,
+     "dep": 1.04,
+     "wind": 14.6,
+     "circ": 1.0,
+     "score": 0.593
+    },
+    {
+     "id": "T172",
+     "lat": 21.0,
+     "lon": 73.0,
+     "mslp": 1012.5,
+     "dep": 2.03,
+     "wind": 9.1,
+     "circ": 0.557,
+     "score": 0.52
+    },
+    {
+     "id": "T182",
+     "lat": 4.8,
+     "lon": 95.2,
+     "mslp": 1011.6,
+     "dep": 1.11,
+     "wind": 11.3,
+     "circ": 0.823,
+     "score": 0.441
+    }
+   ]
+  }
+ ],
+ "gifs": {
+  "mslp": "noaa_gfs_20261113_12_mslp_loop.gif",
+  "barbs": "noaa_gfs_20261113_12_barbs_loop.gif",
+  "rain": "noaa_gfs_20261113_12_rain_loop.gif",
+  "rain24": "noaa_gfs_20261113_12_rain24_loop.gif",
+  "w850": "noaa_gfs_20261113_12_w850_loop.gif",
+  "ew_south": "noaa_gfs_20261113_12_ew_south_loop.gif",
+  "ew_north": "noaa_gfs_20261113_12_ew_north_loop.gif"
+ },
+ "csv": {
+  "candidates": "noaa_gfs_20261113_12_V3_candidates.csv",
+  "tracks": "noaa_gfs_20261113_12_V3_persistent_tracks.csv"
+ },
+ "rendered": "2026-11-13T17:29Z"
+}

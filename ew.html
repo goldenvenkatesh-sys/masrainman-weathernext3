@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EW Index · MasRainman</title>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#121b2e; --panel2:#18233a; --line:#26324d;
+    --text:#e6ecf7; --muted:#8fa0bf; --accent:#a37bff; --ok:#3ddc97;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(90deg,#0f1a30,#1d1640);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .upd{margin-left:auto;color:var(--muted);font-size:12px}
+  main{max-width:1500px;margin:0 auto;padding:14px 16px 40px}
+  .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px;margin-right:2px;min-width:64px}
+  .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+  .seg{display:inline-flex;gap:6px;flex-wrap:wrap}
+  .pill{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;font-size:13px}
+  .pill:hover{border-color:var(--accent)}
+  .pill.on{background:var(--accent);border-color:var(--accent);color:#120626;font-weight:700}
+  .pill small{font-weight:400;opacity:.8;margin-left:4px;font-size:11px}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#120626;font-weight:700}
+  .viewer{background:#fff;border-radius:10px;overflow:auto;border:1px solid var(--line);margin-top:6px}
+  .viewer img{display:block;width:100%;min-width:760px;height:auto}
+  .info{color:var(--muted);font-size:12.5px;margin:8px 0}
+  .empty{color:var(--muted);padding:40px 16px;text-align:center;background:var(--panel);border-radius:10px}
+  footer{color:var(--muted);font-size:12px;margin-top:16px;line-height:1.6}
+  @media (max-width:640px){header h1{font-size:15px}.label{min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>MasRainman · <span>EW Index — extreme 24-h rain</span></h1>
+  <div class="upd" id="upd">Loading…</div>
+  <a class="btn" href="index.html">🗺 Forecast models</a>
+  <a class="btn" href="mme/">🌐 Multi-model</a>
+</header>
+
+<main>
+  <div class="bar"><span class="label">Region</span><div class="seg" id="regions"></div></div>
+  <div class="bar"><span class="label">Model</span><div class="seg" id="models"></div></div>
+  <div class="bar"><span class="label">Cycle</span><div class="seg" id="cycles"></div></div>
+  <div class="bar"><span class="label">Day</span><div class="seg" id="days"></div></div>
+  <div class="bar">
+    <button class="btn" id="prev" title="Previous day (←)">◀</button>
+    <button class="btn" id="play">▶ Play</button>
+    <button class="btn" id="next" title="Next day (→)">▶</button>
+    <a class="btn primary" id="dl" download>⬇ PNG</a>
+  </div>
+  <div class="info" id="info"></div>
+  <div class="viewer" id="viewer"></div>
+
+  <footer>
+    <b>EW index</b>: how unusual the forecast 24-h rain is for that place and time of year — 0 is an ordinary day,
+    0.5 clearly unusual, 0.8 and above extreme, 1 wetter than any day in the 1991–2020 climate.
+    It is the ECMWF Extreme Forecast Index formula against an ERA5 1991–2020 daily climate (±15 days, 0.25°).
+    <b>ECMWF ENS, AIFS ENS and CMC GEPS</b> use their members (a true ensemble EFI);
+    <b>GEFS and WeatherNext 3</b> use the ensemble mean, which smooths rain, so their index runs a little lower;
+    the other models are single runs. Days end at 08:30 IST (IMD rain day). Shown where the model gives at least 1 mm.
+    The same index for every 24 h of the WeatherNext 3, IFS, AIFS, GFS and AIGFS runs is also a layer on the
+    <a href="index.html" style="color:var(--accent)">model maps</a> page.
+    These charts are not official forecasts — please follow IMD for forecasts and warnings.
+  </footer>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const REGIONS = [{v:"ew_south", t:"South India"}, {v:"ew_north", t:"North India"}];
+const ORDER = ["ecmwf_ens","ecmwf_hres","aifs_ens","aifs_single","wn3","gefs","gfs","aigfs","icon","geps"];
+let cycles = [], st = {region:"ew_south", model:"ecmwf_ens", cycle:0, day:0}, timer = null;
+
+function load(){ try{ return JSON.parse(localStorage.getItem("ew_sel")||"{}"); }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem("ew_sel", JSON.stringify({region:st.region, model:st.model})); }catch(e){} }
+
+function pills(el, items, cur, onPick){
+  el.innerHTML = "";
+  for(const it of items){
+    const b = document.createElement("button");
+    b.className = "pill" + (it.v===cur ? " on" : "");
+    b.innerHTML = it.html;
+    b.onclick = () => onPick(it.v);
+    el.appendChild(b);
+  }
+}
+const fmtCycle = id => `${id.slice(8,10)}z ${new Date(Date.UTC(+id.slice(0,4), +id.slice(4,6)-1, +id.slice(6,8))).toLocaleDateString("en-GB",{day:"2-digit",month:"short",timeZone:"UTC"})}`;
+const fmtEnd = iso => new Date(iso).toLocaleString("en-GB",{weekday:"short",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Kolkata"}) + " IST";
+
+function cur(){ return cycles[st.cycle]; }
+function model(){ return cur() && cur().ew[st.model]; }
+
+function render(){
+  pills($("regions"), REGIONS.map(r=>({v:r.v, html:r.t})), st.region, v=>{st.region=v; save(); render();});
+  pills($("cycles"), cycles.map((c,i)=>({v:i, html:fmtCycle(c.id)})), st.cycle, v=>{st.cycle=v; render();});
+  const ew = cur() ? cur().ew : {};
+  const ids = ORDER.filter(m => m in ew).concat(Object.keys(ew).filter(m => !ORDER.includes(m)));
+  if(!ids.includes(st.model)) st.model = ids[0];
+  pills($("models"), ids.map(m=>({v:m, html: ew[m].name + (ew[m].kind==="members" ? " <small>members</small>" : ew[m].kind==="mean" ? " <small>mean</small>" : "")})), st.model,
+        v=>{st.model=v; save(); render();});
+  const m = model();
+  if(!m){ $("days").innerHTML=""; $("viewer").innerHTML='<div class="empty">No EW index maps for this cycle yet.</div>'; $("info").textContent=""; return; }
+  st.day = Math.min(st.day, m.days.length-1);
+  pills($("days"), m.days.map((d,i)=>({v:i, html:"Day "+d.day})), st.day, v=>{st.day=v; render();});
+  const d = m.days[st.day];
+  const src = `mme/rain/${cur().id}/ew/${st.model}/${d[st.region]}`;
+  $("viewer").innerHTML = `<img src="${src}" alt="EW index ${st.region} ${st.model} day ${d.day}">`;
+  $("dl").href = src;
+  $("dl").setAttribute("download", `MasRainman_EW_${st.region.slice(3)}_${st.model}_${cur().id}_day${String(d.day).padStart(2,"0")}.png`);
+  $("info").textContent = `${m.label} · run ${m.run.replace("T"," ").replace(":00Z","Z")} · 24 h ending ${fmtEnd(d.end_ist)}`;
+  // preload the neighbours
+  for(const k of [st.day-1, st.day+1]) if(m.days[k]) (new Image()).src = `mme/rain/${cur().id}/ew/${st.model}/${m.days[k][st.region]}`;
+}
+
+function step(dir){ const m = model(); if(!m) return; st.day = (st.day + dir + m.days.length) % m.days.length; render(); }
+$("prev").onclick = () => step(-1);
+$("next").onclick = () => step(1);
+$("play").onclick = () => {
+  if(timer){ clearInterval(timer); timer=null; $("play").textContent="▶ Play"; return; }
+  timer = setInterval(()=>step(1), 1200); $("play").textContent="⏸ Pause";
+};
+document.addEventListener("keydown", e => { if(e.key==="ArrowLeft") step(-1); if(e.key==="ArrowRight") step(1); });
+
+fetch("mme/manifest.json", {cache:"no-store"}).then(r=>r.json()).then(M=>{
+  cycles = (M.rain||[]).filter(c => c.ew && Object.keys(c.ew).length);
+  $("upd").textContent = "Updated " + (M.updated||"").replace("T"," ");
+  const s = load(); if(s.region) st.region = s.region; if(s.model) st.model = s.model;
+  if(!cycles.length){ $("viewer").innerHTML='<div class="empty">The EW index maps for all models appear after the next multi-model run (00 and 12 UTC cycles).</div>'; render(); return; }
+  render();
+}).catch(()=>{ $("viewer").innerHTML='<div class="empty">Could not load the multi-model manifest.</div>'; });
+</script>
+</body>
+</html>

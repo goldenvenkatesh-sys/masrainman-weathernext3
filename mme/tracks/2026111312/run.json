@@ -1,0 +1,575 @@
+{
+ "cycle": "2026-11-13T12:00Z",
+ "frames": [
+  {
+   "lead": 0,
+   "valid": "2026-11-13T12:00Z",
+   "sst": "lpa_sst_T000.png",
+   "nosst": "lpa_nosst_T000.png"
+  },
+  {
+   "lead": 12,
+   "valid": "2026-11-14T00:00Z",
+   "sst": "lpa_sst_T012.png",
+   "nosst": "lpa_nosst_T012.png"
+  },
+  {
+   "lead": 24,
+   "valid": "2026-11-14T12:00Z",
+   "sst": "lpa_sst_T024.png",
+   "nosst": "lpa_nosst_T024.png"
+  },
+  {
+   "lead": 36,
+   "valid": "2026-11-15T00:00Z",
+   "sst": "lpa_sst_T036.png",
+   "nosst": "lpa_nosst_T036.png"
+  },
+  {
+   "lead": 48,
+   "valid": "2026-11-15T12:00Z",
+   "sst": "lpa_sst_T048.png",
+   "nosst": "lpa_nosst_T048.png"
+  },
+  {
+   "lead": 60,
+   "valid": "2026-11-16T00:00Z",
+   "sst": "lpa_sst_T060.png",
+   "nosst": "lpa_nosst_T060.png"
+  },
+  {
+   "lead": 72,
+   "valid": "2026-11-16T12:00Z",
+   "sst": "lpa_sst_T072.png",
+   "nosst": "lpa_nosst_T072.png"
+  },
+  {
+   "lead": 84,
+   "valid": "2026-11-17T00:00Z",
+   "sst": "lpa_sst_T084.png",
+   "nosst": "lpa_nosst_T084.png"
+  },
+  {
+   "lead": 96,
+   "valid": "2026-11-17T12:00Z",
+   "sst": "lpa_sst_T096.png",
+   "nosst": "lpa_nosst_T096.png"
+  },
+  {
+   "lead": 108,
+   "valid": "2026-11-18T00:00Z",
+   "sst": "lpa_sst_T108.png",
+   "nosst": "lpa_nosst_T108.png"
+  },
+  {
+   "lead": 120,
+   "valid": "2026-11-18T12:00Z",
+   "sst": "lpa_sst_T120.png",
+   "nosst": "lpa_nosst_T120.png"
+  },
+  {
+   "lead": 132,
+   "valid": "2026-11-19T00:00Z",
+   "sst": "lpa_sst_T132.png",
+   "nosst": "lpa_nosst_T132.png"
+  },
+  {
+   "lead": 144,
+   "valid": "2026-11-19T12:00Z",
+   "sst": "lpa_sst_T144.png",
+   "nosst": "lpa_nosst_T144.png"
+  },
+  {
+   "lead": 156,
+   "valid": "2026-11-20T00:00Z",
+   "sst": "lpa_sst_T156.png",
+   "nosst": "lpa_nosst_T156.png"
+  },
+  {
+   "lead": 168,
+   "valid": "2026-11-20T12:00Z",
+   "sst": "lpa_sst_T168.png",
+   "nosst": "lpa_nosst_T168.png"
+  }
+ ],
+ "systems": [
+  {
+   "id": "L1",
+   "basin": "Bay of Bengal",
+   "support": 0.685,
+   "models": [
+    "aifs_ens",
+    "ecmwf_ens",
+    "gefs",
+    "geps",
+    "wn3"
+   ],
+   "members": 41,
+   "track": [
+    {
+     "lead": 0,
+     "lat": 6.04,
+     "lon": 89.05,
+     "mslp": 1008.8,
+     "deficit": 1.23,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 265,
+     "share": 0.27
+    },
+    {
+     "lead": 12,
+     "lat": 6.97,
+     "lon": 88.62,
+     "mslp": 1008.3,
+     "deficit": 1.46,
+     "wind_kt": 23.4,
+     "cat": "D",
+     "spread_km": 194,
+     "share": 0.32
+    },
+    {
+     "lead": 24,
+     "lat": 8.11,
+     "lon": 87.21,
+     "mslp": 1007.3,
+     "deficit": 1.91,
+     "wind_kt": 29.4,
+     "cat": "DD",
+     "spread_km": 148,
+     "share": 0.55
+    },
+    {
+     "lead": 36,
+     "lat": 9.15,
+     "lon": 86.4,
+     "mslp": 1005.9,
+     "deficit": 2.78,
+     "wind_kt": 30.1,
+     "cat": "DD",
+     "spread_km": 83,
+     "share": 0.96
+    },
+    {
+     "lead": 48,
+     "lat": 10.11,
+     "lon": 85.65,
+     "mslp": 1003.1,
+     "deficit": 4.62,
+     "wind_kt": 29.3,
+     "cat": "DD",
+     "spread_km": 95,
+     "share": 1.0
+    },
+    {
+     "lead": 60,
+     "lat": 10.68,
+     "lon": 85.25,
+     "mslp": 999.9,
+     "deficit": 6.88,
+     "wind_kt": 30.3,
+     "cat": "DD",
+     "spread_km": 107,
+     "share": 1.0
+    },
+    {
+     "lead": 72,
+     "lat": 11.16,
+     "lon": 85.33,
+     "mslp": 997.3,
+     "deficit": 8.22,
+     "wind_kt": 34.9,
+     "cat": "CS",
+     "spread_km": 94,
+     "share": 1.0
+    },
+    {
+     "lead": 84,
+     "lat": 11.5,
+     "lon": 85.38,
+     "mslp": 996.8,
+     "deficit": 9.0,
+     "wind_kt": 35.1,
+     "cat": "CS",
+     "spread_km": 107,
+     "share": 1.0
+    },
+    {
+     "lead": 96,
+     "lat": 11.83,
+     "lon": 85.08,
+     "mslp": 996.6,
+     "deficit": 9.29,
+     "wind_kt": 36.0,
+     "cat": "CS",
+     "spread_km": 109,
+     "share": 1.0
+    },
+    {
+     "lead": 108,
+     "lat": 12.07,
+     "lon": 84.26,
+     "mslp": 996.1,
+     "deficit": 10.27,
+     "wind_kt": 35.0,
+     "cat": "CS",
+     "spread_km": 117,
+     "share": 1.0
+    },
+    {
+     "lead": 120,
+     "lat": 12.41,
+     "lon": 82.94,
+     "mslp": 996.5,
+     "deficit": 10.31,
+     "wind_kt": 34.4,
+     "cat": "CS",
+     "spread_km": 121,
+     "share": 1.0
+    },
+    {
+     "lead": 132,
+     "lat": 13.13,
+     "lon": 81.73,
+     "mslp": 998.7,
+     "deficit": 9.27,
+     "wind_kt": 36.2,
+     "cat": "CS",
+     "spread_km": 161,
+     "share": 1.0
+    },
+    {
+     "lead": 144,
+     "lat": 13.17,
+     "lon": 80.11,
+     "mslp": 1001.8,
+     "deficit": 6.62,
+     "wind_kt": 37.7,
+     "cat": "CS",
+     "spread_km": 228,
+     "share": 0.99
+    },
+    {
+     "lead": 156,
+     "lat": 15.41,
+     "lon": 80.28,
+     "mslp": 1005.0,
+     "deficit": 5.28,
+     "wind_kt": 34.4,
+     "cat": "CS",
+     "spread_km": 270,
+     "share": 0.87
+    },
+    {
+     "lead": 168,
+     "lat": 15.51,
+     "lon": 78.98,
+     "mslp": 1007.6,
+     "deficit": 3.09,
+     "wind_kt": 17.7,
+     "cat": "D",
+     "spread_km": 260,
+     "share": 0.8
+    }
+   ],
+   "det_track": [
+    {
+     "lead": 12,
+     "lat": 6.5,
+     "lon": 90.25,
+     "mslp": 1008.9,
+     "deficit": 1.24,
+     "wind_kt": 23.4,
+     "cat": "D",
+     "spread_km": 0,
+     "share": 0.44
+    },
+    {
+     "lead": 24,
+     "lat": 7.45,
+     "lon": 88.45,
+     "mslp": 1006.7,
+     "deficit": 1.78,
+     "wind_kt": 29.4,
+     "cat": "DD",
+     "spread_km": 109,
+     "share": 0.69
+    },
+    {
+     "lead": 36,
+     "lat": 8.55,
+     "lon": 86.55,
+     "mslp": 1005.8,
+     "deficit": 2.71,
+     "wind_kt": 30.1,
+     "cat": "DD",
+     "spread_km": 55,
+     "share": 1.0
+    },
+    {
+     "lead": 48,
+     "lat": 9.83,
+     "lon": 86.53,
+     "mslp": 1003.7,
+     "deficit": 4.06,
+     "wind_kt": 29.3,
+     "cat": "DD",
+     "spread_km": 70,
+     "share": 1.0
+    },
+    {
+     "lead": 60,
+     "lat": 11.0,
+     "lon": 85.97,
+     "mslp": 1001.1,
+     "deficit": 5.81,
+     "wind_kt": 30.3,
+     "cat": "DD",
+     "spread_km": 94,
+     "share": 1.0
+    },
+    {
+     "lead": 72,
+     "lat": 11.42,
+     "lon": 85.88,
+     "mslp": 998.5,
+     "deficit": 7.24,
+     "wind_kt": 34.9,
+     "cat": "CS",
+     "spread_km": 92,
+     "share": 1.0
+    },
+    {
+     "lead": 84,
+     "lat": 11.61,
+     "lon": 86.11,
+     "mslp": 997.8,
+     "deficit": 8.21,
+     "wind_kt": 35.1,
+     "cat": "CS",
+     "spread_km": 87,
+     "share": 1.0
+    },
+    {
+     "lead": 96,
+     "lat": 12.03,
+     "lon": 86.22,
+     "mslp": 997.4,
+     "deficit": 8.53,
+     "wind_kt": 36.0,
+     "cat": "CS",
+     "spread_km": 105,
+     "share": 1.0
+    },
+    {
+     "lead": 108,
+     "lat": 12.39,
+     "lon": 85.42,
+     "mslp": 997.1,
+     "deficit": 9.77,
+     "wind_kt": 35.0,
+     "cat": "CS",
+     "spread_km": 97,
+     "share": 1.0
+    },
+    {
+     "lead": 120,
+     "lat": 12.72,
+     "lon": 84.52,
+     "mslp": 998.5,
+     "deficit": 8.97,
+     "wind_kt": 34.4,
+     "cat": "CS",
+     "spread_km": 99,
+     "share": 1.0
+    },
+    {
+     "lead": 132,
+     "lat": 13.45,
+     "lon": 83.39,
+     "mslp": 997.6,
+     "deficit": 10.54,
+     "wind_kt": 36.2,
+     "cat": "CS",
+     "spread_km": 144,
+     "share": 1.0
+    },
+    {
+     "lead": 144,
+     "lat": 14.66,
+     "lon": 82.3,
+     "mslp": 995.4,
+     "deficit": 11.7,
+     "wind_kt": 37.7,
+     "cat": "CS",
+     "spread_km": 202,
+     "share": 1.0
+    },
+    {
+     "lead": 156,
+     "lat": 16.03,
+     "lon": 81.19,
+     "mslp": 999.2,
+     "deficit": 8.52,
+     "wind_kt": 34.4,
+     "cat": "CS",
+     "spread_km": 268,
+     "share": 1.0
+    },
+    {
+     "lead": 168,
+     "lat": 17.45,
+     "lon": 79.95,
+     "mslp": 1008.6,
+     "deficit": 2.29,
+     "wind_kt": 17.7,
+     "cat": "D",
+     "spread_km": 275,
+     "share": 1.0
+    }
+   ],
+   "min_mslp": 996.1,
+   "peak_wind_kt": 37.7,
+   "peak_cat": "CS",
+   "landfall": [
+    {
+     "where": "South Andhra coast",
+     "prob": 0.565,
+     "lead": 168
+    },
+    {
+     "where": "North Tamil Nadu & Puducherry coast",
+     "prob": 0.135,
+     "lead": 144
+    },
+    {
+     "where": "Other coast",
+     "prob": 0.106,
+     "lead": 132
+    },
+    {
+     "where": "North Andhra coast",
+     "prob": 0.102,
+     "lead": 156
+    },
+    {
+     "where": "No landfall by T+168 h",
+     "prob": 0.077,
+     "lead": null
+    },
+    {
+     "where": "South Tamil Nadu coast",
+     "prob": 0.015,
+     "lead": 144
+    }
+   ],
+   "cyclone_map": "cyclone_L1.png"
+  },
+  {
+   "id": "L2",
+   "basin": "Arabian Sea",
+   "support": 0.668,
+   "models": [
+    "aifs_ens",
+    "ecmwf_ens",
+    "geps",
+    "wn3"
+   ],
+   "members": 40,
+   "track": [
+    {
+     "lead": 12,
+     "lat": 25.08,
+     "lon": 61.85,
+     "mslp": 1014.2,
+     "deficit": 2.1,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 193,
+     "share": 0.29
+    },
+    {
+     "lead": 24,
+     "lat": 24.77,
+     "lon": 61.03,
+     "mslp": 1013.1,
+     "deficit": 1.82,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 262,
+     "share": 0.33
+    },
+    {
+     "lead": 36,
+     "lat": 25.01,
+     "lon": 59.82,
+     "mslp": 1013.8,
+     "deficit": 1.93,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 18,
+     "share": 0.94
+    },
+    {
+     "lead": 48,
+     "lat": 26.73,
+     "lon": 57.1,
+     "mslp": 1013.0,
+     "deficit": 1.67,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 87,
+     "share": 0.94
+    },
+    {
+     "lead": 60,
+     "lat": 25.82,
+     "lon": 57.06,
+     "mslp": 1013.5,
+     "deficit": 1.54,
+     "wind_kt": null,
+     "cat": "LPA",
+     "spread_km": 167,
+     "share": 0.81
+    }
+   ],
+   "det_track": null,
+   "min_mslp": 1013.0,
+   "peak_wind_kt": null,
+   "peak_cat": "LPA",
+   "landfall": [
+    {
+     "where": "No landfall by T+168 h",
+     "prob": 0.622,
+     "lead": null
+    },
+    {
+     "where": "Other coast",
+     "prob": 0.215,
+     "lead": 36
+    },
+    {
+     "where": "Pakistan coast",
+     "prob": 0.164,
+     "lead": 24
+    }
+   ]
+  }
+ ],
+ "models": {
+  "ens": {
+   "ecmwf_ens": 20,
+   "wn3": 1,
+   "aifs_ens": 20,
+   "gefs": 20,
+   "geps": 21
+  },
+  "det": {
+   "ecmwf_hres": 1,
+   "aifs_single": 1,
+   "icon": 1,
+   "gfs": 1
+  }
+ },
+ "rendered": "2026-11-13T23:52Z"
+}

@@ -1,0 +1,40 @@
+{
+ "updated": "2026-11-14T14:25Z",
+ "models": [
+  {
+   "id": "wn3",
+   "label": "WeatherNext 3",
+   "manifest": "data/manifest.json",
+   "base": "runs",
+   "runs": 4
+  },
+  {
+   "id": "ifs",
+   "label": "ECMWF IFS",
+   "manifest": "data/manifest_ifs.json",
+   "base": "ecmwf/ifs",
+   "runs": 4
+  },
+  {
+   "id": "aifs",
+   "label": "ECMWF AIFS",
+   "manifest": "data/manifest_aifs.json",
+   "base": "ecmwf/aifs",
+   "runs": 4
+  },
+  {
+   "id": "gfs",
+   "label": "NCEP GFS",
+   "manifest": "data/manifest_gfs.json",
+   "base": "noaa/gfs",
+   "runs": 2
+  },
+  {
+   "id": "aigfs",
+   "label": "NOAA AIGFS",
+   "manifest": "data/manifest_aigfs.json",
+   "base": "noaa/aigfs",
+   "runs": 2
+  }
+ ]
+}

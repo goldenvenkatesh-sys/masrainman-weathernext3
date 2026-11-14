@@ -44,6 +44,7 @@ PAGES = [("models", "🗺 Forecast models", "../models/"),
          ("cyclone", "📈 NEM &amp; cyclone outlook", "../cyclone/"),
          ("tracks", "🌐 LPA &amp; cyclone tracker", "../tracks/"),
          ("tropical", "🌀 Tropical tracker", "../tropical/"),
+         ("odds", "🎯 Cyclone odds", "../tropical/odds/"),
          ("raintotals", "🌧 Rain totals", "../raintotals/"),
          ("ensrain", "📊 District rain", "../ensrain/"),
          ("ai", "🤖 MasRainMan AI (10-day)", "../")]

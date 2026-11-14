@@ -71,6 +71,15 @@ redraws by itself when a new run arrives. On the PC: `python tracker/tropical_tr
 (one self-contained HTML; add `--every 2` to keep it checking every 2 hours; set `MASRAINMAN_ALL_INDIA` to use the
 Survey of India STATE_BOUNDARY.shp, otherwise the GoI-compliant DataMeet boundaries are downloaded once).
 
+**Cyclone Odds (social cards):** `/tropical/odds/` turns the same tracker data into ready-to-post cards in the
+MasRainman look (Sunset / Paper / Ember themes; 4:5 post, 1:1, 9:16 story, 16:9 sizes): a honeycomb of the chance
+that a storm centre passes within 120 km, landfall odds by coast (first crossing onto the mainland or Sri Lanka),
+IMD strength steps (D … SuCS on peak wind), landfall day (IST), the run-to-run swing, and the HRES / AIFS / AI-GFS
+tracks. Pick a system (e.g. 92B), Bay / Arabian Sea, 3–15 days and the minimum strength; save a PNG, share it, or
+record a 12-second reel (MP4 on Safari/Chrome). A caption with hashtags is written for you. Everything is worked out
+in the browser from `data.json`; the page's files are `tracker/odds*.{html,json,png,woff2}` (land mask from Natural
+Earth via `tracker/make_odds_land.py`).
+
 ## Files
 
 | File | What it does |

@@ -1012,12 +1012,29 @@ def write_outputs(payload, sst, standalone):
         out.write_text(tpl.replace("__BOOT__", json.dumps(boot, separators=(",", ":"))), encoding="utf-8")
         return out
     (OUT_DIR / "index.html").write_text(tpl.replace("__BOOT__", "null"), encoding="utf-8")
+    write_odds_page()
     (OUT_DIR / "data.json").write_text(json.dumps(payload, separators=(",", ":")), encoding="utf-8")
     (OUT_DIR / "sst.json").write_text(json.dumps(sst, separators=(",", ":")), encoding="utf-8")
     (OUT_DIR / "stamp.json").write_text(json.dumps(
         {"stamp": payload["stamp"], "generated": payload["generated"], "sst_date": sst.get("date")}),
         encoding="utf-8")
     return OUT_DIR / "index.html"
+
+
+# Cyclone Odds page (/tropical/odds/): social-media cards (post / square / story / wide, PNG + 12-s reel) worked out
+# in the browser from the same data.json — strike-probability honeycomb, landfall odds by coast, IMD strength steps
+# and landfall day. Its static files live in tracker/ and are copied next to the tracker on every run.
+ODDS_FILES = {"odds.html": "index.html", "odds_land.json": "land.json", "odds_logo.png": "logo.png",
+              "odds_logo_dark.png": "logo_dark.png", "odds_bebasneue.woff2": "bebasneue.woff2",
+              "odds_outfit.woff2": "outfit.woff2"}
+
+
+def write_odds_page():
+    dest = OUT_DIR / "odds"
+    dest.mkdir(parents=True, exist_ok=True)
+    for src, name in ODDS_FILES.items():
+        if (HERE / src).exists():
+            shutil.copyfile(HERE / src, dest / name)
 
 
 def run_once(standalone=False, open_browser=False):

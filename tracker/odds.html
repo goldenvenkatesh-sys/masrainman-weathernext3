@@ -28,6 +28,11 @@ a{color:var(--sun)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:7px 12px;
   font:600 13px Outfit,system-ui,sans-serif;cursor:pointer}
+.runs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.runbtn{text-align:left;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);border-radius:14px;padding:8px 10px;cursor:pointer;font:600 14px Outfit,system-ui,sans-serif}
+.runbtn b{font-size:16px}.runbtn small{display:block;color:var(--sub);font-size:11px;font-weight:400;margin-top:2px}
+.runbtn .new{float:right;font-size:10px;font-weight:800;letter-spacing:1px;padding:2px 6px;border-radius:999px;background:var(--sun);color:#1a0a2a}
+.runbtn.on{background:linear-gradient(90deg,var(--hot),var(--warm));border-color:transparent}.runbtn.on small{color:#fff}
 .chip.on{background:linear-gradient(90deg,var(--hot),var(--warm));border-color:transparent;color:#fff}
 select{width:100%;background:#1b0c30;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 10px;font:600 14px Outfit,system-ui,sans-serif}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -54,7 +59,7 @@ select{width:100%;background:#1b0c30;color:var(--ink);border:1px solid var(--lin
 
 <div class="wrap">
   <div class="panel" id="controls">
-    <div class="grp"><h3>Model run</h3><select id="run"></select></div>
+    <div class="grp"><h3>Model run · newest first</h3><div class="runs" id="run"></div></div>
     <div class="grp"><h3>System / sea</h3><div class="chips" id="area"></div></div>
     <div class="grp"><h3>Look ahead</h3><div class="chips" id="win"></div></div>
     <div class="grp"><h3>Count systems from</h3><div class="chips" id="thr"></div></div>
@@ -65,6 +70,7 @@ select{width:100%;background:#1b0c30;color:var(--ink);border:1px solid var(--lin
     <div class="grp actions">
       <button class="btn" id="png">⬇ Save picture</button>
       <button class="btn alt" id="share">↗ Share</button>
+      <button class="btn alt" id="allruns" style="grid-column:span 2">⬇ Save this card for every run (compare)</button>
       <button class="btn rec" id="reel" style="grid-column:span 2">● Make 12-second reel</button>
     </div>
     <div class="grp"><h3>Caption (tap to copy)</h3><textarea class="cap" id="caption" readonly></textarea></div>
@@ -571,11 +577,16 @@ function chips(id, items, key, after){
 }
 function buildControls(){
   const runs = Object.keys(DATA.products.ens||{}).filter(k=>(DATA.products.ens[k]||[]).length).sort().reverse();
-  const sel=$("run"); sel.innerHTML="";
-  runs.forEach(k=>{ const o=document.createElement("option"); const r=runDate(k), reach=runReach(k);
-    o.value=k; o.textContent=`${String(r.getUTCHours()).padStart(2,"0")}Z ${fmtDay(r).slice(4)} ${r.getUTCFullYear()} · ${Math.round(reach/24)} days`; sel.appendChild(o); });
-  if(!S.run || !runs.includes(S.run)) S.run = runs.find(k=>runReach(k)>=240) || runs[0];
-  sel.value=S.run; sel.onchange=()=>{ S.run=sel.value; refresh(); };
+  // newest run first; each button shows which models have that run and how far it reaches
+  if(!S.run || !runs.includes(S.run) || S.followLatest) { S.run = runs[0]; S.followLatest = true; }
+  const box=$("run"); box.innerHTML="";
+  runs.forEach((k,i)=>{ const r=runDate(k), reach=runReach(k), b=document.createElement("button");
+    const has = [["hres","HRES"],["aifs","AIFS"],["aigfs","AI-GFS"]].filter(([p])=>(DATA.products[p]?.[k]||[]).length).map(x=>x[1]);
+    b.className="runbtn"+(k===S.run?" on":"");
+    b.innerHTML=`${i===0?'<span class="new">LATEST</span>':""}<b>${String(r.getUTCHours()).padStart(2,"0")}Z</b> ${fmtDay(r).slice(4)}`+
+      `<small>ENS 51 · ${Math.round(reach/24)} days${has.length?" · "+has.join(" · "):""}</small>`;
+    b.onclick=()=>{ S.run=k; S.followLatest=(i===0); [...box.children].forEach(c=>c.classList.remove("on")); b.classList.add("on"); refresh(); };
+    box.appendChild(b); });
   const sysIds = new Set();
   Object.values(DATA.products.ens||{}).forEach(ts=>ts.forEach(t=>{ const m=(t.n||"").match(/^(\d\d[AB])\b/); if(m && !/^7\d/.test(m[1])) sysIds.add(m[1]); }));
   (DATA.systems||[]).forEach(s=>{ if(/[AB]$/.test(s.id)) sysIds.add(s.id); });
@@ -616,6 +627,13 @@ function caption(M, st){
 $("caption").onclick=async e=>{ e.target.select(); try{ await navigator.clipboard.writeText(e.target.value); $("status").textContent="Caption copied ✓"; }catch(_){} };
 function fileName(ext){ return `masrainman_cyclone_odds_${S.area}_${S.run}_${S.fmt}.${ext}`; }
 $("png").onclick=()=>{ canvas.toBlob(b=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=fileName("png"); a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); },"image/png"); };
+$("allruns").onclick=async ()=>{
+  const keep=S.run, runs=Object.keys(DATA.products.ens).filter(k=>DATA.products.ens[k].length).sort().reverse();
+  for(const k of runs){ S.run=k; refresh(); await new Promise(r=>setTimeout(r,150));
+    const b=await new Promise(r=>canvas.toBlob(r,"image/png")); const a=document.createElement("a");
+    a.href=URL.createObjectURL(b); a.download=fileName("png"); a.click(); await new Promise(r=>setTimeout(r,700)); }
+  S.run=keep; refresh(); $("status").textContent=`Saved ${runs.length} cards, one per run ✓`;
+};
 $("share").onclick=()=>{ canvas.toBlob(async b=>{ const f=new File([b], fileName("png"), {type:"image/png"});
   if(navigator.canShare && navigator.canShare({files:[f]})){ try{ await navigator.share({files:[f], text:$("caption").value}); }catch(_){} }
   else { $("png").click(); $("status").textContent="Sharing isn't available in this browser — the picture was saved instead."; } },"image/png"); };
@@ -652,7 +670,8 @@ async function load(){
     buildControls(); refresh();
   }catch(e){ $("status").textContent="Could not load the tracker data: "+e.message; }
 }
-setInterval(async ()=>{ try{ const s=(await getJSON("../stamp.json")).stamp; if(STAMP && s!==STAMP){ STAMP=s; DATA=await getJSON("../data.json"); S.run=null; buildControls(); refresh(); } }catch(_){} }, 5*60*1000);
+setInterval(async ()=>{ try{ const s=(await getJSON("../stamp.json")).stamp; if(STAMP && s!==STAMP){ STAMP=s; DATA=await getJSON("../data.json"); buildControls(); refresh();
+      if(S.followLatest) $("status").textContent += " · new run loaded";  } }catch(_){} }, 5*60*1000);
 load();
 </script>
 </body>
